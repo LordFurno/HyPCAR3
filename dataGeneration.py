@@ -7,6 +7,7 @@ import scipy.stats as ss
 import scipy.constants as sc
 import scipy.special   as sp
 import time
+import os
 
 #xi and PT_line from BART
 def xi(gamma, tau):
@@ -188,101 +189,129 @@ def generatePT(kappa,gamma1,gamma2,alpha,beta,pmin,pmax,starRad,starTemp,sma,gra
 
     return ptProfile
 
+def lhsSampling(params,nSamples):
+    '''
+    This function will perform the Latin Hypercube Sampling and scale the data.
 
-'''
-https://arxiv.org/pdf/2010.12241
-Under ideal gas conditions and mixing, partial pressure equates to molecular abundances. 
-This assumption is used here.
-Type A atmopsheres:
-    Hydrogen-rich
-    Contains H2O, CH4, NH3, H2/N2
-    Lacks CO2, O2
-    A1 atmospheres:
-        Mainly contains: H2O, CH4, NH3, and H2
-        Lacks: CO2, O2
-        H > 2O + 4C
-        3N < H - 2O -4C
+    Inputs
+    ------
+    params: The list of parameters that will be sampled
+    nSamples: Number of samples to be generated
 
-        D = H - N - 2C
-        H2O = 2O / D
-        NH3 = 2N / D
-        CH4 = 2C / D
-        H2 = (H - 2O - 4C - 3N) / D
-    A2 atmospheres:
-        Mainly contains: H2O, CH4, NH3, N2
-        Lacks: CO2, O2
-        H > 2O + 4c
-        3N > H - 2O - 4C
-         
-        D = H + 2C + 3N + 4O
-        H2O = 6O / D
-        NH3 = (2H - 8C - 4O) / D
-        CH4 = 6C / D
-        N2 = (3N + 4C + 2O - H) / D
-Type B atmospheres:
-    Oxygen rich
-    Mainly contain O2, N2, CO2, H2O
-    Lacks NH3, H2
-    2O > H + 4C
-    D = H + 2O + 2N
-    H2O = 2H / D
-    N2 = 2N / D
-    CO2 = 4C / D
-    O2 = (2O - H - 4C) /D
-Type C atmospheres:
-    Contains H2O, CO2, CH4, N2
-    Lacks NH3, H2, O2 
+    Returns
+    -------
+    scaledSamples: A matrix containing the samples
+    '''
+    lhsSamples=lhs(len(params),nSamples)
 
-    H + C + O + N = 1
-    This is unlike the others, which their abundances defined in repsect to hydrogen
-    This is a hydrogen-poor atmosphere
+    scaledSamples=np.zeros_like(lhsSamples)
 
-    Side conditions, so no negative results
-    O > 0.5H + 2C -> O2-rich with no CH4
-    H > 2O + 4C -> H2 ->H2-rich with no CO2
-    C > 0.25H + 0.5O -> graphite condensation with no H2O
+    for i, (key,(minVal,maxVal)) in enumerate(params.items()):
+        scaledSamples[:,i]=lhsSamples[:,i]*(maxVal-minVal)+minVal
+    return scaledSamples
 
-    H2O = (H + 2O - 4C) / (H + 2O + 2N)
-    CH4 = (H - 2O + 4C) / (2H + 4O + 4N)
-    CO2 = (2O + 4C - H) / (2H + 4O + 4N)
-    N2 = 2N / (H + 2O + 2N)
+def createConfigFile(independant,dependant,moleculeAbundances,filePath):
+    '''
+    This function will create a config file for the example exoplanet generated. 
+    This is the file that will be passed to PSG when actually generating the transmittance data.
 
-Based on solar elemental abundances:
-https://arxiv.org/pdf/0909.0948
+    Inputs
+    ------
+    independant: The independant parameters that were generated.
+                 This includes starRad, starTemp, kappa, gamma1, gamm2, alpha, albedo,distance
+    dependant: The independant parameters that were generated.
+                This includes semiMajorAxis, planetRad, planetMass, density, grav, surfTemp, surfPres, ptProfile
+    filePath: The filepath of this config file
+    moleculeCombination: What molecules are present
+    starType: The host star's type (g,m,k)
+    
+    Returns
+    -------
+    None
+    '''
+    
+    #Independant order:
+    #StarRad,starTemp,Kappa,Gamma1,Gamma2,alpha,Albedo,Distance, molecule1,molecule2....
 
-The ranges for the elemental molecules will be:
+    starRad,starTemp,kappa,gamma1,gamma2,alpha,albedo,dist=independant[:8]
 
-Hydrogen will be 1.0
-Everything is based off of that
-O_min, O_max = 1e-3, 1e-1
-C_min, C_max = 1e-4, 1e-2
-N_min, N_max = 1e-5, 1e-3
 
-For C-type atmospheres: 
-Just randomly sample O,C,N,H and normalize
-Check if it fulfills the conditions and then calculate abundances
-'''
 #Molecule order will be:
 #O2, N2, H2, CO2, H2O, CH4, NH3
 def calculateMoleculeAbundances(atmosphereType):
-    #Molecule order will be:
-    #O2, N2, H2, CO2, H2O, CH4, NH3
+    '''
+    This function calculates the molecular abundances based on the atmosphere type.
+    Based on this study: https://arxiv.org/pdf/2010.12241
+
+    Under ideal gas conditions and mixing, partial pressure equates to molecular abundances. 
+    This assumption is used here.
+
+    Type A atmopsheres:
+        Hydrogen-rich
+        Contains H2O, CH4, NH3, H2/N2
+        Lacks CO2, O2
+        A1 atmospheres:
+            Mainly contains: H2O, CH4, NH3, and H2
+            Lacks: CO2, O2
+            H > 2O + 4C
+            3N < H - 2O -4C
+
+            D = H - N - 2C
+            H2O = 2O / D
+            NH3 = 2N / D
+            CH4 = 2C / D
+            H2 = (H - 2O - 4C - 3N) / D
+        A2 atmospheres:
+            Mainly contains: H2O, CH4, NH3, N2
+            Lacks: CO2, O2
+            H > 2O + 4c
+            3N > H - 2O - 4C
+            
+            D = H + 2C + 3N + 4O
+            H2O = 6O / D
+            NH3 = (2H - 8C - 4O) / D
+            CH4 = 6C / D
+            N2 = (3N + 4C + 2O - H) / D
+    Type B atmospheres:
+        Oxygen rich
+        Mainly contain O2, N2, CO2, H2O
+        Lacks NH3, H2
+        2O > H + 4C
+        D = H + 2O + 2N
+        H2O = 2H / D
+        N2 = 2N / D
+        CO2 = 4C / D
+        O2 = (2O - H - 4C) /D
+    Type C atmospheres:
+        Contains H2O, CO2, CH4, N2
+        Lacks NH3, H2, O2 
+
+        H + C + O + N = 1
+        This is unlike the others, which their abundances defined in repsect to hydrogen
+        This is a hydrogen-poor atmosphere
+
+        Side conditions, so no negative results
+        O > 0.5H + 2C -> O2-rich with no CH4
+        H > 2O + 4C -> H2 ->H2-rich with no CO2
+        C > 0.25H + 0.5O -> graphite condensation with no H2O
+
+        H2O = (H + 2O - 4C) / (H + 2O + 2N)
+        CH4 = (H - 2O + 4C) / (2H + 4O + 4N)
+        CO2 = (2O + 4C - H) / (2H + 4O + 4N)
+        N2 = 2N / (H + 2O + 2N)
+
+    
+
+    Inputs
+    ------
+    atmosphereType: What atmosphere type to generate (A1,A2,B,C)
+
+    Returns
+    -------
+    abundances: A list with 7 values each representing the abundance of O2, N2, H2, CO2, H2O, CH4, NH3
+
+    '''
     abundances=[0.0]*7
-
-    #Sampling ranges for elemental abundances. Based on solar abundances with some variability.
-    O_min, O_max = 1e-3, 1e-1
-    C_min, C_max = 1e-4, 1e-2
-    N_min, N_max = 1e-5, 1e-3
-
-    O_mean=(np.log(O_min)+np.log(O_max))/2
-    O_std=(np.log(O_max)-np.log(O_min))/4
-
-    C_mean=(np.log(C_min)+np.log(C_max))/2
-    C_std=(np.log(C_max)-np.log(C_min))/4
-
-    N_mean=(np.log(C_min)+np.log(C_max))/2
-    N_std=(np.log(N_max)-np.log(N_min))/4
-
 
     if atmosphereType=="A1":
         '''
@@ -440,20 +469,203 @@ def calculateMoleculeAbundances(atmosphereType):
             #Valid sample found
             #calculate abundances
 
-
-          
-
             abundances[1]=N2
             abundances[3]=CO2
             abundances[4]=H2O
             abundances[5]=CH4
 
             return abundances
+        
+# if __name__=="main":
 start=time.time()
-a1=calculateMoleculeAbundances("A1")
-a2=calculateMoleculeAbundances("A2")
-b=calculateMoleculeAbundances("B")
-c=calculateMoleculeAbundances("C")
+starTypes=["G","M","K"]
+molecules=["O2","N2","H2","CO2","H2O","CH4","NH3"]
+atmosphereTypes=["A1","A2","B","C"]
+seed=42
+random.seed(seed)
+np.random.seed(seed)
+
+#Creates folders for the data
+for aType in ["A","B","C"]:
+    folderPath=r"C:\Users\Tristan\Downloads\HyPCAR3\data"#Temporary, will change when move to Cedar
+    folderPath+=f"\\{aType}"
+    if not os.path.exists(folderPath):
+        os.makedirs(folderPath)
+
+#Creates folder for the config files
+configFolder=r"C:\Users\Tristan\Downloads\HyPCAR3\configs"
+if not os.path.exists(configFolder):
+    os.makedirs(configFolder)
+
+
+for atmosphereType in atmosphereTypes:
+    gStarParamRanges = {
+    'starRad': (0.8, 1.3),
+    'starTemp': (5000, 6000),
+    'Kappa': (-3.5, -2.0),
+    'Gamma1': (-1.5,  1.1),
+    'Gamma2': (-1.5,  0.),
+    'alpha': ( 0.,   1.),
+    'Albedo':(0.1, 0.8),
+    'Distance': (1.3,15.)}
+    mStarParamRanges = {
+        'starRad': (0.14, 0.55),
+        'starTemp': (3000, 3800),
+        'Kappa': (-3.5, -2.0),
+        'Gamma1': (-1.5,  1.1),
+        'Gamma2': (-1.5,  0.),
+        'alpha': ( 0.,   1.),
+        'Albedo':(0.1, 0.8),
+        'Distance': (5.,25.)}
+    kStarParamRanges = {
+        'starRad': (0.6, 0.95),
+        'starTemp': (3800, 5300),
+        'Kappa': (-3.5, -2.0),
+        'Gamma1': (-1.5,  1.1),
+        'Gamma2': (-1.5,  0.),
+        'alpha': ( 0.,   1.),
+        'Albedo':(0.1, 0.8),
+        'Distance': (1.3,15.)}
+
+    if atmosphereType=="A1" or atmosphereType=="A2":
+        nSamples=10000
+    else:
+        nSamples=20000
+
+    gStarSamples=lhsSampling(gStarParamRanges,nSamples)
+    mStarSamples=lhsSampling(mStarParamRanges,nSamples)
+    kStarSamples=lhsSampling(kStarParamRanges,nSamples)
+
+    #Each sample is in form of [StarRad,starTemp,Kappa,Gamma1,Gamma2,alpha,Albedo,Distance,molecule1,molecule2...]
+    
+    #Adjusting star radius based on their temperature:
+    for index,starSample in enumerate([gStarSamples,mStarSamples,kStarSamples]):
+        for i,sample in enumerate(starSample):
+            if index==0:#G type star
+                if sample[1]>5500:
+                    sample[0]=np.random.uniform(0.9,1.3)
+                else:
+                    sample[0]=np.random.uniform(0.8,1.1)
+                starSample[i]=sample
+
+            elif index==1:#M type star
+                if sample[1]<3250:
+                    sample[0]=np.random.uniform(0.14,0.40)
+                else:
+                    sample[0]=np.random.uniform(0.3,0.55)
+                starSample[i]=sample
+            else:#K type star
+                if sample[1]>5000:
+                    sample[0]=np.random.uniform(0.7,0.95)
+                else:
+                    sample[0]=np.random.uniform(0.6,0.85)
+                starSample[i]=sample
+
+    #Generate dependant parameters
+    #Dependant parameters will be stored in a seperate list/dictionary
+    #semi major axis, planet radius, planet mass, planet density, planet gravity, surface temperature, surface pressure,  pressure-temperature profile
+    gStarDependant=[]
+    mStarDependant=[]
+    kStarDependant=[]
+    for i,starSample in enumerate([gStarSamples,mStarSamples,kStarSamples]):
+        for sample in starSample:
+            starRad,starTemp=sample[0],sample[1]
+            kappa,gamma1,gamma2,alpha=sample[2],sample[3],sample[4],sample[5]
+
+            #Star luminostiy formula. 4πr^2*Temp^4*constant
+            starLuminosity=4*np.pi*(starRad*const.R_sun.value)**2*starTemp**4*const.sigma_sb.value
+
+
+            #Use starTemp to find the bounds on the semimajor axis
+            #Approximation source: Kopparapu et al 2013, ApJ,
+            #"Habitable Zones Around Main-sequence Stars: New Estimates"
+
+            innerEdge= 1.7763 + 1.4335e-04 * (starTemp - 5780.) + 3.3954e-09 * (starTemp - 5780.)**2 - 7.6364e-12 * (starTemp - 5780.)**3 - 1.1950e-15 * (starTemp - 5780.)**4
+
+            outerEdge=0.3207 + 5.4471e-05 * (starTemp - 5780.) + 1.5275e-09 * (starTemp - 5780.)**2 - 2.1709e-12 * (starTemp - 5780.)**3 - 3.8282e-16 * (starTemp - 5780.)**4
+            
+            semiMajorAxisMin = (starLuminosity / const.L_sun.value / innerEdge)**0.5
+            semiMajorAxisMax = (starLuminosity / const.L_sun.value / outerEdge)**0.5
+
+            # Generate a semimajor axis [AU]
+            semiMajorAxis=np.random.uniform(semiMajorAxisMin, semiMajorAxisMax)
+
+            #Generate planet parameters
+            planetRad,planetMass,density,grav = generatePlanet(starLuminosity,semiMajorAxis)
+
+            #Calculate surface pressures and temperature profile
+            mean = 1.0
+            stdv = 2.5
+            lo   = 0.1
+            hi   = 90.
+            a, b = (lo - mean) / stdv, (hi - mean) / stdv
+            rv   = ss.truncnorm(a, b, loc=mean, scale=stdv)
+            surfPres = rv.rvs()
+            pmin=1e-6#Bottom of thermosphere for Earth
+            # Generate pressure array
+            press=np.logspace(np.log10(pmin), np.log10(surfPres), num=50)
+
+            #Generate temperature profile
+            mean=0.95
+            stdv=0.1
+            lo=0.7
+            hi=1.1
+            a,b=(lo - mean) / stdv, (hi - mean) / stdv
+            rv=ss.truncnorm(a, b, loc=mean, scale=stdv)
+            beta= rv.rvs()
+            #Pressure temperature profile
+            PTprofile=generatePT(kappa, gamma1, gamma2, alpha, beta, pmin, surfPres, starRad, starTemp, semiMajorAxis, grav)
+            # Extract surface temperature
+            surfTemp = PTprofile[0,1]
+
+            #semi major axis, planet radius, planet mass, planet density, planet gravity, surface temperature, surface pressure,  pressure-temperature profile
+            dependantParameters=[semiMajorAxis,planetRad,planetMass,density,grav,surfTemp,surfPres, PTprofile]
+            if i==0:#gStarSample
+                gStarDependant.append(dependantParameters)
+            elif i==1:#mStarSample
+                mStarDependant.append(dependantParameters)
+            else:#kStarSample
+                kStarDependant.append(dependantParameters)
+    configs=[]#List of configs to give to PSG later
+    for i,starSample in enumerate([gStarSamples,mStarSamples,kStarSamples]):
+        for counter,sample in enumerate(starSample):
+            configNum=(i*nSamples)+counter+1#+1 because counter starts at 0
+            configFileName=os.path.join(configFolder,f"{atmosphereType}_{configNum}.txt")
+
+            if i==0:
+                #G star
+                dependantParameters=gStarDependant[counter]
+                starType="G"
+            elif i==1:
+                #M star
+                dependantParameters=mStarDependant[counter]
+                starType="M"
+            else:
+                #K star
+                dependantParameters=kStarDependant[counter]
+                starType="K"
+            moleculeAbundances=calculateMoleculeAbundances(atmosphereType)
+            # print(moleculeAbundances)
+            # break
+        # break
+    # break
+#220 seconds to do evrything before creating config file and runningto psg
+#Not as bad as I thought
+print(time.time()-start)
+
+
+
+
+
+
+
+
+    
+# start=time.time()
+# a1=calculateMoleculeAbundances("A1")
+# a2=calculateMoleculeAbundances("A2")
+# b=calculateMoleculeAbundances("B")
+# c=calculateMoleculeAbundances("C")
 #O2, N2, H2, CO2, H2O, CH4, NH3
 # test=set([])
 # counter=0
@@ -466,13 +678,13 @@ c=calculateMoleculeAbundances("C")
 # print(test)
 # print(counter)
 
-print(f"Abundances for A1-Type: {a1}")
+# print(f"Abundances for A1-Type: {a1}")
 
-print(f"Abundances for A2-Type: {a2}")
+# print(f"Abundances for A2-Type: {a2}")
 
-print(f"Abundances for B-Type: {b}")
+# print(f"Abundances for B-Type: {b}")
 
-print(f"Abundances for C-Type: {c}")
+# print(f"Abundances for C-Type: {c}")
 
 
-print(time.time()-start)
+# print(time.time()-start)

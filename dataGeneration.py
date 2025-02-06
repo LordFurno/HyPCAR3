@@ -210,7 +210,7 @@ def lhsSampling(params,nSamples):
         scaledSamples[:,i]=lhsSamples[:,i]*(maxVal-minVal)+minVal
     return scaledSamples
 
-def createConfigFile(independant,dependant,moleculeAbundances,filePath):
+def createConfigFile(independant,dependant,moleculeAbundances,starType,filePath):
     '''
     This function will create a config file for the example exoplanet generated. 
     This is the file that will be passed to PSG when actually generating the transmittance data.
@@ -221,9 +221,10 @@ def createConfigFile(independant,dependant,moleculeAbundances,filePath):
                  This includes starRad, starTemp, kappa, gamma1, gamm2, alpha, albedo,distance
     dependant: The independant parameters that were generated.
                 This includes semiMajorAxis, planetRad, planetMass, density, grav, surfTemp, surfPres, ptProfile
-    filePath: The filepath of this config file
-    moleculeCombination: What molecules are present
+    moleculeAbundances: The abundances of eaech molecule: O2, N2, H2, CO2, H2O, CH4, NH3
     starType: The host star's type (g,m,k)
+    filePath: The filepath of this config file
+    
     
     Returns
     -------
@@ -233,7 +234,12 @@ def createConfigFile(independant,dependant,moleculeAbundances,filePath):
     #Independant order:
     #StarRad,starTemp,Kappa,Gamma1,Gamma2,alpha,Albedo,Distance, molecule1,molecule2....
 
-    starRad,starTemp,kappa,gamma1,gamma2,alpha,albedo,dist=independant[:8]
+    starRad,starTemp,kappa,gamma1,gamma2,alpha,albedo,dist=independant
+    semiMajorAxis, planetRad, planetMass, density, grav, surfTemp, surfPres, ptProfile=dependant
+    #g/mol
+    moleculeWeights={"O2":31.999, "N2":28.02, "H2":2.016,"CO2":44.01, "H2O":18.01528,"CH4":16.04,"NH3":17.03052 }#g/mol
+    
+
 
 
 #Molecule order will be:
@@ -645,6 +651,7 @@ for atmosphereType in atmosphereTypes:
                 dependantParameters=kStarDependant[counter]
                 starType="K"
             moleculeAbundances=calculateMoleculeAbundances(atmosphereType)
+
             # print(moleculeAbundances)
             # break
         # break

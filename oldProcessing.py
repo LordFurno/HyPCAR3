@@ -44,7 +44,7 @@ def createDataFile(data,filePath,folderPath):
     '''
     wavelength,transmittance=data["Wave/freq"],data["Total"]
     #C:\Users\Tristan\Downloads\HyPCAR\configFiles\O2-1.txt
-    prefix=r"C:\Users\Tristan\Downloads\HyPCAR\configFiles"
+    prefix=r"C:\Users\Tristan\Downloads\HyPCAR3\configFiles"
     name=filePath.removeprefix(prefix)
     name=name[1:]#Remove backslash
     name=name.removesuffix(".txt")
@@ -56,7 +56,7 @@ def createDataFile(data,filePath,folderPath):
         for i in range(len(wavelength)):
             writer.writerow((wavelength[i],transmittance[i]))
         
-def callPSG(configs, moleculeCombination):
+def callPSG(configs, atmosphereType):
     '''
     This function will take all the config files and pass them through PSG to get transmittance data.
 
@@ -69,7 +69,7 @@ def callPSG(configs, moleculeCombination):
     -------
     None, the files will be created    
     '''
-    folderPath = os.path.join("C:\\Users\\Tristan\\Downloads\\HyPCAR\\data", "-".join(moleculeCombination))
+    folderPath = os.path.join("C:\\Users\\Tristan\\Downloads\\HyPCAR3\\data", atmosphereType)
     os.makedirs(folderPath, exist_ok=True)
     print(f"Folder created: {folderPath}")
     client=Client(n_workers=4)

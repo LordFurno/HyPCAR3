@@ -1,4 +1,4 @@
-import itertools
+
 from pyDOE import lhs
 import numpy as np
 import random
@@ -8,7 +8,7 @@ import scipy.constants as sc
 import scipy.special   as sp
 import time
 import os
-
+from processing import callPSG
 #xi and PT_line from BART
 def xi(gamma, tau):
     """
@@ -235,10 +235,68 @@ def createConfigFile(independant,dependant,moleculeAbundances,starType,filePath)
     #StarRad,starTemp,Kappa,Gamma1,Gamma2,alpha,Albedo,Distance, molecule1,molecule2....
 
     starRad,starTemp,kappa,gamma1,gamma2,alpha,albedo,dist=independant
-    semiMajorAxis, planetRad, planetMass, density, grav, surfTemp, surfPres, ptProfile=dependant
-    #g/mol
-    moleculeWeights={"O2":31.999, "N2":28.02, "H2":2.016,"CO2":44.01, "H2O":18.01528,"CH4":16.04,"NH3":17.03052 }#g/mol
     
+    semiMajorAxis,planetRad,planetMass,planetDensity,planetGrav,surfTemp,surfPres,PTprofile=dependant
+    
+    #g/mol
+    #O2, N2, H2, CO2, H2O, CH4, NH3
+    abundanceDictionary={}
+    molecules=["O2","N2","H2","CO2","H2O","CH4","NH3"]
+    for i in range(moleculeAbundances):
+        abundanceDictionary[molecules[i]]=moleculeAbundances[i]
+
+    moleculeWeights={"O2":31.999, "N2":28.02, "H2":2.016,"CO2":44.01, "H2O":18.01528,"CH4":16.04,"NH3":17.03052 }#g/mol
+    averageWeight=0
+    for molecule in abundanceDictionary:
+        averageWeight+=moleculeWeights[molecule]*abundanceDictionary[molecule]
+    
+    HITRANValues={"O2":"HIT[7]","N2":"HIT[22]","H2":"HIT[45]","CO2":"HIT[2]","H2O":"HIT[1]","CH4":"HIT[6]","NH3":"HIT[11]"}
+    
+    #Copys the config file
+    lines=[]
+    with open(r"C:\Users\Tristan\Downloads\HyPCAR3\configTemplate.txt") as template:
+        for line in template:
+            lines.append(line)
+
+    #System information
+    lines[3]="<OBJECT-DIAMETER>"+str(2*planetRad*const.R_earth.value/1000)+"\n" #Planet diameter [km]
+    lines[4]="<OBJECT-GRAVITY>"+str(planetDensity)+"\n" #Planet density [g/cm3], the gravity part is just straight up wrong
+    lines[7]="<OBJECT-STAR-DISTANCE>"+str(semiMajorAxis)+"\n" #Semimajor axis [AU]
+    lines[11]="<OBJECT-STAR-TYPE>"+str(starType)+"\n" #Stellar class
+    lines[12]="<OBJECT-STAR-TEMPERATURE>"+str(starTemp)+"\n" #Star temperature [K]
+    lines[13]="<OBJECT-STAR-RADIUS>"+str(starRad)+"\n" #Stellar radius [Rsun]
+    lines[23]="<GEOMETRY-OBS-ALTITUDE>"+str(dist)+"\n" #Distance to system
+
+    #Atmosphere information
+    lines[42]="<ATMOSPHERE-NGAS>"+str(len(moleculeAbundances))+"\n" #Number of gases are in the atmosphere
+    lines[43]="<ATMOSPHERE-GAS>"+",".join(molecules)+"\n" #What gases are in the atmosphere
+    lines[44]="<ATMOSPHERE-TYPE>"+",".join(HITRANValues[mol] for mol in molecules)+"\n" #HITRAN values for each gas
+    lines[45]="<ATMOSPHERE-ABUN>"+"1,"*(len(moleculeAbundances)-1)+"1"+"\n" #Molecule abunadnces. They're all 1, because abundances are defined in vertical profile
+    lines[46]="<ATMOSPHERE-UNIT>"+"scl,"*(len(moleculeAbundances)-1)+"scl"+"\n" #Abundance unit
+    lines[49]="<ATMOSPHERE-WEIGHT>"+str(averageWeight)+"\n" #Molecule weight of atmosphere g/mol
+    lines[50]="<ATMOSPHERE-PRESSURE>"+str(surfPres)+"\n" #Planetary surface pressure bars
+    lines[52]="<ATMOSPHERE-LAYERS-MOLECULES>"+",".join(molecules)+"\n" #Molecule in vertical profile
+
+    #Atmosphere layers
+    #Starts at line 54
+
+    for i in range(50):
+        atmosphereInfo=",".join(map(str,PTprofile[i]))+","+",".join(map(str,list(moleculeAbundances.values())))
+        lines[54+i]="<ATMOSPHERE-LAYER-"+str(i+1)+">"+atmosphereInfo+"\n"
+
+    #Surface information
+    lines[112]="<SURFACE-TEMPERATURE>"+str(surfTemp)+"\n" 
+    lines[113]="<SURFACE-ALBEDO>"+str(albedo)+"\n"
+    lines[114]="<SURFACE-EMISSIVITY>"+str(1.-albedo)+"\n"
+
+    #Write to new config file
+    with open(filePath,"w") as f:
+        f.writelines(lines)
+    
+
+    
+
+
 
 
 
@@ -499,7 +557,7 @@ for aType in ["A","B","C"]:
         os.makedirs(folderPath)
 
 #Creates folder for the config files
-configFolder=r"C:\Users\Tristan\Downloads\HyPCAR3\configs"
+configFolder=r"C:\Users\Tristan\Downloads\HyPCAR3\configFiles"
 if not os.path.exists(configFolder):
     os.makedirs(configFolder)
 
@@ -534,9 +592,9 @@ for atmosphereType in atmosphereTypes:
         'Distance': (1.3,15.)}
 
     if atmosphereType=="A1" or atmosphereType=="A2":
-        nSamples=10000
+        nSamples=10000#Number of samples per star type
     else:
-        nSamples=20000
+        nSamples=20000#Number of samples per star type
 
     gStarSamples=lhsSampling(gStarParamRanges,nSamples)
     mStarSamples=lhsSampling(mStarParamRanges,nSamples)
@@ -632,8 +690,10 @@ for atmosphereType in atmosphereTypes:
                 mStarDependant.append(dependantParameters)
             else:#kStarSample
                 kStarDependant.append(dependantParameters)
-    configs=[]#List of configs to give to PSG later
+
+
     for i,starSample in enumerate([gStarSamples,mStarSamples,kStarSamples]):
+        configs=[]#List of configs to give to PSG later
         for counter,sample in enumerate(starSample):
             configNum=(i*nSamples)+counter+1#+1 because counter starts at 0
             configFileName=os.path.join(configFolder,f"{atmosphereType}_{configNum}.txt")
@@ -651,6 +711,18 @@ for atmosphereType in atmosphereTypes:
                 dependantParameters=kStarDependant[counter]
                 starType="K"
             moleculeAbundances=calculateMoleculeAbundances(atmosphereType)
+
+            configs.append(configFileName)
+
+            if len(configs)==32:#Pass them in 32 chunks
+                callPSG(configs,folderPath)
+                configs=[]
+
+            #Create config file
+            createConfigFile(sample,dependantParameters,moleculeAbundances,starType,configFileName)
+
+        if configs:
+            callPSG(configs,folderPath)#Anything left over. Only for A1/A2 case, since 20000 is divisible by 32
 
             # print(moleculeAbundances)
             # break

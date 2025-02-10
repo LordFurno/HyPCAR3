@@ -242,7 +242,7 @@ def createConfigFile(independant,dependant,moleculeAbundances,starType,filePath)
     #O2, N2, H2, CO2, H2O, CH4, NH3
     abundanceDictionary={}
     molecules=["O2","N2","H2","CO2","H2O","CH4","NH3"]
-    for i in range(moleculeAbundances):
+    for i in range(len(moleculeAbundances)):
         abundanceDictionary[molecules[i]]=moleculeAbundances[i]
 
     moleculeWeights={"O2":31.999, "N2":28.02, "H2":2.016,"CO2":44.01, "H2O":18.01528,"CH4":16.04,"NH3":17.03052 }#g/mol
@@ -254,7 +254,9 @@ def createConfigFile(independant,dependant,moleculeAbundances,starType,filePath)
     
     #Copys the config file
     lines=[]
-    with open(r"C:\Users\Tristan\Downloads\HyPCAR3\configTemplate.txt") as template:
+    # configTemplatePath=r"C:\Users\Tristan\Downloads\HyPCAR3\configTemplate.txt"
+    configTemplatePath="/home/tristanb/projects/def-pjmann/tristanb/configTemplate.txt"
+    with open(configTemplatePath) as template:
         for line in template:
             lines.append(line)
 
@@ -281,7 +283,7 @@ def createConfigFile(independant,dependant,moleculeAbundances,starType,filePath)
     #Starts at line 54
 
     for i in range(50):
-        atmosphereInfo=",".join(map(str,PTprofile[i]))+","+",".join(map(str,list(moleculeAbundances.values())))
+        atmosphereInfo=",".join(map(str,PTprofile[i]))+","+",".join(map(str,list(abundanceDictionary.values())))
         lines[54+i]="<ATMOSPHERE-LAYER-"+str(i+1)+">"+atmosphereInfo+"\n"
 
     #Surface information
@@ -540,197 +542,207 @@ def calculateMoleculeAbundances(atmosphereType):
 
             return abundances
         
-# if __name__=="main":
-start=time.time()
-starTypes=["G","M","K"]
-molecules=["O2","N2","H2","CO2","H2O","CH4","NH3"]
-atmosphereTypes=["A1","A2","B","C"]
-seed=42
-random.seed(seed)
-np.random.seed(seed)
+if __name__=="__main__":
+    start=time.time()
+    starTypes=["G","M","K"]
+    molecules=["O2","N2","H2","CO2","H2O","CH4","NH3"]
+    atmosphereTypes=["A1","A2","B","C"]
+    seed=42
+    random.seed(seed)
+    np.random.seed(seed)
 
-#Creates folders for the data
-for aType in ["A","B","C"]:
-    folderPath=r"C:\Users\Tristan\Downloads\HyPCAR3\data"#Temporary, will change when move to Cedar
-    folderPath+=f"\\{aType}"
-    if not os.path.exists(folderPath):
-        os.makedirs(folderPath)
+    #Creates folders for the data
+    for aType in ["A","B","C"]:
+        folderPath="/home/tristanb/scratch/data"+f"/{aType}"
+        # folderPath=r"C:\Users\Tristan\Downloads\HyPCAR3\data"#Temporary, will change when move to Cedar
+        # folderPath+=f"\\{aType}"
+        if not os.path.exists(folderPath):
+            os.makedirs(folderPath)
 
-#Creates folder for the config files
-configFolder=r"C:\Users\Tristan\Downloads\HyPCAR3\configFiles"
-if not os.path.exists(configFolder):
-    os.makedirs(configFolder)
+    #Creates folder for the config files
+    # configFolder=r"C:\Users\Tristan\Downloads\HyPCAR3\configFiles"
+    configFolder="/home/tristanb/scratch/configFiles"
+    if not os.path.exists(configFolder):
+        os.makedirs(configFolder)
 
-
-for atmosphereType in atmosphereTypes:
-    gStarParamRanges = {
-    'starRad': (0.8, 1.3),
-    'starTemp': (5000, 6000),
-    'Kappa': (-3.5, -2.0),
-    'Gamma1': (-1.5,  1.1),
-    'Gamma2': (-1.5,  0.),
-    'alpha': ( 0.,   1.),
-    'Albedo':(0.1, 0.8),
-    'Distance': (1.3,15.)}
-    mStarParamRanges = {
-        'starRad': (0.14, 0.55),
-        'starTemp': (3000, 3800),
-        'Kappa': (-3.5, -2.0),
-        'Gamma1': (-1.5,  1.1),
-        'Gamma2': (-1.5,  0.),
-        'alpha': ( 0.,   1.),
-        'Albedo':(0.1, 0.8),
-        'Distance': (5.,25.)}
-    kStarParamRanges = {
-        'starRad': (0.6, 0.95),
-        'starTemp': (3800, 5300),
+    run=True
+    for atmosphereType in atmosphereTypes:
+        gStarParamRanges = {
+        'starRad': (0.8, 1.3),
+        'starTemp': (5000, 6000),
         'Kappa': (-3.5, -2.0),
         'Gamma1': (-1.5,  1.1),
         'Gamma2': (-1.5,  0.),
         'alpha': ( 0.,   1.),
         'Albedo':(0.1, 0.8),
         'Distance': (1.3,15.)}
+        mStarParamRanges = {
+            'starRad': (0.14, 0.55),
+            'starTemp': (3000, 3800),
+            'Kappa': (-3.5, -2.0),
+            'Gamma1': (-1.5,  1.1),
+            'Gamma2': (-1.5,  0.),
+            'alpha': ( 0.,   1.),
+            'Albedo':(0.1, 0.8),
+            'Distance': (5.,25.)}
+        kStarParamRanges = {
+            'starRad': (0.6, 0.95),
+            'starTemp': (3800, 5300),
+            'Kappa': (-3.5, -2.0),
+            'Gamma1': (-1.5,  1.1),
+            'Gamma2': (-1.5,  0.),
+            'alpha': ( 0.,   1.),
+            'Albedo':(0.1, 0.8),
+            'Distance': (1.3,15.)}
 
-    if atmosphereType=="A1" or atmosphereType=="A2":
-        nSamples=10000#Number of samples per star type
-    else:
-        nSamples=20000#Number of samples per star type
+        if atmosphereType=="A1" or atmosphereType=="A2":
+            nSamples=10000#Number of samples per star type
+        else:
+            nSamples=20000#Number of samples per star type
 
-    gStarSamples=lhsSampling(gStarParamRanges,nSamples)
-    mStarSamples=lhsSampling(mStarParamRanges,nSamples)
-    kStarSamples=lhsSampling(kStarParamRanges,nSamples)
+        gStarSamples=lhsSampling(gStarParamRanges,nSamples)
+        mStarSamples=lhsSampling(mStarParamRanges,nSamples)
+        kStarSamples=lhsSampling(kStarParamRanges,nSamples)
 
-    #Each sample is in form of [StarRad,starTemp,Kappa,Gamma1,Gamma2,alpha,Albedo,Distance,molecule1,molecule2...]
-    
-    #Adjusting star radius based on their temperature:
-    for index,starSample in enumerate([gStarSamples,mStarSamples,kStarSamples]):
-        for i,sample in enumerate(starSample):
-            if index==0:#G type star
-                if sample[1]>5500:
-                    sample[0]=np.random.uniform(0.9,1.3)
+        #Each sample is in form of [StarRad,starTemp,Kappa,Gamma1,Gamma2,alpha,Albedo,Distance,molecule1,molecule2...]
+        
+        #Adjusting star radius based on their temperature:
+        for index,starSample in enumerate([gStarSamples,mStarSamples,kStarSamples]):
+            for i,sample in enumerate(starSample):
+                if index==0:#G type star
+                    if sample[1]>5500:
+                        sample[0]=np.random.uniform(0.9,1.3)
+                    else:
+                        sample[0]=np.random.uniform(0.8,1.1)
+                    starSample[i]=sample
+
+                elif index==1:#M type star
+                    if sample[1]<3250:
+                        sample[0]=np.random.uniform(0.14,0.40)
+                    else:
+                        sample[0]=np.random.uniform(0.3,0.55)
+                    starSample[i]=sample
+                else:#K type star
+                    if sample[1]>5000:
+                        sample[0]=np.random.uniform(0.7,0.95)
+                    else:
+                        sample[0]=np.random.uniform(0.6,0.85)
+                    starSample[i]=sample
+
+        #Generate dependant parameters
+        #Dependant parameters will be stored in a seperate list/dictionary
+        #semi major axis, planet radius, planet mass, planet density, planet gravity, surface temperature, surface pressure,  pressure-temperature profile
+        gStarDependant=[]
+        mStarDependant=[]
+        kStarDependant=[]
+        for i,starSample in enumerate([gStarSamples,mStarSamples,kStarSamples]):
+            for sample in starSample:
+                starRad,starTemp=sample[0],sample[1]
+                kappa,gamma1,gamma2,alpha=sample[2],sample[3],sample[4],sample[5]
+
+                #Star luminostiy formula. 4πr^2*Temp^4*constant
+                starLuminosity=4*np.pi*(starRad*const.R_sun.value)**2*starTemp**4*const.sigma_sb.value
+
+
+                #Use starTemp to find the bounds on the semimajor axis
+                #Approximation source: Kopparapu et al 2013, ApJ,
+                #"Habitable Zones Around Main-sequence Stars: New Estimates"
+
+                innerEdge= 1.7763 + 1.4335e-04 * (starTemp - 5780.) + 3.3954e-09 * (starTemp - 5780.)**2 - 7.6364e-12 * (starTemp - 5780.)**3 - 1.1950e-15 * (starTemp - 5780.)**4
+
+                outerEdge=0.3207 + 5.4471e-05 * (starTemp - 5780.) + 1.5275e-09 * (starTemp - 5780.)**2 - 2.1709e-12 * (starTemp - 5780.)**3 - 3.8282e-16 * (starTemp - 5780.)**4
+                
+                semiMajorAxisMin = (starLuminosity / const.L_sun.value / innerEdge)**0.5
+                semiMajorAxisMax = (starLuminosity / const.L_sun.value / outerEdge)**0.5
+
+                # Generate a semimajor axis [AU]
+                semiMajorAxis=np.random.uniform(semiMajorAxisMin, semiMajorAxisMax)
+
+                #Generate planet parameters
+                planetRad,planetMass,density,grav = generatePlanet(starLuminosity,semiMajorAxis)
+
+                #Calculate surface pressures and temperature profile
+                mean = 1.0
+                stdv = 2.5
+                lo   = 0.1
+                hi   = 90.
+                a, b = (lo - mean) / stdv, (hi - mean) / stdv
+                rv   = ss.truncnorm(a, b, loc=mean, scale=stdv)
+                surfPres = rv.rvs()
+                pmin=1e-6#Bottom of thermosphere for Earth
+                # Generate pressure array
+                press=np.logspace(np.log10(pmin), np.log10(surfPres), num=50)
+
+                #Generate temperature profile
+                mean=0.95
+                stdv=0.1
+                lo=0.7
+                hi=1.1
+                a,b=(lo - mean) / stdv, (hi - mean) / stdv
+                rv=ss.truncnorm(a, b, loc=mean, scale=stdv)
+                beta= rv.rvs()
+                #Pressure temperature profile
+                PTprofile=generatePT(kappa, gamma1, gamma2, alpha, beta, pmin, surfPres, starRad, starTemp, semiMajorAxis, grav)
+                # Extract surface temperature
+                surfTemp = PTprofile[0,1]
+
+                #semi major axis, planet radius, planet mass, planet density, planet gravity, surface temperature, surface pressure,  pressure-temperature profile
+                dependantParameters=[semiMajorAxis,planetRad,planetMass,density,grav,surfTemp,surfPres, PTprofile]
+                if i==0:#gStarSample
+                    gStarDependant.append(dependantParameters)
+                elif i==1:#mStarSample
+                    mStarDependant.append(dependantParameters)
+                else:#kStarSample
+                    kStarDependant.append(dependantParameters)
+
+
+        for i,starSample in enumerate([gStarSamples,mStarSamples,kStarSamples]):
+            configs=[]#List of configs to give to PSG later
+            for counter,sample in enumerate(starSample):
+                configNum=(i*nSamples)+counter+1#+1 because counter starts at 0
+                configFileName=os.path.join(configFolder,f"{atmosphereType}_{configNum}.txt")
+
+                if i==0:
+                    #G star
+                    dependantParameters=gStarDependant[counter]
+                    starType="G"
+                elif i==1:
+                    #M star
+                    dependantParameters=mStarDependant[counter]
+                    starType="M"
                 else:
-                    sample[0]=np.random.uniform(0.8,1.1)
-                starSample[i]=sample
+                    #K star
+                    dependantParameters=kStarDependant[counter]
+                    starType="K"
+                moleculeAbundances=calculateMoleculeAbundances(atmosphereType)
 
-            elif index==1:#M type star
-                if sample[1]<3250:
-                    sample[0]=np.random.uniform(0.14,0.40)
-                else:
-                    sample[0]=np.random.uniform(0.3,0.55)
-                starSample[i]=sample
-            else:#K type star
-                if sample[1]>5000:
-                    sample[0]=np.random.uniform(0.7,0.95)
-                else:
-                    sample[0]=np.random.uniform(0.6,0.85)
-                starSample[i]=sample
-
-    #Generate dependant parameters
-    #Dependant parameters will be stored in a seperate list/dictionary
-    #semi major axis, planet radius, planet mass, planet density, planet gravity, surface temperature, surface pressure,  pressure-temperature profile
-    gStarDependant=[]
-    mStarDependant=[]
-    kStarDependant=[]
-    for i,starSample in enumerate([gStarSamples,mStarSamples,kStarSamples]):
-        for sample in starSample:
-            starRad,starTemp=sample[0],sample[1]
-            kappa,gamma1,gamma2,alpha=sample[2],sample[3],sample[4],sample[5]
-
-            #Star luminostiy formula. 4πr^2*Temp^4*constant
-            starLuminosity=4*np.pi*(starRad*const.R_sun.value)**2*starTemp**4*const.sigma_sb.value
+                configs.append(configFileName)
+                #Create config file
+                createConfigFile(sample,dependantParameters,moleculeAbundances,starType,configFileName)
 
 
-            #Use starTemp to find the bounds on the semimajor axis
-            #Approximation source: Kopparapu et al 2013, ApJ,
-            #"Habitable Zones Around Main-sequence Stars: New Estimates"
+                if len(configs)==32:#Pass them in 32 chunks
+                    callPSG(configs,atmosphereType)
+                    configs=[]
+                    run=False
+                    break
 
-            innerEdge= 1.7763 + 1.4335e-04 * (starTemp - 5780.) + 3.3954e-09 * (starTemp - 5780.)**2 - 7.6364e-12 * (starTemp - 5780.)**3 - 1.1950e-15 * (starTemp - 5780.)**4
+               
+            if run==False:
+                break
+        
 
-            outerEdge=0.3207 + 5.4471e-05 * (starTemp - 5780.) + 1.5275e-09 * (starTemp - 5780.)**2 - 2.1709e-12 * (starTemp - 5780.)**3 - 3.8282e-16 * (starTemp - 5780.)**4
-            
-            semiMajorAxisMin = (starLuminosity / const.L_sun.value / innerEdge)**0.5
-            semiMajorAxisMax = (starLuminosity / const.L_sun.value / outerEdge)**0.5
-
-            # Generate a semimajor axis [AU]
-            semiMajorAxis=np.random.uniform(semiMajorAxisMin, semiMajorAxisMax)
-
-            #Generate planet parameters
-            planetRad,planetMass,density,grav = generatePlanet(starLuminosity,semiMajorAxis)
-
-            #Calculate surface pressures and temperature profile
-            mean = 1.0
-            stdv = 2.5
-            lo   = 0.1
-            hi   = 90.
-            a, b = (lo - mean) / stdv, (hi - mean) / stdv
-            rv   = ss.truncnorm(a, b, loc=mean, scale=stdv)
-            surfPres = rv.rvs()
-            pmin=1e-6#Bottom of thermosphere for Earth
-            # Generate pressure array
-            press=np.logspace(np.log10(pmin), np.log10(surfPres), num=50)
-
-            #Generate temperature profile
-            mean=0.95
-            stdv=0.1
-            lo=0.7
-            hi=1.1
-            a,b=(lo - mean) / stdv, (hi - mean) / stdv
-            rv=ss.truncnorm(a, b, loc=mean, scale=stdv)
-            beta= rv.rvs()
-            #Pressure temperature profile
-            PTprofile=generatePT(kappa, gamma1, gamma2, alpha, beta, pmin, surfPres, starRad, starTemp, semiMajorAxis, grav)
-            # Extract surface temperature
-            surfTemp = PTprofile[0,1]
-
-            #semi major axis, planet radius, planet mass, planet density, planet gravity, surface temperature, surface pressure,  pressure-temperature profile
-            dependantParameters=[semiMajorAxis,planetRad,planetMass,density,grav,surfTemp,surfPres, PTprofile]
-            if i==0:#gStarSample
-                gStarDependant.append(dependantParameters)
-            elif i==1:#mStarSample
-                mStarDependant.append(dependantParameters)
-            else:#kStarSample
-                kStarDependant.append(dependantParameters)
-
-
-    for i,starSample in enumerate([gStarSamples,mStarSamples,kStarSamples]):
-        configs=[]#List of configs to give to PSG later
-        for counter,sample in enumerate(starSample):
-            configNum=(i*nSamples)+counter+1#+1 because counter starts at 0
-            configFileName=os.path.join(configFolder,f"{atmosphereType}_{configNum}.txt")
-
-            if i==0:
-                #G star
-                dependantParameters=gStarDependant[counter]
-                starType="G"
-            elif i==1:
-                #M star
-                dependantParameters=mStarDependant[counter]
-                starType="M"
-            else:
-                #K star
-                dependantParameters=kStarDependant[counter]
-                starType="K"
-            moleculeAbundances=calculateMoleculeAbundances(atmosphereType)
-
-            configs.append(configFileName)
-
-            if len(configs)==32:#Pass them in 32 chunks
-                callPSG(configs,folderPath)
-                configs=[]
-
-            #Create config file
-            createConfigFile(sample,dependantParameters,moleculeAbundances,starType,configFileName)
-
-        if configs:
-            callPSG(configs,folderPath)#Anything left over. Only for A1/A2 case, since 20000 is divisible by 32
-
-            # print(moleculeAbundances)
+            if configs:
+                callPSG(configs,atmosphereType)#Anything left over. Only for A1/A2 case, since 20000 is divisible by 32
+        if run==False:
+            break
+                # print(moleculeAbundances)
+                # break
             # break
         # break
-    # break
-#220 seconds to do evrything before creating config file and runningto psg
-#Not as bad as I thought
-print(time.time()-start)
+    #220 seconds to do evrything before creating config file and runningto psg
+    #Not as bad as I thought
+    print(time.time()-start)
 
 
 
@@ -739,31 +751,31 @@ print(time.time()-start)
 
 
 
-    
-# start=time.time()
-# a1=calculateMoleculeAbundances("A1")
-# a2=calculateMoleculeAbundances("A2")
-# b=calculateMoleculeAbundances("B")
-# c=calculateMoleculeAbundances("C")
-#O2, N2, H2, CO2, H2O, CH4, NH3
-# test=set([])
-# counter=0
-# for i in range(1000):
-#     b=calculateMoleculeAbundances("B")
-#     if b.index(max(b))==1:
-#         print(max(b))
-#         counter+=1
-#     test.add(b.index(max(b)))
-# print(test)
-# print(counter)
+        
+    # start=time.time()
+    # a1=calculateMoleculeAbundances("A1")
+    # a2=calculateMoleculeAbundances("A2")
+    # b=calculateMoleculeAbundances("B")
+    # c=calculateMoleculeAbundances("C")
+    #O2, N2, H2, CO2, H2O, CH4, NH3
+    # test=set([])
+    # counter=0
+    # for i in range(1000):
+    #     b=calculateMoleculeAbundances("B")
+    #     if b.index(max(b))==1:
+    #         print(max(b))
+    #         counter+=1
+    #     test.add(b.index(max(b)))
+    # print(test)
+    # print(counter)
 
-# print(f"Abundances for A1-Type: {a1}")
+    # print(f"Abundances for A1-Type: {a1}")
 
-# print(f"Abundances for A2-Type: {a2}")
+    # print(f"Abundances for A2-Type: {a2}")
 
-# print(f"Abundances for B-Type: {b}")
+    # print(f"Abundances for B-Type: {b}")
 
-# print(f"Abundances for C-Type: {c}")
+    # print(f"Abundances for C-Type: {c}")
 
 
-# print(time.time()-start)
+    # print(time.time()-start)

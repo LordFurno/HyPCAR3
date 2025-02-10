@@ -1,0 +1,2 @@
+import eureka
+print("yes")

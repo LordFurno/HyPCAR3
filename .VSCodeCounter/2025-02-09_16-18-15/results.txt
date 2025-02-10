@@ -1,0 +1,70 @@
+Date : 2025-02-09 16:18:15
+Directory : c:\Users\Tristan\Downloads\HyPCAR3
+Total : 33 files,  7673 codes, 287 comments, 1352 blanks, all 9312 lines
+
+Languages
++----------+------------+------------+------------+------------+------------+
+| language | files      | code       | comment    | blank      | total      |
++----------+------------+------------+------------+------------+------------+
+| Python   |         31 |      7,452 |        287 |      1,350 |      9,089 |
+| JSON     |          2 |        221 |          0 |          2 |        223 |
++----------+------------+------------+------------+------------+------------+
+
+Directories
++------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                   | files      | code       | comment    | blank      | total      |
++------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                      |         33 |      7,673 |        287 |      1,352 |      9,312 |
+| . (Files)                                                              |          6 |      1,163 |        174 |        263 |      1,600 |
+| pypsg                                                                  |         27 |      6,510 |        113 |      1,089 |      7,712 |
+| pypsg (Files)                                                          |          6 |        718 |          9 |        110 |        837 |
+| pypsg\cfg                                                              |          4 |      2,587 |         16 |        439 |      3,042 |
+| pypsg\globes                                                           |         11 |      2,896 |         15 |        477 |      3,388 |
+| pypsg\globes (Files)                                                   |          5 |      1,597 |          5 |        270 |      1,872 |
+| pypsg\globes\exocam                                                    |          2 |        420 |          3 |         75 |        498 |
+| pypsg\globes\exoplasim                                                 |          2 |        379 |          3 |         52 |        434 |
+| pypsg\globes\waccm                                                     |          2 |        500 |          4 |         80 |        584 |
+| pypsg\lyr                                                              |          2 |        171 |         40 |         30 |        241 |
+| pypsg\rad                                                              |          2 |         69 |         33 |         18 |        120 |
+| pypsg\trn                                                              |          2 |         69 |          0 |         15 |         84 |
++------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++------------------------------------------------------------------------+----------+------------+------------+------------+------------+
+| filename                                                               | language | code       | comment    | blank      | total      |
++------------------------------------------------------------------------+----------+------------+------------+------------+------------+
+| c:\Users\Tristan\Downloads\HyPCAR3\dataGeneration.py                   | Python   |        529 |        100 |        140 |        769 |
+| c:\Users\Tristan\Downloads\HyPCAR3\oldCode.py                          | Python   |        363 |         70 |         89 |        522 |
+| c:\Users\Tristan\Downloads\HyPCAR3\oldProcessing.py                    | Python   |         73 |          2 |         10 |         85 |
+| c:\Users\Tristan\Downloads\HyPCAR3\processing.py                       | Python   |         45 |          1 |         21 |         67 |
+| c:\Users\Tristan\Downloads\HyPCAR3\pypsg\__init__.py                   | Python   |         15 |          0 |          1 |         16 |
+| c:\Users\Tristan\Downloads\HyPCAR3\pypsg\cfg\__init__.py               | Python   |         30 |          0 |          2 |         32 |
+| c:\Users\Tristan\Downloads\HyPCAR3\pypsg\cfg\base.py                   | Python   |      1,823 |          3 |        312 |      2,138 |
+| c:\Users\Tristan\Downloads\HyPCAR3\pypsg\cfg\config.py                 | Python   |        258 |          4 |         43 |        305 |
+| c:\Users\Tristan\Downloads\HyPCAR3\pypsg\cfg\models.py                 | Python   |        476 |          9 |         82 |        567 |
+| c:\Users\Tristan\Downloads\HyPCAR3\pypsg\docker.py                     | Python   |        161 |          0 |         34 |        195 |
+| c:\Users\Tristan\Downloads\HyPCAR3\pypsg\exceptions.py                 | Python   |         43 |          0 |         10 |         53 |
+| c:\Users\Tristan\Downloads\HyPCAR3\pypsg\globes\__init__.py            | Python   |         10 |          0 |          3 |         13 |
+| c:\Users\Tristan\Downloads\HyPCAR3\pypsg\globes\decoder.py             | Python   |        388 |          0 |         45 |        433 |
+| c:\Users\Tristan\Downloads\HyPCAR3\pypsg\globes\exocam\__init__.py     | Python   |          6 |          0 |          3 |          9 |
+| c:\Users\Tristan\Downloads\HyPCAR3\pypsg\globes\exocam\exocam.py       | Python   |        414 |          3 |         72 |        489 |
+| c:\Users\Tristan\Downloads\HyPCAR3\pypsg\globes\exoplasim\__init__.py  | Python   |          5 |          0 |          1 |          6 |
+| c:\Users\Tristan\Downloads\HyPCAR3\pypsg\globes\exoplasim\exoplasim.py | Python   |        374 |          3 |         51 |        428 |
+| c:\Users\Tristan\Downloads\HyPCAR3\pypsg\globes\globes.py              | Python   |        492 |          4 |         66 |        562 |
+| c:\Users\Tristan\Downloads\HyPCAR3\pypsg\globes\molec.json             | JSON     |         86 |          0 |          1 |         87 |
+| c:\Users\Tristan\Downloads\HyPCAR3\pypsg\globes\structure.py           | Python   |        621 |          1 |        155 |        777 |
+| c:\Users\Tristan\Downloads\HyPCAR3\pypsg\globes\waccm\__init__.py      | Python   |          6 |          0 |          2 |          8 |
+| c:\Users\Tristan\Downloads\HyPCAR3\pypsg\globes\waccm\waccm.py         | Python   |        494 |          4 |         78 |        576 |
+| c:\Users\Tristan\Downloads\HyPCAR3\pypsg\lyr\__init__.py               | Python   |          6 |          0 |          2 |          8 |
+| c:\Users\Tristan\Downloads\HyPCAR3\pypsg\lyr\lyr.py                    | Python   |        165 |         40 |         28 |        233 |
+| c:\Users\Tristan\Downloads\HyPCAR3\pypsg\rad\__init__.py               | Python   |          6 |          0 |          2 |          8 |
+| c:\Users\Tristan\Downloads\HyPCAR3\pypsg\rad\rad.py                    | Python   |         63 |         33 |         16 |        112 |
+| c:\Users\Tristan\Downloads\HyPCAR3\pypsg\request.py                    | Python   |        307 |          3 |         31 |        341 |
+| c:\Users\Tristan\Downloads\HyPCAR3\pypsg\settings.py                   | Python   |        126 |          6 |         29 |        161 |
+| c:\Users\Tristan\Downloads\HyPCAR3\pypsg\trn\__init__.py               | Python   |          6 |          0 |          2 |          8 |
+| c:\Users\Tristan\Downloads\HyPCAR3\pypsg\trn\trn.py                    | Python   |         63 |          0 |         13 |         76 |
+| c:\Users\Tristan\Downloads\HyPCAR3\pypsg\units.py                      | Python   |         66 |          0 |          5 |         71 |
+| c:\Users\Tristan\Downloads\HyPCAR3\test.ipynb                          | JSON     |        135 |          0 |          1 |        136 |
+| c:\Users\Tristan\Downloads\HyPCAR3\test.py                             | Python   |         18 |          1 |          2 |         21 |
+| Total                                                                  |          |      7,673 |        287 |      1,352 |      9,312 |
++------------------------------------------------------------------------+----------+------------+------------+------------+------------+

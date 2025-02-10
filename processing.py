@@ -4,7 +4,6 @@ import pypsg
 import time
 import os
 import csv
-
 from retrying import retry
 
 @retry(stop_max_attempt_number=5, wait_fixed=1)#Retry 3 times, with 200 miiliseconds inebtween
@@ -22,7 +21,8 @@ def generate_spectra(configPath):
 def createDataFile(data,filePath,folderPath):
     wavelength,transmittance=data["Wave/freq"],data["Total"]
 
-    prefix=r"C:\Users\Tristan\Downloads\HyPCAR3\configFiles"
+    # prefix=r"C:\Users\Tristan\Downloads\HyPCAR3\configFiles"
+    prefix="/home/tristanb/scratch/configFiles"
     
     name=filePath.removeprefix(prefix)
     name=name[1:]#Remove backslash
@@ -39,8 +39,11 @@ def createDataFile(data,filePath,folderPath):
 
 
 def callPSG(configs,atmosphereType):
-    folderPath = os.path.join("C:\\Users\\Tristan\\Downloads\\HyPCAR3\\data", atmosphereType)
-    os.makedirs(folderPath, exist_ok=True)
+    if atmosphereType=="A1" or atmosphereType=="A2":
+        atmosphereType="A"
+    
+    # folderPath = os.path.join("/home/tristanb/scratch/data", atmosphereType)
+    folderPath="/home/tristanb/scratch/data/"+atmosphereType
     results=[]
     
     with concurrent.futures.ProcessPoolExecutor(max_workers=6) as executor:
@@ -59,8 +62,8 @@ def callPSG(configs,atmosphereType):
                 logging.error(f"{cp} generated an exception: {exc}")
     # print(len(results))
 
-if __name__ == "__main__":
-    start=time.time()
-    config_paths = [r"C:\Users\Tristan\Downloads\HyPCAR3\configFiles\O2-N2-CO2-H2O-N2O-CH4-H2S-724.txt" for i in range(16)]
-    callPSG(config_paths,"A")
-    print(time.time()-start)
+# if __name__ == "__main__":
+#     start=time.time()
+#     config_paths = [r"C:\Users\Tristan\Downloads\HyPCAR3\configFiles\O2-N2-CO2-H2O-N2O-CH4-H2S-724.txt" for i in range(16)]
+#     callPSG(config_paths,"A")
+#     print(time.time()-start)

@@ -542,6 +542,21 @@ def calculateMoleculeAbundances(atmosphereType):
 
             return abundances
         
+#60k samples per atmospheres type
+#A1 has 30k
+#A2 has 30k
+#Data type with no target molecules will have 30k samples? Haven't decided yet
+#32 files takes around 11.5 secs.
+#So, 180,000/32 = 5625
+#5625*11.5=64687.5 seconds
+#Around 17 hours which isn't bad
+#To be safe, lets set the time limit to be around 24 hours?
+#11.77
+#12.56
+#11.15
+#10.82
+#10.79
+
 if __name__=="__main__":
     start=time.time()
     starTypes=["G","M","K"]

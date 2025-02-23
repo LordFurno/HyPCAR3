@@ -5,7 +5,7 @@ import time
 import os
 import csv
 from retrying import retry
-
+#Use module 3.1.6 for mpi4py
 @retry(stop_max_attempt_number=5, wait_fixed=1)#Retry 3 times, with 200 miiliseconds inebtween
 def generate_spectra(configPath):
     abs_config_path = os.path.abspath(configPath)
@@ -28,7 +28,7 @@ def createDataFile(data,filePath,folderPath):
     name=name[1:]#Remove backslash
     name=name.removesuffix(".txt")
 
-    newFileName=folderPath+f"\\{name}"+".csv"
+    newFileName=folderPath+f"/{name}"+".csv"
 
 
 
@@ -43,7 +43,11 @@ def callPSG(configs,atmosphereType):
         atmosphereType="A"
     
     # folderPath = os.path.join("/home/tristanb/scratch/data", atmosphereType)
+    # folderPath=os.path.join(r"C:\Users\Tristan\Downloads\HyPCAR3\data",atmosphereType)
     folderPath="/home/tristanb/scratch/data/"+atmosphereType
+    #Make folder
+    os.mkdirs(folderPath)
+
     results=[]
     
     with concurrent.futures.ProcessPoolExecutor(max_workers=6) as executor:
@@ -62,8 +66,9 @@ def callPSG(configs,atmosphereType):
                 logging.error(f"{cp} generated an exception: {exc}")
     # print(len(results))
 
-# if __name__ == "__main__":
-#     start=time.time()
-#     config_paths = [r"C:\Users\Tristan\Downloads\HyPCAR3\configFiles\O2-N2-CO2-H2O-N2O-CH4-H2S-724.txt" for i in range(16)]
-#     callPSG(config_paths,"A")
-#     print(time.time()-start)
+if __name__ == "__main__":
+    start=time.time()
+    
+    config_paths = [r"/home/tristanb/projects/def-pjmann/tristanb/workingDirectory/working-0.txt" for i in range(16)]
+    callPSG(config_paths,"A")
+    print(time.time()-start)

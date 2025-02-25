@@ -34,18 +34,19 @@ def oneHotEncoding(combination):
 
     Inputs
     ------
-    combination: Tuple that contains all molecules present
+    combination: Tuple containing the abundances of the molecules in this order: "O2","N2","H2","CO2","H2O","CH4","NH3"
 
     Returns
     -------
     vector: One-hot encoded vector of 1's and 0's
     '''
 
-    #The order of the molecules are: "O2", "N2", "CO2", "H2O", "N2O", "CH4", "H2S"
+    #The order of the molecules are: "O2","N2","H2","CO2","H2O","CH4","NH3"
     vector=[0.]*7
-    moleculeIndexes={"O2":0, "N2":1, "CO2":2, "H2O":3, "N2O":4, "CH4":5, "H2S":6}
-    for molecule in combination:
-        vector[moleculeIndexes[molecule]]=1.0
+    for i,abundance in enumerate(combination):
+        #At what point should a molecule be considered present? I don't know need to think about that
+        if abundance>0.001:
+            vector[i]=1.0
     return torch.tensor(vector) 
 
 def wavelengthFilter(string):
@@ -74,13 +75,12 @@ class customDataset(Dataset):
         filePath,label=self.samples[index]
 
         #Get config file for this sample
-        configFilePath=r"C:\Users\Tristan\Downloads\HyPCAR\configFiles"+f"\\"
+        configFilePath="/home/tristanb/scratch/configFiles/"
         fileName=os.path.basename(filePath)
         fileName=fileName.removesuffix(".csv")
         configFilePath+=fileName+".txt"
 
-        #Encode label
-        label=oneHotEncoding(label)
+
         #Extract data from file
         data=pd.read_csv(filePath)
         wavelength=list(map(wavelengthFilter,data.iloc[:,0]))#Removes um from wavelength data
@@ -148,9 +148,36 @@ class detectionModel(nn.Module):
         
         return x
 
+
+def getLabel(filePath,specialMolecules=False):
+    configFolder="/home/tristanb/scratch/configFiles"
+    filePath=filePath.removesuffix(".csv")
+    configFilePath=os.path.join(configFolder,filePath)
+    configFilePath+=".txt"
+
+    lines=[]
+    with open(configFilePath) as f:
+        for line in f:
+            lines.append(line)
+
+
+    abundances=lines[54]
+    abundances=abundances.removepreifx("<ATMOSPHERE-LAYER-1>")
+    abundances=abundances.split(",")
+    if not specialMolecules:
+        abundances=list(map(float,abundances[2:]))#Remove temperature profile information
+        label=oneHotEncoding(abundances)
+        return label
+    else:
+        abundances=list(map(float,abundances[2:9]))#Only gets target values, not background moolecules or 
+        label=oneHotEncoding(abundances)
+        return label
+
+
+
 molecules=["O2", "N2", "CO2", "H2O", "N2O", "CH4", "H2S"]
 folderPath=r"C:\Users\Tristan\Downloads\HyPCAR\data"
-moleculeCombinations=getMoleculeCombinations(molecules)
+
 random.seed(42)
 
 
@@ -162,48 +189,50 @@ allLabels=[]
 
 
 testSplit=0.15
-
-for combination in moleculeCombinations:
-    if combination==():
-        curFolderPath=r"C:\Users\Tristan\Downloads\HyPCAR\data\None"
-    else:
-        curFolderPath=folderPath+f"\\{"-".join(combination)}"
-
-    files=[]#Shuffles all files in molecule combination directory
+for atmosphereType in ["A","B","C","None"]:
+    curFolderPath="/home/tristanb/scratch/data/"+atmosphereType
+    files=[]
     for path in os.listdir(curFolderPath):
-        #I'll just add molecule label here to make it easier
-        files.append((os.path.join(curFolderPath,path),combination))
+        #Need to get molecule abundances as well, this means that for each file, I need to go to the config file
+        #Then extract the abundances there
+        #This is how I will get the one-hot vector for the presence
+        #Will just write a functionn
+        if atmosphereType=="None":
+            #Gett labels in a special way
+            label=getLabel(path,True)
+        else:
+
+            label=getLabel(path)
+        files.append((os.path.join(curFolderPath,path),label))
+
     random.shuffle(files)
 
-
-    testingSamples=[]#Contains testing data for that molecule combination
+    testingSamples=[]
     for i,data in enumerate(files):
-        path,combination=data[0],data[1]
+        path,label=data[0],data[1]
         if i<(len(files)*testSplit):#Adds testing data
-            testingSamples.append((os.path.join(curFolderPath,path),combination))
-        else:#Adds rest of data to training/validation
-            allSamples.append((os.path.join(curFolderPath,path),combination))
-            allLabels.append(oneHotEncoding(combination))
+            testingSamples.append((path,label))
+        else:
+            allSamples.append(path)
+            allLabels.append(label)
     testingData.extend(testingSamples)
 
 
+
 random.shuffle(testingData)
-
-
 testingDataset=customDataset(testingData)
 testingDataloader=DataLoader(testingDataset,batch_size=32,shuffle=True)#Testing data loader
 
 
 device=torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
 numEpochs=15
+
+
 
 
 f1_scores=[]
 n_splits=5 #Number of folds (adjust as necessary)
 cv=StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=42)
-
-# print(oneHotEncoding(()))
 
 
 for trainIndex, valIndex in cv.split(allSamples, np.argmax(allLabels, axis=1)):#K-fold stratified cross validation
@@ -260,7 +289,8 @@ for trainIndex, valIndex in cv.split(allSamples, np.argmax(allLabels, axis=1)):#
 
         training_loss=running_loss / len(trainingDataloader)
         training_accuracy=100 * correct / total
-
+        with open("HyPCAR_Detection_training.txt","a") as f:
+            f.write(f"Epoch {epoch+1}, Training Loss: {training_loss}, Training Accuracy: {training_accuracy}%")
         print(f"Epoch {epoch+1}, Training Loss: {training_loss}, Training Accuracy: {training_accuracy}%")
 
 
@@ -284,7 +314,8 @@ for trainIndex, valIndex in cv.split(allSamples, np.argmax(allLabels, axis=1)):#
                 total+=labels.numel()  # Total number of elements
             valLoss=val_loss / len(validationDataloader)
             valAcc=100 * correct / total
-
+            with open("HyPCAR_Detection_training.txt","a") as f:
+                f.write(f"Epoch {epoch+1}, Validation Loss: {valLoss}, Validation Accuracy: {valAcc}%")
             print(f"Epoch {epoch+1}, Validation Loss: {valLoss}, Validation Accuracy: {valAcc}%")
 
 torch.save(model.state_dict(), "detectionModel.pt")
@@ -324,5 +355,6 @@ all_labels=np.concatenate(all_labels, axis=0)
 
 # Calculate F1 score
 f1=f1_score(all_labels, all_predictions, average='macro')  # You can choose 'micro', 'macro', or 'weighted'
-
+with open("HyPCAR_Detection_training.txt","a") as f:
+    f.write(f"Test Loss: {test_loss}, Test Accuracy: {test_accuracy}%, Test F1 Score: {f1}")
 print(f"Test Loss: {test_loss}, Test Accuracy: {test_accuracy}%, Test F1 Score: {f1}")

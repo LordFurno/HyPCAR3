@@ -8,7 +8,7 @@ configFolder="/home/tristanb/scratch/configFiles"
 for fileName in os.listdir(configFolder):
     atmosphereType,numbers=fileName.split("_")
     if len(atmosphereType)==2:
-        #A1 or A2
+        #A1 or A2 
         atmosphereType="A"
     dataFolder="/home/tristanb/scratch/data/"+atmosphereType
 

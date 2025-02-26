@@ -75,7 +75,8 @@ class customDataset(Dataset):
         filePath,label=self.samples[index]
 
         #Get config file for this sample
-        configFilePath="/home/tristanb/scratch/configFiles/"
+        configFilePath=os.path.join(os.environ["$SLURM_TMPDIR"],"configFiles")
+        # configFilePath="/home/tristanb/scratch/configFiles/"
         fileName=os.path.basename(filePath)
         fileName=fileName.removesuffix(".csv")
         configFilePath+=fileName+".txt"
@@ -150,7 +151,8 @@ class detectionModel(nn.Module):
 
 
 def getLabel(filePath,specialMolecules=False):
-    configFolder="/home/tristanb/scratch/configFiles"
+    configFolder=os.path.join(os.environ["$SLURM_TMPDIR"],"configFiles")
+    # configFolder="/home/tristanb/scratch/configFiles"
     filePath=filePath.removesuffix(".csv")
     configFilePath=os.path.join(configFolder,filePath)
     configFilePath+=".txt"
@@ -176,7 +178,6 @@ def getLabel(filePath,specialMolecules=False):
 
 
 molecules=["O2", "N2", "CO2", "H2O", "N2O", "CH4", "H2S"]
-folderPath=r"C:\Users\Tristan\Downloads\HyPCAR\data"
 
 random.seed(42)
 
@@ -190,7 +191,8 @@ allLabels=[]
 
 testSplit=0.15
 for atmosphereType in ["A","B","C","None"]:
-    curFolderPath="/home/tristanb/scratch/data/"+atmosphereType
+    dataPath="data/"+atmosphereType
+    curFolderPath=os.path.join(os.environ["$SLURM_TMPDIR"],dataPath)
     files=[]
     for path in os.listdir(curFolderPath):
         #Need to get molecule abundances as well, this means that for each file, I need to go to the config file
@@ -246,7 +248,7 @@ for trainIndex, valIndex in cv.split(allSamples, np.argmax(allLabels, axis=1)):#
         yData.append(allSamples[index])
 
 
-
+#55587583
     trainingDataset=customDataset(xData)
     validationDataset=customDataset(yData)
     

@@ -33,3 +33,5 @@ cd /home/tristanb/projects/def-pjmann/tristanb
 python detectionModel.py
 
 
+#/home/tristanb/projects/def-pjmann/tristanb/psgImage.sif
+#scp -i C:\Users\Tristan\.ssh\sshCedar  tristanb@cedar.alliancecan.ca:/home/tristanb/projects/def-pjmann/tristanb/detectionModel.pt "C:\Users\Tristan\Downloads\HyPCAR3\"

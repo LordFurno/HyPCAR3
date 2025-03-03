@@ -11,22 +11,7 @@ import torch.optim as optim
 from sklearn.metrics import precision_score, recall_score, f1_score,multilabel_confusion_matrix, roc_auc_score
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import f1_score
-def getMoleculeCombinations(molecules):
-    '''
-    This functions take a list of molecules and then returns all possible combinations
 
-    Inputs
-    ------
-    molecules: List of molecules
-
-    Returns
-    -------
-    combinationList: List of combinations
-    '''
-    combinationList=[]
-    for r in range(len(molecules)+1):
-        combinationList.extend(itertools.combinations(molecules,r))
-    return combinationList
 
 def oneHotEncoding(combination):
     '''
@@ -167,6 +152,7 @@ def getLabel(filePath,specialMolecules=False):
     abundances=lines[54]
     abundances=abundances.removeprefix("<ATMOSPHERE-LAYER-1>")
     abundances=abundances.split(",")
+    
     if not specialMolecules:
         abundances=list(map(float,abundances[2:]))#Remove temperature profile information
         label=oneHotEncoding(abundances)

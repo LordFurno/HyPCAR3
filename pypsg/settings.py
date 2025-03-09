@@ -20,7 +20,7 @@ USER_SETTINGS_PATH = USER_DATA_PATH / 'settings.json'
 
 DEFAULT_SETTINGS = {
     'url': PSG_URL,
-    'api_key': "8bd9208abbd2dd15f3dd",
+    'api_key': "API_KEY",
     'encoding': 'utf-8',
     'cfg_max_lines': 1500,
     'timeout': REQUEST_TIMEOUT

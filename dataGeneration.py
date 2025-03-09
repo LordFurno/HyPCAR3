@@ -68,6 +68,7 @@ def PT_line(pressure, kappa,  gamma1, gamma2, alpha, beta, R_star,   T_star, T_i
     gamma1 = 10**(gamma1)
     gamma2 = 10**(gamma2)
 
+
     if T_int_type == 'thorngren':
         # Planetary internal temperature (Thorngren et al. 2019)
         # Hard-coded values are fitted parameters!

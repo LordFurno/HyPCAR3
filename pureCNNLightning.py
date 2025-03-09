@@ -6,7 +6,8 @@ import random
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
-
+import pytorch_lightning as pl
+from pytorch_lightning.loggers import CSVLogger
 import time
 
 
@@ -113,29 +114,6 @@ def getAbundances(fileName):
         abundances=list(map(float,abundances[2:]))#Remove temperature profile information
     return abundances
 
-
-
-def detectMolecules(data):
-    '''
-    This function will pass the data through the detection model and return its raw output
-
-    Inputs
-    ------
-    data: A tensor of batch 32 that contains the wavelength, transmittance data
-    
-    
-    Returns
-    -------
-    outputs: A vector that represents the detection models output
-    '''
-    #Load the saved model weights
-    
-    detect.load_state_dict(torch.load("/home/tristanb/projects/def-pjmann/tristanb/detectionModel.pt",weights_only=True))
-    with torch.no_grad():
-        outputs=detect(data)
-
-    return outputs
-
 def wavelengthFilter(string):
     '''
     This function removes the um suffix from the wavelength data.
@@ -151,8 +129,6 @@ def wavelengthFilter(string):
     string=string.removesuffix(" um")
     return float(string)
  
-
-
 class customDataset(Dataset):
     def __init__(self,samples):
         self.samples=samples
@@ -160,7 +136,6 @@ class customDataset(Dataset):
         return len(self.samples)
     def __getitem__(self, index):
         return self.samples[index][0],self.samples[index][1],self.samples[index][2]
-
 class testDataset(Dataset):
     def __init__(self,samples):#samples contain a listt of all file paths
         self.samples=samples
@@ -168,7 +143,7 @@ class testDataset(Dataset):
         return len(self.samples)
     def __getitem__(self, index):
         return self.samples[index][0],self.samples[index][1]
-    
+
 class MultiHeadAttention(nn.Module):
     def __init__(self, input_dim, num_heads):
         super(MultiHeadAttention, self).__init__()
@@ -361,13 +336,81 @@ class abundanceModel(nn.Module):#CHange to output uncertainty as well
 
         #Changed in etc/php-fpm.conf
         #Changed pid to equal /tmp/php-fpm.pid
-        return abundances,attention_weights
+        return abundances,uncertainties,attention_weights
+    
 
 
+class AbundanceModule(pl.LightningModule):
+    def __init__(self, lr=0.001):
+        super().__init__()
+        self.lr=lr
 
 
+        self.detect=detectionModel()
 
-if __name__ == '__main__':
+        self.detect.load_state_dict(torch.load("/home/tristanb/projects/def-pjmann/tristanb/detectionModel.pt",weights_only=True))
+        self.detect.eval()
+        
+        
+        self.model=abundanceModel()
+        self.criterion=nn.MSELoss()
+
+    def forward(self,x,detectionOutput):
+        return self.model(x,detectionOutput)
+
+    def training_step(self,batch):
+        data,labels,configs=batch
+
+        #Forward pass through detection model
+        with torch.no_grad():
+            detectionOutput=self.detect(data)
+        
+
+        
+        outputs,uncertainties,attentionWeights=self.model(data,detectionOutput)
+
+        loss=self.criterion(outputs,labels)
+
+        #Log additional metrics
+        self.log("train_loss", loss)
+        kl_loss=kl_divergence(outputs,labels)
+        topk_acc=topKAccuracy(outputs,labels)
+        cross_entropy=customCrossEntropy(outputs,labels)
+        self.log("train_kl", kl_loss)
+        self.log("train_topk", topk_acc)
+        self.log("train_cross_entropy", cross_entropy)
+        return loss
+
+    def validation_step(self, batch):
+
+        data,labels,configs=batch
+
+        #Forward pass through detection model
+        with torch.no_grad():
+            detectionOutput=self.detect(data)
+        
+
+        
+        outputs,uncertainties,attentionWeights=self.model(data,detectionOutput)
+
+        loss=self.criterion(outputs,labels)
+
+        #Log additional metrics
+        self.log("train_loss", loss, prog_bar=True)
+        kl_loss=kl_divergence(outputs,labels)
+        topk_acc=topKAccuracy(outputs,labels)
+        cross_entropy=customCrossEntropy(outputs,labels)
+        self.log("train_kl", kl_loss)
+        self.log("train_topk", topk_acc)
+        self.log("train_cross_entropy", cross_entropy)
+        return loss
+
+    def configure_optimizers(self):
+        optimizer=optim.Adam(self.parameters(), lr=self.lr)
+        return optimizer
+
+
+if __name__=="__main__":
     molecules=["O2","N2","H2","CO2","H2O","CH4","NH3"]
 
 
@@ -400,8 +443,6 @@ if __name__ == '__main__':
             configFilePath=os.path.join(configFolderPath,fileName)
             configFilePath+=".txt"
 
-
-
             label=getAbundances(configFilePath)
             files.append((os.path.join(curFolderPath,path),label))
 
@@ -420,27 +461,9 @@ if __name__ == '__main__':
     random.shuffle(testingData)
 
 
-
-    device=torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-    detect=detectionModel()
-    detect=detect.to(device)
-
-    print(device)
-
-
-    numEpochs=10
-
-
-
-    '''
-    Consider pre-loading the data set before training even beings. This would make it so that I only ever have to load
-    the data once. Then the batches will be super fast, even for a seperate validation split.
-    '''
-
     start1=time.time()
     preLoadedData=[]
-    for dataPath,label in allSamples:#Pre-loads all the data, tqdm provides a progress bar so we can get an idea how long it will take
+    for dataPath,label in allSamples:#Pre-loads all the data
         
         configFilePath=os.path.join(os.environ["SLURM_TMPDIR"],"configFiles")
 
@@ -472,137 +495,30 @@ if __name__ == '__main__':
 
     trainingDataloader=DataLoader(trainingDataset,batch_size=32,shuffle=True)
     validationDataloader=DataLoader(validationDataset,batch_size=32,shuffle=True)
-    
 
-
-    model=abundanceModel().to(device)
-    optimizer=optim.Adam(model.parameters(),lr=0.001)
-
-    torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
-
-
-
-    criterion=nn.MSELoss()
-
-    for epoch in range(numEpochs):
-        model.train()
-        running_loss = 0.0
-        running_KL_loss = 0.0  
-        running_top_k = 0.0    
-        running_cross_entropy = 0.0  
-
-        for batch in trainingDataloader:
-            data,labels,configs=batch
-
-            data=data.to(device)
-            labels=labels.to(device)
-
-            optimizer.zero_grad()
-
-            detectionOutput=detectMolecules(data)
-
-            outputs,attentionWeights=model(data,detectionOutput)
-
-            loss=criterion(outputs,labels)
-            running_loss+=loss.item()
-            running_KL_loss+=kl_divergence(outputs,labels)
-            running_top_k+=topKAccuracy(outputs,labels,1)
-            running_cross_entropy+=customCrossEntropy(outputs,labels)
-
-
-            loss.backward()
-
-            optimizer.step()
-
-        trainingLoss=running_loss/len(trainingDataloader)
-        klLoss=running_KL_loss/len(trainingDataloader)
-        topKAcc=running_top_k/len(trainingDataloader)
-        crossEntropy=running_cross_entropy/len(trainingDataloader)
-
-
-        #Instead of weighted accuracy, use top-k accuracy and R^2 value. 
-        with open("pureCNN.txt",'a') as f:
-            f.write(f"Epoch {epoch+1}, Loss: {trainingLoss}, KL Divergence: {klLoss}, Top-K Accuracy: {topKAcc}, Cross Entropy: {crossEntropy}"+"\n")
-
-        print(f"Epoch {epoch+1}, Loss: {trainingLoss}, KL Divergence: {klLoss}, Top-K Accuracy: {topKAcc}, Cross Entropy: {crossEntropy}")
-
-        model.eval()
-        with torch.no_grad():
-            val_loss=0
-            validation_KL_loss=0.0
-            
-            validation_top_k=0.0
-            validation_cross_entropy=0.0
-
-            counter=0
-            for index,batch in enumerate(validationDataloader):
-                data,labels,config=batch
-
-                data=data.to(device)
-                labels=labels.to(device)
-
-                optimizer.zero_grad()
-
-                moleculeDetection=detectMolecules(data)
-
-                outputs,attentionWeights=model(data,moleculeDetection)
-
-                loss=criterion(outputs,labels)
-
-
-                val_loss+=loss.item()
-                validation_KL_loss+=kl_divergence(outputs,labels)
-                validation_top_k+=topKAccuracy(outputs,labels,1)
-                validation_cross_entropy+=customCrossEntropy(outputs,labels)
-
-            
-
-            valLoss=val_loss/len(validationDataloader)
-            valKL=validation_KL_loss/len(validationDataloader)
-            valTopK=validation_top_k/len(validationDataloader)
-            valCrossEntropy=validation_cross_entropy/len(validationDataloader)
-        with open("pureCNN.txt",'a') as f:
-            f.write(f"Validation Loss: {valLoss}, KL Divergence: {valKL}, Top-K Accuracy: {valTopK}, Cross Entropy: {valCrossEntropy}"+"\n")
-        print(f"Validation Loss: {valLoss}, KL Divergence: {valKL}, Top-K Accuracy: {valTopK}, Cross Entropy: {valCrossEntropy}")
-
-    torch.save(model.state_dict(), "pureCNN.pt")
-    model.eval()
 
     testingDataset=testDataset(testingData)
     testingDataloader=DataLoader(testingDataset,batch_size=32,shuffle=True)#Testing data loader
 
-    test_loss=0
-    regularLoss=nn.MSELoss()
-    test_kl_loss=0.0
-    test_top_k=0.0
-    test_cross_entropy=0.0
-    with torch.no_grad():
-        for batch in testingDataloader:
-            data,labels,config=batch
-
-            data=data.to(device)
-            labels=labels.to(device)
-
-            
-            moleculeDetection=detectMolecules(data)
-            
-            outputs,attentionWeights=model(data,moleculeDetection)
+    model_module = AbundanceModule(lr=0.001)
+    
+    logger = CSVLogger(save_dir="logs", name="pureCNN")
+    # Create Trainer with DDP accelerator (for multi-GPU training)
+    trainer = pl.Trainer(
+        accelerator="gpu",
+        devices=3,
+        num_nodes=3,
+        strategy="ddp"
+    )
+    
+    #Train the model
+    trainer.fit(model_module, trainingDataloader, validationDataloader)
 
 
-            loss=criterion(outputs,labels)
+    trainer.test(model_module, test_dataloaders=testingDataloader)
 
 
-            test_loss+=loss.item()
-            test_kl_loss+=kl_divergence(outputs,labels)
-            test_top_k+=topKAccuracy(outputs,labels,1)
-            test_cross_entropy+=customCrossEntropy(outputs,labels)
-            
+    # Save the model if needed
+    trainer.save_checkpoint("pureCNN.pt")
 
-        test_loss=test_loss/len(testingDataloader)
-        testKL=test_kl_loss/len(testingDataloader)
-        testTopK=test_top_k/len(testingDataloader)
-        testCrossEntropy=test_cross_entropy/len(testingDataloader)
 
-    with open("pureCNN.txt",'a') as f:
-        f.write(f"Testing Loss: {test_loss}, KL Divergence: {testKL}, Top-K Accuracy: {testTopK}, Cross Entropy: {testCrossEntropy}"+"\n")
-    # print(f"Testing Loss: {test_loss}, KL Divergence: {testKL}, Top-K Accuracy: {testTopK}, Cross Entropy: {testCrossEntropy}")

@@ -171,8 +171,8 @@ def testNewAbundances(fileNames,moleculeAbundances):
 
         abundanceDictionary={}
         molecules=["O2","N2","H2","CO2","H2O","CH4","NH3"]
-        for i in range(len(moleculeAbundances)):
-            abundanceDictionary[molecules[i]]=moleculeAbundances[i]
+        for i in range(len(moleculeAbundances[index])):
+            abundanceDictionary[molecules[i]]=moleculeAbundances[index][i]
 
         moleculeWeights={"O2":31.999, "N2":28.02, "H2":2.016,"CO2":44.01, "H2O":18.01528,"CH4":16.04,"NH3":17.03052 }#g/mol
         averageWeight=0
@@ -187,7 +187,7 @@ def testNewAbundances(fileNames,moleculeAbundances):
             atmosphereInfo=atmosphereInfo.removesuffix("\n")
             atmosphereInfo=atmosphereInfo.split(",")
 
-            atmosphereInfo[2:]=moleculeAbundances
+            atmosphereInfo[2:]=moleculeAbundances[index]
             
     
 
@@ -198,11 +198,11 @@ def testNewAbundances(fileNames,moleculeAbundances):
         HITRANValues={"O2":"HIT[7]","N2":"HIT[22]","H2":"HIT[45]","CO2":"HIT[2]","H2O":"HIT[1]","CH4":"HIT[6]","NH3":"HIT[11]"}
 
         #Additional parameters to actually run the data properly.
-        lines[42]="<ATMOSPHERE-NGAS>"+str(len(moleculeAbundances))+"\n" #Number of gases are in the atmosphere
+        lines[42]="<ATMOSPHERE-NGAS>"+str(len(moleculeAbundances[index]))+"\n" #Number of gases are in the atmosphere
         lines[43]="<ATMOSPHERE-GAS>"+",".join(molecules)+"\n" #What gases are in the atmosphere
         lines[44]="<ATMOSPHERE-TYPE>"+",".join(HITRANValues[mol] for mol in molecules)+"\n" #HITRAN values for each gas
-        lines[45]="<ATMOSPHERE-ABUN>"+"1,"*(len(moleculeAbundances)-1)+"1"+"\n" #Molecule abunadnces. They're all 1, because abundances are defined in vertical profile
-        lines[46]="<ATMOSPHERE-UNIT>"+"scl,"*(len(moleculeAbundances)-1)+"scl"+"\n" #Abundance unit
+        lines[45]="<ATMOSPHERE-ABUN>"+"1,"*(len(moleculeAbundances[index])-1)+"1"+"\n" #Molecule abunadnces. They're all 1, because abundances are defined in vertical profile
+        lines[46]="<ATMOSPHERE-UNIT>"+"scl,"*(len(moleculeAbundances[index])-1)+"scl"+"\n" #Abundance unit
         lines[49]="<ATMOSPHERE-WEIGHT>"+str(averageWeight)+"\n" #Molecule weight of atmosphere g/mol
         lines[52]="<ATMOSPHERE-LAYERS-MOLECULES>"+",".join(molecules)+"\n" #Molecule in vertical profile
 
@@ -754,7 +754,7 @@ class customLoss(nn.Module):
 
 
         
-
+        
         sigmaLikelihood=0.1#How well simulated data matches predicted abundances. How accurate simulations are
 
         
@@ -767,6 +767,8 @@ class customLoss(nn.Module):
         
         #Combine the loss
         #For now, just add everything, but the in future, can play with the idea of multiplying each by some factor 
+
+            
         return posterior+dataLoss+detectionLoss
 
 

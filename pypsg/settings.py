@@ -46,11 +46,11 @@ def save_settings(**kwargs):
             raise KeyError(f'Unknown setting {key}.')
     with USER_SETTINGS_PATH.open('w') as file:
         json.dump(previous_settings, file, indent=4)
-    print(f'Saved settings to {USER_SETTINGS_PATH}')
+    # print(f'Saved settings to {USER_SETTINGS_PATH}')
     # pylint: disable-next=global-statement
     global settings_need_reload
     settings_need_reload = True
-    print('Reloading settings...')
+    # print('Reloading settings...')
     reload_settings()
 
 def load_settings():

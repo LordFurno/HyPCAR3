@@ -1,0 +1,68 @@
+digraph dataGeneration {
+    rankdir=TB; 
+    fontname="Helvetica";
+    graph [bgcolor="#0d0d0d"];
+    node [fontname="Helvetica", fontsize=10];
+
+    //Input/Output: shape=oval, fillcolor=lightblue
+    // Process: shape="rectangle",style="rounded, filled", fillcolor=lightgrey
+    //Decision/check : shape=diamond, style=filled, fillcolor=gold
+
+    //Inputs:
+    atmoType [label="Input: Atmosphere Type\n(A1, A2, B, C, None)",shape=oval,style="filled", fillcolor=lightblue];
+    starType [label="Input: Stellar Type\n(M, G, K)",shape=oval,style="filled",fillcolor=lightblue];
+
+    //Processes (right side):
+    lhsSample [label="Sample Parameters (LHS)\n(Independent variable sampling)",shape="rectangle",style="rounded, filled", fillcolor=lightgrey];
+    radTemp [label="Determine Stellar Radius & Temperature", shape="rectangle",style="rounded, filled", fillcolor=lightgrey];
+    starLum [label="Calculate Star Luminosity\n(L = 4πR²σT⁴)", shape="rectangle",style="rounded, filled", fillcolor=lightgrey];
+    smaBounds [label="Calculate Habitable Zone Bounds",shape="rectangle",style="rounded, filled", fillcolor=lightgrey];
+    genPlanet [label="Generate Planetary Parameters\n(Radius, Mass, Gravity, e.t.c)",shape="rectangle",style="rounded, filled", fillcolor=lightgrey];
+    pt [label="Calculate Pressure-Temperature Profile",shape="rectangle",style="rounded, filled", fillcolor=lightgrey];
+
+    //Processes (left side):
+    hconSample [label="Sample Elemental Abundances\n(H, C, O, N)",shape="rectangle",style="rounded, filled", fillcolor=lightgrey];
+    calcAbundance [label="Calculate Molecular Abundances",shape="rectangle",style="rounded, filled", fillcolor=lightgrey];
+
+    //Decisions:
+    atmoCheck [label="Check Atmospheric Viability\n(Cosmic Shoreline Test)",shape=diamond, style=filled, fillcolor=gold];
+    mixCheck [label="Validate Elemental\nMixing Ratios",shape=diamond, style=filled, fillcolor=gold];
+    
+    //Final process
+    psg [label="Run Radiative Transfer Model (PSG)",shape="rectangle",style="rounded, filled", fillcolor=lightgrey];
+
+    //Output
+    spectra [label="Transmitttance Spectra",shape=oval,style="filled",fillcolor=lightblue]
+
+    //Defining flow (right side):
+    starType -> lhsSample [color=white];
+    lhsSample -> radTemp [color=white];
+    radTemp -> starLum [color=white];
+    starLum -> smaBounds [color=white];
+    smaBounds -> genPlanet [color=white];
+    genPlanet -> atmoCheck [color=white];
+
+    //Decisions
+    atmoCheck -> genPlanet [label="No", style=dashed, color=red,constraint=false,fontcolor=white];
+    atmoCheck -> pt [label="Yes",color=green,fontcolor=white];
+
+
+    //Defining flow (left side):
+    atmoType -> hconSample [color=white];
+    hconSample -> mixCheck [color=white];
+
+    //Decisions
+    mixCheck -> hconSample [label="No", style=dashed, color=red,constraint=false,fontcolor=white];
+    mixCheck -> calcAbundance [label="Yes",color=green,fontcolor=white];
+
+    //Final flow
+    calcAbundance -> psg [color=white];
+    pt -> psg [color=white];
+    genPlanet -> psg [color=white];
+    radTemp -> psg [color=white];
+    starLum -> psg [color=white];
+    starType -> psg [color=white];
+    psg -> spectra [color=white];
+
+
+}

@@ -14,7 +14,7 @@ from sklearn.model_selection import StratifiedKFold
 
 import matplotlib.pyplot as plt
 import time
-from runPsg import get_data_async
+from psgDocker3 import get_data_async
 
 
 def oneHotEncoding(combination):
@@ -487,8 +487,6 @@ class abundanceModel(nn.Module):#CHange to output uncertainty as well
         #Changed pid to equal /tmp/php-fpm.pid
         return abundances,uncertainties,attention_weights
 
-#Will probably need to change this so it works with batches
-#Will adress that later
 def calculateLikelihood(yReal,ySim,sigma):
     '''
     This function calculates the likelhood P(A_pred|Y_real). It is a gaussian likelihood function.
@@ -504,11 +502,11 @@ def calculateLikelihood(yReal,ySim,sigma):
     likelihood: Likelihood value for given real and simulated data
     '''
 
-    mse = torch.mean((yReal - ySim)**2,dim=1)  #Mean squared error between real and simulated data
+    mse = torch.mean((yReal - ySim)**2,dim=[1,2])  #Mean squared error between real and simulated data
     #return np.exp(-mse / (2 * sigma ** 2))
     nll = mse / (2 * sigma**2)
-
-    # Optionally include constant term: nll += 0.5 * np.log(2 * np.pi * sigma**2)
+    # nll_aggregated = torch.mean(nll, dim=0)  # shape: (B,)
+    # return nll_aggregated
     return nll
 
 
@@ -669,7 +667,7 @@ def calculateExpectedValues(predAbun):
         #Its unkown, prior should just be 1
         #So there is essentially no prior. Just want the likelihood
         return None
-    return expected.values()
+    return list(expected.values())
 
 def calculatePrior(predAbun,sigmaPrior):
     '''
@@ -678,18 +676,22 @@ def calculatePrior(predAbun,sigmaPrior):
     '''
     totalLoss=0.0
     batchSize=predAbun.shape[0]
+    
     for i in range(batchSize):
         sampleLoss=0.0
         sampleAbundance=predAbun[i]
         sampleSigma=sigmaPrior[i]
         expectedValues=calculateExpectedValues(sampleAbundance.tolist())
-        for j in range(len(sampleAbundance)):
-            mu=expectedValues[j]
-            sigma=sampleSigma[j]
+        if expectedValues==None:
+            totalLoss+=0
+        else:
+            for j in range(len(sampleAbundance)):
+                mu=expectedValues[j]
+                sigma=sampleSigma[j]
 
-            y=sampleAbundance[j]
-            sampleLoss+=np.log(np.sqrt(2 * np.pi) * sigma) + ((y - mu)**2) / (2 * sigma**2)
-        totalLoss+=sampleLoss
+                y=sampleAbundance[j]
+                sampleLoss+=np.log(np.sqrt(2 * np.pi) * sigma) + ((y - mu)**2) / (2 * sigma**2)
+            totalLoss+=sampleLoss
     return totalLoss/batchSize
 
 
@@ -713,18 +715,14 @@ def calculatePosterior(yReal,ySim,sigmaLikelihood,predAbun,sigmaPrior):
     '''
 
 
-
-
     prior=calculatePrior(predAbun,sigmaPrior) 
     likelihood=calculateLikelihood(yReal,ySim,sigmaLikelihood)
+    nll_mean = torch.mean(likelihood)
 
+    # print(f"Likelihood: {nll_mean}")
+    # print(f"Prior: {prior}")
 
-    #For the likelihood, I should just take the aggregated transmittance. However, later if I want to include wavelength-molecule mapping, here is where I would do it.
-
-    print(f"Likelihood: {likelihood}")
-    print(f"Prior: {prior}")
-
-    posterior=likelihood+prior
+    posterior=nll_mean+prior
     return posterior
 
 
@@ -732,6 +730,17 @@ class customLoss(nn.Module):
     def __init__(self):
         super(customLoss, self).__init__()
         self.dataBased=nn.MSELoss()
+
+    def spearmanLoss(self,detection,pred):
+        batchSize=detection.shape[0]
+        loss=[]
+        for i in range(batchSize):
+            spearman,pVal=spearmanr(detection[i],pred[i])
+
+            loss.append(1.0-spearman)
+        lossAvg=np.mean(loss)
+        return torch.tensor(lossAvg)
+
 
     def forward(self,predAbun,uncertainty,realAbun,detectionOutput,config,inputTransmittance):#Predicted abundances, actual abundances, config file, real data
         '''
@@ -745,10 +754,11 @@ class customLoss(nn.Module):
         
         #How should I compare detection output to abundance output. Hmm, could be ranked based, 
         #Like molecules with more confidence in exsisting should have higher abundance
+        detectionTemp,predTemp=detectionOutput.cpu(),predAbun.cpu()
 
-        spearman,pValue=spearmanr(detectionOutput,predAbun)
-        detectionLoss=1.0-spearman#Best case is 0, worst case is 1. Boundeed between 1 and 0
-
+        
+        detectionLoss=self.spearmanLoss(detectionTemp,predTemp)
+        # predAbun=predAbun.to(device)
 
         dataLoss=self.dataBased(predAbun,realAbun)#Ranges from 0 to infinity
 
@@ -767,14 +777,7 @@ class customLoss(nn.Module):
         
         #Combine the loss
         #For now, just add everything, but the in future, can play with the idea of multiplying each by some factor 
-
-            
-        return posterior+dataLoss+detectionLoss
-
-
-
-
-
+        return (posterior*0.1043407843093306)+(dataLoss*19.981757202049163)+(detectionLoss*1.618602199271624)
 
 
 
@@ -832,6 +835,7 @@ if __name__ == '__main__':
 
     detect=detectionModel()
     detect=detect.to(device)
+    
 
     print(device)
 
@@ -840,10 +844,7 @@ if __name__ == '__main__':
 
 
 
-    '''
-    Consider pre-loading the data set before training even beings. This would make it so that I only ever have to load
-    the data once. Then the batches will be super fast, even for a seperate validation split.
-    '''
+
 
     start1=time.time()
     preLoadedData=[]
@@ -883,8 +884,18 @@ if __name__ == '__main__':
     
 
 
-    model=abundanceModel().to(device)
-    optimizer=optim.Adam(model.parameters(),lr=0.001)
+    model=abundanceModel()
+    model.load_state_dict(torch.load("/home/tristanb/projects/def-pjmann/tristanb/pureAbundance.pt",weights_only=True))
+    model=model.to(device)
+
+    for name, param in model.named_parameters():
+        if "conv" in name or "bn" in name:
+            #Freze these layers
+            param.requires_grad = False
+    
+
+
+    optimizer=optim.Adam(model.parameters(),lr=1e-5)
 
     torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
 

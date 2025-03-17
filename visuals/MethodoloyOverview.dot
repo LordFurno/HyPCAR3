@@ -1,0 +1,20 @@
+digraph Methodology {
+    rankdir=LR;  // sets the layout direction from left to right
+    graph [bgcolor="#0d0d0d"];
+    node [shape=box, style=rounded, fontname="Helvetica", fontsize=10, fillcolor="#E8F4FA", style=filled];
+
+    // Define nodes
+    DataGeneration [label="Data Generation"];
+    TrainDetection [label="Train Detection Model"];
+    CombineInputs [label="Combine:\nDetection Model Outputs\n+ Raw Data"];
+    TrainAbundance [label="Train Abundance Model"];
+    FineTune [label="Fine-tune Abundance Model"];
+    CustomLoss [label="Custom-loss Function"];
+
+    // Define flow
+    DataGeneration -> TrainDetection [color="white"];
+    TrainDetection -> CombineInputs [color="white"];
+    CombineInputs -> TrainAbundance [color="white"];
+    CustomLoss -> FineTune [color="white"];
+    TrainAbundance -> FineTune [color="white"];
+}

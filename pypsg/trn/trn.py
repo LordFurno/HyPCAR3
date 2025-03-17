@@ -54,7 +54,11 @@ class PyTrn(table.QTable):
                 np.fromstring(line,sep=' ') for line in content
             ]
         )
+        # return content
+        # print(content)
         data = {}
+        if "" in names:
+            names.remove("")
         for i, name in enumerate(names):
             data[name] = content[:,i] * (wl_unit if i==0 else trn_unit)
         return cls(data=data)

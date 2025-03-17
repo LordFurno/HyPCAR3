@@ -6,12 +6,14 @@ from io import StringIO
 # Asynchronous function to execute the command
 async def execute_command_async(file_path):
     command = [
-        "docker", "exec", "-t", "psgWithDirectoryPort8080",
+        "docker", "exec", "-t", "psg",
         "curl", "-d", "type=trn", "--data-urlencode", f"file@/containerDirectory/{file_path}",
-        "http://host.docker.internal:8080/api.php"
+        "http://localhost:3000/api.php"
     ]
     
     try:
+        # curl --data-urlencode file@configTemplate.txt http://172.17.0.1:8080/api.php
+        # curl --data-urlencode file@/containerDirectory/working-0.txt http://localhost:8080/api.php
         # Run the subprocess asynchronously
         process = await asyncio.create_subprocess_exec(
             *command,
@@ -43,30 +45,25 @@ def get_data_async():
     results=asyncio.run(run_commands_async(file_paths))
 
     #Extract data
-    # data = []
-    # for result in results:
-    #     if result[1]:  
-    #         try:
-    #             data_array = np.loadtxt(StringIO(result[1]), comments='#')
-    #             # Extract columns 0 and 1 as a list of tuples
-    #             data_array = list(zip(data_array[:, 0], data_array[:, 1]))[:-1]
-    #             # Convert to PyTorch tensor
-    #             data.append((result[0], torch.tensor(data_array)))
-    #         except Exception as e:
-    #             print(f"Error processing data for {result[0]}: {e}")
-
- 
-    data=[]
+    data = []
     for result in results:
         if result[1]:  
             try:
-                data_array=np.loadtxt(StringIO(result[1]), comments='#')
+                data_array = np.loadtxt(StringIO(result[1]), comments='#')
                 # Extract columns 0 and 1 as a list of tuples
-                data_array=list(zip(data_array[:, 0], data_array[:, 1]))[:-1]
+                data_array = list(zip(data_array[:, 0], data_array[:, 1]))[:-1]
                 # Convert to PyTorch tensor
-                data.append(torch.tensor(data_array))
+                num=result[0].removeprefix("working-")
+                num=num.removesuffix(".txt")
+
+
+                data.append((int(num), torch.tensor(data_array)))
             except Exception as e:
                 print(f"Error processing data for {result[0]}: {e}")
+    data.sort(key=lambda x:x[0])
+    data=[d[1] for d in data]
+ 
+
 
     # Stack the tensors into one tensor
     if data:

@@ -1,0 +1,137 @@
+digraph AbundanceModel {
+    // Global settings
+    rankdir=TB;
+    fontsize=10;
+    fontname="Helvetica";
+    splines=polyline;
+
+    // Global node styling
+    node [shape=box, style="rounded,filled", fontname="Helvetica", fontsize=10];
+
+    // ==== Input Nodes ====
+    DetectionInput [label="Detection Input\n[Batch, 7]", shape=oval, fillcolor=lightblue];
+    DataInput [label="Data Input\n[Batch, 2, 784]", shape=oval, fillcolor=lightblue];
+
+
+    // ==== Detection Branch ====
+    subgraph cluster_detect {
+    label = "Detection Branch";
+    style = rounded;
+    color = red;
+
+    fcDetect [label="fcDetect\n(7 -> 64)\n+ ReLU"];
+    }
+
+    // ==== Convolution Branch ====
+    subgraph cluster_conv {
+        label = "Convolution Branch";
+        style = rounded;
+        color = blue;
+
+        conv1 [label="Conv1d (2->128)\nK:5, S:2\n+ BN + ReLU"];
+        pool1 [label="MaxPool1d (K:2)"];
+
+        conv2 [label="Conv1d (128->128)\nK:5, S:2\n+ BN + ReLU"];
+        pool2 [label="MaxPool1d (K:2)"];
+
+        conv3 [label="Conv1d (128->64)\nK:3, S:2\n+ BN + ReLU"];
+        pool3 [label="MaxPool1d (K:2)"];
+
+        conv4 [label="Conv1d (64->32)\nK:2, S:2\n+ BN + ReLU"];
+        pool4 [label="MaxPool1d (K:2)"];
+
+        dropout1 [label="Dropout (0.4)"];
+
+        attention [label="MultiHeadAttention\n(input_dim=32, heads=8)"];
+        flatten [label="Flatten\n(Output: vector)"];
+
+        attentionWeight [label="Attention Weights\n[Batch,8,2,2]", shape=oval, fillcolor=lightblue];
+
+
+        // Arrange conv layer pairs in two columns
+        { rank = same; conv1; pool1; }
+        { rank = same; conv2; pool2; }
+        { rank = same; conv3; pool3; }
+        { rank = same; conv4; pool4; }
+
+        // Vertical invisible edges to keep alignment
+
+        // Visible internal connections
+        conv1 -> pool1;
+        pool1 -> conv2;
+        conv2 -> pool2;
+        pool2 -> conv3;
+        conv3 -> pool3;
+        pool3 -> conv4;
+        conv4 -> pool4;
+
+        // After conv blocks
+        pool4 -> dropout1;
+        dropout1 -> attention;
+        attention -> flatten;
+        attention -> attentionWeight;
+    }
+
+    // ==== Concatenation & Combined Layers ====
+    // Represent concatenation of detection and conv branches
+    combined [shape=ellipse, label="Concatenation\n(Output: 128)", style="filled", fillcolor=yellow];
+
+    subgraph cluster_comb {
+        label = "Combined Fully Connected\nLayers";
+        labeljust="c"; // Center-align the label
+        style = rounded;
+        color = darkgreen;
+
+        fc_combined [label="fc_combined\n(128->128)\n+ ReLU"];
+        fc2 [label="fc2\n(128->64)\n+ ReLU"];
+        fc3 [label="fc3\n(64->32)\n+ ReLU"];
+    }
+
+        // ==== Output Branches ====
+    subgraph cluster_abundance {
+        label = "Abundance Branch";
+        labeljust="c"; 
+        style = rounded;
+        color = lightgrey;
+
+        fc4 [label="fc4\n(32->7)"];
+        softmax [label="Softmax"];
+        Abundances [label="Abundances\n[Batches, 7]", shape=oval, fillcolor=lightblue];
+    }
+
+    subgraph cluster_uncertainty {
+        label = "Uncertainty Branch";
+        labeljust="c";
+        style = rounded;
+        color = purple;
+
+        fc_uncertainty [label="fc_uncertainty\n(32->7)"];
+        softplus [label="Softplus"];
+        Uncertainties [label="Uncertainties\n[Batches, 7])", shape=oval, fillcolor=lightblue];
+    }
+
+    // ==== Connections ====
+    // Input connections
+    DetectionInput -> fcDetect;
+    DataInput -> conv1;
+
+    // Convolution branch flow (already defined inside cluster_conv)
+
+    // Connect outputs from each branch to concatenation node
+    fcDetect -> combined
+    flatten -> combined 
+
+    // Combined fully connected layers
+    combined -> fc_combined;
+    fc_combined -> fc2;
+    fc2 -> fc3;
+
+    // Branching into abundance and uncertainty paths
+    fc3 -> fc4;
+    fc4 -> softmax;
+    softmax -> Abundances;
+
+    fc3 -> fc_uncertainty;
+    fc_uncertainty -> softplus;
+    softplus -> Uncertainties;
+}

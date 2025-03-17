@@ -12,8 +12,17 @@ from sklearn.metrics import precision_score, recall_score, f1_score,multilabel_c
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import f1_score
 from tqdm import tqdm
-from runPSGDocker import get_data_async
+
+
 import matplotlib.pyplot as plt
+import concurrent.futures
+import logging
+import pypsg
+import os
+from psgDocker3 import get_data_async
+from retrying import retry
+#Use module 3.1.6 for mpi4py
+
 
 def wavelengthFilter(string):
     '''
@@ -359,14 +368,14 @@ class detectionModel(nn.Module):
         return x
     
 def calculateChiSquared(yPred,yReal,sigma):
-    chi2Elements = ((yPred - yReal) ** 2) / (sigma ** 2)
-    # Sum over the spectral points to get a chi-squared value per sample.
-    chi2Batch = torch.sum(chi2Elements, dim=1)
-    return chi2Batch
+    chiElements=((yPred-yReal)**2)/(sigma**2)
+    total=torch.sum(chiElements)
+    totalPoints=yPred.numel()
 
+    chiVal=total/totalPoints
+    return chiVal.item()
 
-
-molecules=["O2", "N2", "CO2", "H2O", "N2O", "CH4", "H2S"]
+molecules=["O2","N2","H2","CO2","H2O","CH4","NH3"]
 
 
 random.seed(42)
@@ -375,113 +384,114 @@ random.seed(42)
 testingData=[]
 
 
+if __name__=="__main__":
+
+    testSplit=0.1
+    for atmosphereType in ["A","B","C"]:
+        curFolderPath=r"C:\Users\Tristan\Downloads\HyPCAR3\data"
+        curFolderPath+="\\"+atmosphereType
+        files=[]
+        for path in os.listdir(curFolderPath):
+            #Need to get molecule abundances as well, this means that for each file, I need to go to the config file
+            #Then extract the abundances there
+            #This is how I will get the one-hot vector for the presence
+            #Will just write a functionn
+
+            files.append(os.path.join(curFolderPath,path))
+
+        random.shuffle(files)
+
+        testingSamples=[]
+        for i,data in enumerate(files):
+            path=data
+            if i<(len(files)*testSplit):#Adds testing data
+                testingSamples.append((path))
+            else:
+                break
+        testingData.extend(testingSamples)
+
+    print("DONE")
 
 
-testSplit=0.1
-for atmosphereType in ["A","B","C"]:
-    curFolderPath=r"C:\Users\Tristan\Downloads\HyPCAR3\data"
-    curFolderPath+="\\"+atmosphereType
-    files=[]
-    for path in os.listdir(curFolderPath):
-        #Need to get molecule abundances as well, this means that for each file, I need to go to the config file
-        #Then extract the abundances there
-        #This is how I will get the one-hot vector for the presence
-        #Will just write a functionn
+    random.shuffle(testingData)
+    testingDataset=customDataset(testingData)
+    testingDataloader=DataLoader(testingDataset,batch_size=32,shuffle=True)#Testing data loader
 
-        files.append(os.path.join(curFolderPath,path))
+    device=torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    random.shuffle(files)
-
-    testingSamples=[]
-    for i,data in enumerate(files):
-        path=data
-        if i<(len(files)*testSplit):#Adds testing data
-            testingSamples.append((path))
-        else:
-            break
-    testingData.extend(testingSamples)
-
-print("DONE")
+    model=abundanceModel()
+    model.load_state_dict(torch.load(r"C:\Users\Tristan\Downloads\HyPCAR3\pureCNN.pt",weights_only=True))
+    model=model.to(device)
 
 
-random.shuffle(testingData)
-testingDataset=customDataset(testingData)
-testingDataloader=DataLoader(testingDataset,batch_size=32,shuffle=True)#Testing data loader
-
-device=torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-model=abundanceModel()
-model.load_state_dict(torch.load(r"C:\Users\Tristan\Downloads\HyPCAR3\pureCNN.pt",weights_only=True))
-model=model.to(device)
+    detect=detect=detectionModel()
+    detect.load_state_dict(torch.load(r"C:\Users\Tristan\Downloads\HyPCAR3\detectionModel.pt",weights_only=True))
+    detect=detect.to(device)
 
 
-detect=detect=detectionModel()
-detect.load_state_dict(torch.load(r"C:\Users\Tristan\Downloads\HyPCAR3\detectionModel.pt",weights_only=True))
-detect=detect.to(device)
+    model.eval()
+    detect.eval()
+    with torch.no_grad():
 
 
-model.eval()
-detect.eval()
-with torch.no_grad():
+        total=0
+        totalSamples=0
+        counter=0
+        for batch in tqdm(testingDataloader):
+            data,labels,configs=batch
+
+            data=data.to(device)
+            labels=labels.to(labels)
+            detectionOutput=detect(data)
+        
+
+            predAbun,uncertainties,attentionWeights=model(data,detectionOutput)
+
+            ySim=testNewAbundances(configs,predAbun)
+
+            ySim=ySim.to(device)
+
+            chi2Batch=calculateChiSquared(ySim,data,0.1)
+        
+            with open("chiSquaredValues.txt","a") as f:
+                f.write(str(chi2Batch)+"\n")
+            total+=chi2Batch
+            totalSamples+=1
+            # if counter==0:
+            #     # plt.figure(0)
+            #     yReal=data[0]
+            #     ySim=ySim[0]
+            #     realX,realY=yReal[:,0],yReal[:,1]
+
+            #     simX,simY=ySim[:,0],ySim[:,1]
+
+            #     realX,realY=realX.cpu(),realY.cpu()
+            #     simX,simY=simX.cpu(),simY.cpu()
+                
+            #     print()
+            #     print(labels[0].tolist())
+            #     print(predAbun[0].tolist())
+            #     print(ySim)
+            #     print(yReal)
+
+            #     plt.plot(simX,simY,color="red",label="Simulated")
+            #     plt.plot(realX,realY,color="blue",label="Real")
 
 
-    total=0
-    totalSamples=0
-    counter=0
-    for batch in tqdm(testingDataloader):
-        data,labels,configs=batch
+            #     plt.xlabel('X axis label')
+            #     plt.ylabel('Y axis label')
+            #     plt.title('Simulated vs Real Data')
 
-        data=data.to(device)
-        labels=labels.to(labels)
-        detectionOutput=detect(data)
-    
+            #     plt.show(block=True)
+            #     print(calculateChiSquared(ySim,yReal,0.1))
 
-        predAbun,uncertainties,attentionWeights=model(data,detectionOutput)
+            #     print(torch.sum(chi2Batch).item()/data.shape[0])
+            # counter+=1
 
-        ySim=testNewAbundances(configs,predAbun)
+        meanChi2=total/totalSamples 
+        print(meanChi2)
 
-        ySim=ySim.to(device)
-
-        chi2Batch=calculateChiSquared(ySim,data,0.1)
-    
-
-        total += torch.sum(chi2Batch).item()  # Sum across batch
-        totalSamples += data.shape[0]  # Track total samples
-        if counter==0:
-            # plt.figure(0)
-            yReal=data[0]
-            ySim=ySim[0]
-            realX,realY=yReal[:,0],yReal[:,1]
-
-            simX,simY=ySim[:,0],ySim[:,1]
-
-            realX,realY=realX.cpu(),realY.cpu()
-            simX,simY=simX.cpu(),simY.cpu()
-            
-            print()
-            print(labels[0].tolist())
-            print(predAbun[0].tolist())
-            print(ySim)
-            print(yReal)
-
-            plt.plot(simX,simY,color="red",label="Simulated")
-            plt.plot(realX,realY,color="blue",label="Real")
-
-
-            plt.xlabel('X axis label')
-            plt.ylabel('Y axis label')
-            plt.title('Simulated vs Real Data')
-
-            plt.show(block=True)
-
-
-            print(torch.sum(chi2Batch).item()/data.shape[0])
-        counter+=1
-
-    meanChi2 = total / totalSamples 
-    print(meanChi2)
-
-    
+        
 
 
 

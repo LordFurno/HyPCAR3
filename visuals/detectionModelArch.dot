@@ -1,0 +1,82 @@
+digraph detectionModel {
+    rankdir=TB;
+    fontsize=10;
+    fontname="Helvetica";
+    splines=polyline;
+    
+    //Global node style
+    node [shape=box, style="rounded,filled", fontname="Helvetica", fontsize=10];
+
+    //Input node
+    Input [label="Input\n[Batch, 2, 784]", shape=oval, fillcolor=lightblue];
+
+    //Subgraph for Convolutional Blocks arranged in 2 columns
+    subgraph cluster_Conv {
+        label = "Convolutional Blocks";
+        style = rounded;
+        color = blue;
+
+        // Define nodes
+        Conv1 [label="Conv1d (2→128)\nK:5, S:2\n+ BN + ReLU", fillcolor=lightgrey];
+        Pool1 [label="MaxPool1d\n(Kernel:2)", fillcolor=lightgrey];
+
+        Conv2 [label="Conv1d (128→128)\nK:5, S:2\n+ BN + ReLU", fillcolor=lightgrey];
+        Pool2 [label="MaxPool1d\n(Kernel:2)", fillcolor=lightgrey];
+
+        Conv3 [label="Conv1d (128→64)\nK:3, S:2\n+ BN + ReLU", fillcolor=lightgrey];
+        Pool3 [label="MaxPool1d\n(Kernel:2)", fillcolor=lightgrey];
+
+        Conv4 [label="Conv1d (64→32)\nK:2, S:2\n+ BN + ReLU", fillcolor=lightgrey];
+        Pool4 [label="MaxPool1d\n(Kernel:2)", fillcolor=lightgrey];
+
+        // Arrange in two columns by forcing same rank.
+        { rank = same; Conv1; Pool1; }
+        { rank = same; Conv2; Pool2; }
+        { rank = same; Conv3; Pool3; }
+        { rank = same; Conv4; Pool4; }
+
+        Pool1 -> Conv2
+        Pool2 -> Conv3
+        Pool3 -> Conv4
+
+       
+        Conv1 -> Pool1;
+        Conv2 -> Pool2;
+        Conv3 -> Pool3;
+        Conv4 -> Pool4;
+    }
+
+    // Processing after conv cluster
+    Drop_conv [label="Dropout (0.4)", fillcolor=orange];
+    Flatten  [label="Flatten\n(Output: 64)", fillcolor=lightgrey];
+
+    // Subgraph for Fully Connected Layers arranged similarly (if desired)
+    subgraph cluster_FC {
+        label = "Fully Connected Layers";
+        style = rounded;
+        color = darkgreen;
+
+        FC1 [label="Linear1 (64→128)\n+ ReLU", fillcolor=lightgrey];
+        Drop_fc [label="Dropout (0.75)", fillcolor=orange];
+        FC2 [label="Linear2 (128→64)\n+ ReLU", fillcolor=lightgrey];
+        FC3 [label="Linear3 (64→7)\nSigmoid", fillcolor=lightgrey];
+
+        { rank = same; FC1; Drop_fc; }
+        { rank = same; FC2; FC3; }
+
+        // Visible connection between FC layers
+        FC1 -> Drop_fc;
+        Drop_fc -> FC2;
+        FC2 -> FC3;
+    }
+
+    // Final output node
+    Output [label="Output\n[Batch, 7]", shape=oval, fillcolor=lightblue];
+
+    // Overall flow connections
+    Input -> Conv1;
+    Pool4 -> Drop_conv;
+    Drop_conv -> Flatten;
+    Flatten -> FC1;
+    FC3 -> Output;
+}

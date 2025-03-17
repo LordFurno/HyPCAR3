@@ -69,6 +69,8 @@ def callPSG(configs,atmosphereType):
 if __name__ == "__main__":
     start=time.time()
     
-    config_paths = [r"/home/tristanb/projects/def-pjmann/tristanb/workingDirectory/working-0.txt" for i in range(16)]
+    config_paths = [r"/home/tristanb/projects/def-pjmann/tristanb/workingDirectory/working-0.txt" for i in range(32)]
+    # config_paths=[r"C:\Users\Tristan\Downloads\HyPCAR\workingDirectory\working-"+f"{i}.txt" for i in range(32)]
+
     callPSG(config_paths,"A")
     print(time.time()-start)

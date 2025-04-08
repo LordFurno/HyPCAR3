@@ -384,8 +384,18 @@ if __name__=="__main__":
             attention_sums = aggregated_attention.sum(axis=1)  
             
 
+            print("REAL")
+            for index,molecule in enumerate(molecules):
+                print(f"{molecule}: {labels[0][index]*100}%")
+            print()
+            print("PRED")
+            for index,molecule in enumerate(molecules):
+                print(f"{molecule}: {predAbun[0][index]*100}%")
+        
 
-
+            print(F"Uncertainties: {uncertainties[0].tolist()}")
+            print(f"Attention Weights: {attentionWeights[0].tolist()}")
+            # print(un)
             wavelength = data_sample[:, 0].cpu().numpy()
             transmittance = data_sample[:, 1].cpu().numpy()
             #Aggregated attention scatterplot
@@ -396,6 +406,9 @@ if __name__=="__main__":
             plt.xlabel("Wavelength (nm)")
             plt.ylabel("Transmittance")
             plt.show()
+            #Real Abundances: [0.0, 0.0, 0.032601602375507355, 0.0, 0.20410604774951935, 0.1226552352309227, 0.6406370997428894]
+            #Predicted Abundances: [7.996823114808649e-06, 0.09490162879228592, 0.14875809848308563, 2.9451175578287803e-06, 0.16910181939601898, 0.07918565720319748, 0.5080417990684509]
+            #Uncertainties: [0.9459805488586426, 0.7382314801216125, 0.8511866331100464, 0.464542955160141, 0.8512697815895081, 0.38728490471839905, 0.5241609811782837]
             '''
             #This code does the scatter plott per head
             attention_head = upsampled_weights[0, 0].detach().numpy()

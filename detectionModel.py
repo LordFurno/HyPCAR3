@@ -134,8 +134,8 @@ class detectionModel(nn.Module):
         x=torch.sigmoid(self.fc3(x))
         
         return x
-
-
+#Change lines 120-152 (1-indexed) to lines 122-152 (1-indexed) in psg_cfg(12)
+#Line 119
 def getLabel(filePath,specialMolecules=False):
     configFolder=os.path.join(os.environ["SLURM_TMPDIR"],"configFiles")
     # configFolder="/home/tristanb/scratch/configFiles"

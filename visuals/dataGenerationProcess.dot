@@ -1,7 +1,7 @@
 digraph dataGeneration {
     rankdir=TB; 
     fontname="Helvetica";
-    graph [bgcolor="#0d0d0d"];
+    graph [bgcolor="#DCE7EB"];
     node [fontname="Helvetica", fontsize=10];
 
     //Input/Output: shape=oval, fillcolor=lightblue
@@ -35,34 +35,34 @@ digraph dataGeneration {
     spectra [label="Transmitttance Spectra",shape=oval,style="filled",fillcolor=lightblue]
 
     //Defining flow (right side):
-    starType -> lhsSample [color=white];
-    lhsSample -> radTemp [color=white];
-    radTemp -> starLum [color=white];
-    starLum -> smaBounds [color=white];
-    smaBounds -> genPlanet [color=white];
-    genPlanet -> atmoCheck [color=white];
+    starType -> lhsSample [color=black];
+    lhsSample -> radTemp [color=black];
+    radTemp -> starLum [color=black];
+    starLum -> smaBounds [color=black];
+    smaBounds -> genPlanet [color=black];
+    genPlanet -> atmoCheck [color=black];
 
     //Decisions
-    atmoCheck -> genPlanet [label="No", style=dashed, color=red,constraint=false,fontcolor=white];
-    atmoCheck -> pt [label="Yes",color=green,fontcolor=white];
+    atmoCheck -> genPlanet [label="No", style=dashed, color=red,constraint=false,fontcolor=black];
+    atmoCheck -> pt [label="Yes",color=green,fontcolor=black];
 
 
     //Defining flow (left side):
-    atmoType -> hconSample [color=white];
-    hconSample -> mixCheck [color=white];
+    atmoType -> hconSample [color=black];
+    hconSample -> mixCheck [color=black];
 
     //Decisions
-    mixCheck -> hconSample [label="No", style=dashed, color=red,constraint=false,fontcolor=white];
-    mixCheck -> calcAbundance [label="Yes",color=green,fontcolor=white];
+    mixCheck -> hconSample [label="No", style=dashed, color=red,constraint=false,fontcolor=black];
+    mixCheck -> calcAbundance [label="Yes",color=green,fontcolor=black];
 
     //Final flow
-    calcAbundance -> psg [color=white];
-    pt -> psg [color=white];
-    genPlanet -> psg [color=white];
-    radTemp -> psg [color=white];
-    starLum -> psg [color=white];
-    starType -> psg [color=white];
-    psg -> spectra [color=white];
+    calcAbundance -> psg [color=black];
+    pt -> psg [color=black];
+    genPlanet -> psg [color=black];
+    radTemp -> psg [color=black];
+    starLum -> psg [color=black];
+    starType -> psg [color=black];
+    psg -> spectra [color=black];
 
 
 }

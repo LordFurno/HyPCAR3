@@ -6,7 +6,7 @@ import random
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
-
+import math
 import time
 
 
@@ -32,25 +32,25 @@ def kl_divergence(predictions, targets):
 def topKAccuracy(output,target,k=1):
     '''
     This functions calculates the top-K accuracy for the predicted abundance values.
-    
+
     Inputs
     ------
     output: The output from the abundance model
     target: The target abundance values
     k: k value for top-k accuracy.
-    
+
     Returns
     -------
     Top-k value as a percentage of the values that match.
     '''
     _,topKPred = output.topk(k, dim=1)
-    
+
     # Get the indices of the top k true abundances
     _,topKTarget = target.topk(k, dim=1)
-    
+
     #Compare predictions with true targets
     correct = (topKPred == topKTarget).sum().item()
-    
+
     #Return the accuracy as a percentage
     return correct/(target.size(0) * k)
 
@@ -70,16 +70,16 @@ def customCrossEntropy(output, target):
 
     # Apply log to predictions (log-softmax is typically used to stabilize computation)
     log_predictions=torch.log(output + 1e-9)  # Adding a small value to prevent log(0)
-    
+
     # Element-wise multiplication of log_predictions with targets
     elementwise_loss=-target * log_predictions
-    
+
     # Sum over the molecules (dim=1) to get the loss for each example in the batch
     cross_entropy_loss=torch.sum(elementwise_loss, dim=1)
-    
+
     # Average over the batch
     cross_entropy_loss=torch.mean(cross_entropy_loss)
-    
+
     return cross_entropy_loss
 
 def getAbundances(fileName):
@@ -107,7 +107,7 @@ def getAbundances(fileName):
 
     if "None" in os.path.basename(fileName):
         #Special case
-        abundances=list(map(float,abundances[2:9]))#Only gets target values, not background moolecules or 
+        abundances=list(map(float,abundances[2:9]))#Only gets target values, not background moolecules or
 
     else:
         abundances=list(map(float,abundances[2:]))#Remove temperature profile information
@@ -122,15 +122,15 @@ def detectMolecules(data):
     Inputs
     ------
     data: A tensor of batch 32 that contains the wavelength, transmittance data
-    
-    
+
+
     Returns
     -------
     outputs: A vector that represents the detection models output
     '''
     #Load the saved model weights
-    
-    detect.load_state_dict(torch.load("/home/tristanb/projects/def-pjmann/tristanb/detectionModel.pt",weights_only=True))
+
+    detect.load_state_dict(torch.load("/home/tristanb/projects/def-pjmann/tristanb/flexibleDetectionModel.pt",weights_only=True))
     with torch.no_grad():
         outputs=detect(data)
 
@@ -150,7 +150,7 @@ def wavelengthFilter(string):
     '''
     string=string.removesuffix(" um")
     return float(string)
- 
+
 
 
 class customDataset(Dataset):
@@ -168,7 +168,64 @@ class testDataset(Dataset):
         return len(self.samples)
     def __getitem__(self, index):
         return self.samples[index][0],self.samples[index][1]
-    
+
+class detectionModel(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.conv1=nn.Conv1d(in_channels=2, out_channels=128, kernel_size=5, stride=2)
+        self.bn1=nn.BatchNorm1d(128)
+        self.pool1=nn.MaxPool1d(2)
+
+        self.conv2=nn.Conv1d(in_channels=128,out_channels=128,kernel_size=5,stride=2)
+        self.bn2=nn.BatchNorm1d(128)
+        self.pool2=nn.MaxPool1d(2)
+
+        self.conv3=nn.Conv1d(in_channels=128,out_channels=64,kernel_size=3,stride=2)
+        self.bn3=nn.BatchNorm1d(64)
+        self.pool3=nn.MaxPool1d(2)
+
+        self.conv4=nn.Conv1d(in_channels=64,out_channels=32,kernel_size=2,stride=2)
+        self.bn4=nn.BatchNorm1d(32)
+        self.pool4=nn.MaxPool1d(2)
+
+        self.dropout1=nn.Dropout(0.4)
+
+        self.global_pool = nn.AdaptiveAvgPool1d(1)
+
+        
+
+        self.fc1=nn.Linear(32,128)
+        self.dropout2=nn.Dropout(0.75)
+        self.fc2=nn.Linear(128,64)
+        self.fc3=nn.Linear(64,7)#7 molecule present
+
+    def forward(self,x):
+        # Permute dimensions to [batch_size, channels, sequence_length]
+        x=x.permute(0, 2, 1)
+        x=F.relu(self.bn1(self.conv1(x)))
+        x=self.pool1(x)
+
+        x=F.relu(self.bn2(self.conv2(x)))
+        x=self.pool2(x)
+
+        x=F.relu(self.bn3(self.conv3(x)))
+        x=self.pool3(x)
+
+        x=F.relu(self.bn4(self.conv4(x)))
+        x=self.pool4(x)
+
+        x=self.dropout1(x)
+
+        x=self.global_pool(x)
+        x=torch.flatten(x,1)
+
+        x=F.relu(self.fc1(x))
+        x=self.dropout2(x)
+        
+        x=F.relu(self.fc2(x))
+        x=torch.sigmoid(self.fc3(x))
+        
+        return x
 class MultiHeadAttention(nn.Module):
     def __init__(self, input_dim, num_heads):
         super(MultiHeadAttention, self).__init__()
@@ -213,157 +270,81 @@ class MultiHeadAttention(nn.Module):
 
         return out, attention_weights
 
-class detectionModel(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.conv1=nn.Conv1d(in_channels=2, out_channels=128, kernel_size=5, stride=2)
-        self.bn1=nn.BatchNorm1d(128)
-        self.pool1=nn.MaxPool1d(2)
+class positionalEncoding(nn.Module):
+    def __init__(self,dModel,maxLen=5000):
+        super(positionalEncoding,self).__init__()
 
-        self.conv2=nn.Conv1d(in_channels=128,out_channels=128,kernel_size=5,stride=2)
-        self.bn2=nn.BatchNorm1d(128)
-        self.pool2=nn.MaxPool1d(2)
+        pe=torch.zeros(maxLen,dModel)
+        position=torch.arange(0,maxLen,dtype=torch.float).unsqueeze(1)
 
-        self.conv3=nn.Conv1d(in_channels=128,out_channels=64,kernel_size=3,stride=2)
-        self.bn3=nn.BatchNorm1d(64)
-        self.pool3=nn.MaxPool1d(2)
+        divTerm=torch.exp(torch.arange(0,dModel,2).float() * (-math.log(10000.0) / dModel))
 
-        self.conv4=nn.Conv1d(in_channels=64,out_channels=32,kernel_size=2,stride=2)
-        self.bn4=nn.BatchNorm1d(32)
-        self.pool4=nn.MaxPool1d(2)
+        pe[:, 0::2]=torch.sin(position * divTerm)
+        pe[:, 1::2]=torch.cos(position * divTerm)
 
-        self.dropout1=nn.Dropout(0.4)
-
-        self.flatten=nn.Flatten()
-
-        self.fc1=nn.Linear(64,128)
-        self.dropout2=nn.Dropout(0.75)
-        self.fc2=nn.Linear(128,64)
-        self.fc3=nn.Linear(64,7)#7 molecule present
+        pe=pe.unsqueeze(0)  #shape: (1, maxlen, dModel)
+        self.register_buffer('pe', pe)
 
     def forward(self,x):
-        # Permute dimensions to [batch_size, channels, sequence_length]
-        x=x.permute(0, 2, 1)
-        x=F.relu(self.bn1(self.conv1(x)))
-        x=self.pool1(x)
-
-        x=F.relu(self.bn2(self.conv2(x)))
-        x=self.pool2(x)
-
-        x=F.relu(self.bn3(self.conv3(x)))
-        x=self.pool3(x)
-
-        x=F.relu(self.bn4(self.conv4(x)))
-        x=self.pool4(x)
-
-        x=self.dropout1(x)
-
-        x=torch.flatten(x, 1)
-
-        x=F.relu(self.fc1(x))
-        x=self.dropout2(x)
-        
-        x=F.relu(self.fc2(x))
-        x=torch.sigmoid(self.fc3(x))
-        
+        #x shape: [batch_size, seq_length, d_model]
+        seqLength=x.size(1)
+        x=x+self.pe[:, :seqLength, :]
         return x
-    
+
+
 class abundanceModel(nn.Module):#CHange to output uncertainty as well
     def __init__(self):
         super().__init__()
 
-        self.fcDetect=nn.Linear(7, 64)#7 molecules to be detected
+        self.fcDetect=nn.Linear(7, 64)
 
-        
-        self.conv1=nn.Conv1d(in_channels=2, out_channels=128, kernel_size=5, stride=2)
-        self.bn1=nn.BatchNorm1d(128)
-        self.pool1=nn.MaxPool1d(2)
+        self.inputProjection=nn.Linear(2,32)
+        self.posEncoding=positionalEncoding(32)
+        self.attention=MultiHeadAttention(32,8)
 
-        self.conv2=nn.Conv1d(in_channels=128,out_channels=128,kernel_size=5,stride=2)
-        self.bn2=nn.BatchNorm1d(128)
-        self.pool2=nn.MaxPool1d(2)
-
-        self.conv3=nn.Conv1d(in_channels=128,out_channels=64,kernel_size=3,stride=2)
-        self.bn3=nn.BatchNorm1d(64)
-        self.pool3=nn.MaxPool1d(2)
-
-        self.conv4=nn.Conv1d(in_channels=64,out_channels=32,kernel_size=2,stride=2)
-        self.bn4=nn.BatchNorm1d(32)
-        self.pool4=nn.MaxPool1d(2)
-
-        self.dropout1=nn.Dropout(0.4)
+        self.global_pool=nn.AdaptiveAvgPool1d(1)
 
 
-        self.attention=MultiHeadAttention(input_dim=32, num_heads=8)
-
-
-        self.fc_combined=nn.Linear(128, 128)#Combines both input branches (detection + data)
-
-
+        self.fc_combined=nn.Linear(96, 128)
         self.flatten=nn.Flatten()
+        self.dropout=nn.Dropout(0.75)
+        self.fc2=nn.Linear(128, 64)
+        self.fc3=nn.Linear(64, 32)
 
-
-        self.dropout2=nn.Dropout(0.75)
-        self.fc2=nn.Linear(128,64)
-
-        self.fc3=nn.Linear(64,32)
-        self.fc4=nn.Linear(32,7)#7 molecule present
-
-        #Another branch for uncertaintiy values for each molecule
-        self.fc_uncertainty=nn.Linear(32,7)
+        self.fc4=nn.Linear(32, 7)#Abundance branch: predicts 7 molecule values.
+        self.fc_uncertainty=nn.Linear(32, 7)  # Uncertainty branch.
 
     def forward(self,x,detectionOutput):
-
         detectionOutput=F.relu(self.fcDetect(detectionOutput))
 
+        #Process sequence
+        x=F.relu(self.inputProjection(x))#Now:[batch_size, seq_length, 32]
+        x=self.posEncoding(x)
 
-        #Permute dimensions to [batch_size, channels, sequence_length]
-        x=x.permute(0, 2, 1)
-        x=F.relu(self.bn1(self.conv1(x)))
-        x=self.pool1(x)
+        x,attention_weights=self.attention(x)#x remains [batch_size, seq_length, 32]
 
-        x=F.relu(self.bn2(self.conv2(x)))
-        x=self.pool2(x)
+       
+        x_pool=self.global_pool(x.transpose(1, 2)).squeeze(-1)
 
-        x=F.relu(self.bn3(self.conv3(x)))
-        x=self.pool3(x)
+        #Combine with detection branch
 
-        x=F.relu(self.bn4(self.conv4(x)))
-        x=self.pool4(x)
-
-
-        x=self.dropout1(x)
-
-        x, attention_weights=self.attention(x.permute(0, 2, 1))  #Switch back to (batch, seq_len, feature_dim)
-
-
-        x=torch.flatten(x, 1)
-
-        combined=torch.cat((x,detectionOutput), dim=1)
+        combined=torch.cat((x_pool,detectionOutput),dim=1)#[batch_size, 96]
         combined=F.relu(self.fc_combined(combined))
         combined=F.relu(self.fc2(combined))
         combined=F.relu(self.fc3(combined))
 
+        combined=self.dropout(combined)
 
-        #Abundance branch
+        #Abundance branch: use softmax so that the 7 outputs sum to 1.
         logits=self.fc4(combined)
-        #Apply softmax to make the output sum to 1 for abundances
         abundances=F.softmax(logits, dim=1)
 
-
+        #Uncertainty branch: use softplus to ensure positive uncertainty values.
         uncertaintyRaw=self.fc_uncertainty(combined)
-        uncertainties=F.softplus(uncertaintyRaw)#Soft plus, since we don't want to bound to 1
+        uncertainties=F.softplus(uncertaintyRaw)
 
-        #In www.conf, found in etc php-fpm.d
-        #listen = /tmp/run/php-fpm
-        #And commented out listen.acl_gorups=apache,nginx
-        #listen.moded=0666
-
-        #Changed in etc/php-fpm.conf
-        #Changed pid to equal /tmp/php-fpm.pid
-        return abundances,attention_weights
-
-
+        #Return outputs as well as attention weights for inspection.
+        return abundances, uncertainties, attention_weights
 
 
 
@@ -380,7 +361,9 @@ if __name__ == '__main__':
     allSamples=[]
     allLabels=[]
 
+
     testSplit=0.10
+
     for atmosphereType in ["A","B","C"]:
         dataPath="data/"+atmosphereType
 
@@ -427,7 +410,7 @@ if __name__ == '__main__':
     print(device)
 
 
-    numEpochs=10
+    numEpochs=15
 
 
 
@@ -439,7 +422,7 @@ if __name__ == '__main__':
     start1=time.time()
     preLoadedData=[]
     for dataPath,label in allSamples:#Pre-loads all the data, tqdm provides a progress bar so we can get an idea how long it will take
-        
+
         configFilePath=os.path.join(os.environ["SLURM_TMPDIR"],"configFiles")
 
         fileName=os.path.basename(dataPath)
@@ -470,7 +453,7 @@ if __name__ == '__main__':
 
     trainingDataloader=DataLoader(trainingDataset,batch_size=32,shuffle=True)
     validationDataloader=DataLoader(validationDataset,batch_size=32,shuffle=True)
-    
+
 
 
     model=abundanceModel().to(device)
@@ -485,9 +468,9 @@ if __name__ == '__main__':
     for epoch in range(numEpochs):
         model.train()
         running_loss = 0.0
-        running_KL_loss = 0.0  
-        running_top_k = 0.0    
-        running_cross_entropy = 0.0  
+        running_KL_loss = 0.0
+        running_top_k = 0.0
+        running_cross_entropy = 0.0
 
         for batch in trainingDataloader:
             data,labels,configs=batch
@@ -499,7 +482,7 @@ if __name__ == '__main__':
 
             detectionOutput=detectMolecules(data)
 
-            outputs,attentionWeights=model(data,detectionOutput)
+            outputs,uncertainties,attentionWeights=model(data,detectionOutput)
 
             loss=criterion(outputs,labels)
             running_loss+=loss.item()
@@ -518,8 +501,8 @@ if __name__ == '__main__':
         crossEntropy=running_cross_entropy/len(trainingDataloader)
 
 
-        #Instead of weighted accuracy, use top-k accuracy and R^2 value. 
-        with open("pureCNN.txt",'a') as f:
+        #Instead of weighted accuracy, use top-k accuracy and R^2 value.
+        with open("transformerBaseAbundance.txt",'a') as f:
             f.write(f"Epoch {epoch+1}, Loss: {trainingLoss}, KL Divergence: {klLoss}, Top-K Accuracy: {topKAcc}, Cross Entropy: {crossEntropy}"+"\n")
 
         print(f"Epoch {epoch+1}, Loss: {trainingLoss}, KL Divergence: {klLoss}, Top-K Accuracy: {topKAcc}, Cross Entropy: {crossEntropy}")
@@ -528,7 +511,7 @@ if __name__ == '__main__':
         with torch.no_grad():
             val_loss=0
             validation_KL_loss=0.0
-            
+
             validation_top_k=0.0
             validation_cross_entropy=0.0
 
@@ -543,7 +526,7 @@ if __name__ == '__main__':
 
                 moleculeDetection=detectMolecules(data)
 
-                outputs,attentionWeights=model(data,moleculeDetection)
+                outputs,uncertainties,attentionWeights=model(data,moleculeDetection)
 
                 loss=criterion(outputs,labels)
 
@@ -553,17 +536,17 @@ if __name__ == '__main__':
                 validation_top_k+=topKAccuracy(outputs,labels,1)
                 validation_cross_entropy+=customCrossEntropy(outputs,labels)
 
-            
+
 
             valLoss=val_loss/len(validationDataloader)
             valKL=validation_KL_loss/len(validationDataloader)
             valTopK=validation_top_k/len(validationDataloader)
             valCrossEntropy=validation_cross_entropy/len(validationDataloader)
-        with open("pureCNN.txt",'a') as f:
+        with open("transformerBaseAbundance.txt",'a') as f:
             f.write(f"Validation Loss: {valLoss}, KL Divergence: {valKL}, Top-K Accuracy: {valTopK}, Cross Entropy: {valCrossEntropy}"+"\n")
         print(f"Validation Loss: {valLoss}, KL Divergence: {valKL}, Top-K Accuracy: {valTopK}, Cross Entropy: {valCrossEntropy}")
 
-    torch.save(model.state_dict(), "pureCNN.pt")
+    torch.save(model.state_dict(), "transformerBaseAbundance.pt")
     model.eval()
 
     testingDataset=testDataset(testingData)
@@ -576,15 +559,15 @@ if __name__ == '__main__':
     test_cross_entropy=0.0
     with torch.no_grad():
         for batch in testingDataloader:
-            data,labels,config=batch
+            data,labels=batch
 
             data=data.to(device)
             labels=labels.to(device)
 
-            
+
             moleculeDetection=detectMolecules(data)
-            
-            outputs,attentionWeights=model(data,moleculeDetection)
+
+            outputs,uncertainties,attentionWeights=model(data,moleculeDetection)
 
 
             loss=criterion(outputs,labels)
@@ -594,13 +577,13 @@ if __name__ == '__main__':
             test_kl_loss+=kl_divergence(outputs,labels)
             test_top_k+=topKAccuracy(outputs,labels,1)
             test_cross_entropy+=customCrossEntropy(outputs,labels)
-            
+
 
         test_loss=test_loss/len(testingDataloader)
         testKL=test_kl_loss/len(testingDataloader)
         testTopK=test_top_k/len(testingDataloader)
         testCrossEntropy=test_cross_entropy/len(testingDataloader)
 
-    with open("pureCNN.txt",'a') as f:
+    with open("transformerBaseAbundance.txt",'a') as f:
         f.write(f"Testing Loss: {test_loss}, KL Divergence: {testKL}, Top-K Accuracy: {testTopK}, Cross Entropy: {testCrossEntropy}"+"\n")
     # print(f"Testing Loss: {test_loss}, KL Divergence: {testKL}, Top-K Accuracy: {testTopK}, Cross Entropy: {testCrossEntropy}")

@@ -2,101 +2,15 @@ import torch
 from torch.utils.data import DataLoader,Dataset,random_split
 import pandas as pd
 import os
-import numpy as np
-import itertools
 import random
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
-from sklearn.metrics import precision_score, recall_score, f1_score,multilabel_confusion_matrix, roc_auc_score
-from sklearn.model_selection import StratifiedKFold
-from sklearn.metrics import f1_score
-from tqdm import tqdm
 import math
-
-import matplotlib.pyplot as plt
-import concurrent.futures
-import logging
-import pypsg
-import os
-from psgDocker3 import get_data_async
-from retrying import retry
-#Use module 3.1.6 for mpi4py
+import time
 
 
-def wavelengthFilter(string):
-    '''
-    This function removes the um suffix from the wavelength data.
-
-    Inputs
-    ------
-    string: A string to remove um from.
-
-    Returns
-    -------
-    string: A float
-    '''
-    string=string.removesuffix(" um")
-    return float(string)
-
-def getAbundances(fileName):
-    '''
-    This function grabs the molecule abundances from the config files and returns them as a vector
-
-    Inputs
-    ------
-    fileName: The name of the config file.
-
-    Returns
-    -------
-    abundances: A vector containing the abundance information
-    '''
-    abundances=[0.0]*7
-    moleculeNames=["O2", "N2", "CO2", "H2O", "N2O", "CH4", "H2S"]
-    lines=[]
-    with open(fileName) as f:
-        for line in f:
-            lines.append(line)
-
-    abundances=lines[54]
-    abundances=abundances.removeprefix("<ATMOSPHERE-LAYER-1>")
-    abundances=abundances.split(",")
-
-    if "None" in os.path.basename(fileName):
-        #Special case
-        abundances=list(map(float,abundances[2:9]))#Only gets target values, not background moolecules or 
-
-    else:
-        abundances=list(map(float,abundances[2:]))#Remove temperature profile information
-    return abundances
-
-class customDataset(Dataset):
-    def __init__(self,samples):#samples contain a listt of all file paths
-        self.samples=samples
-
-    def __len__(self):
-        return len(self.samples)
-
-    def __getitem__(self,index):
-        filePath=self.samples[index]
-
-
-        configFilePath=r"C:\Users\Tristan\Downloads\HyPCAR3\configFiles\\"
-        # configFilePath="/home/tristanb/scratch/configFiles/"
-        fileName=os.path.basename(filePath)
-        fileName=fileName.removesuffix(".csv")
-        configFilePath+=fileName+".txt"
-
-        label=getAbundances(configFilePath)
-        #Extract data from file
-        data=pd.read_csv(filePath)
-        wavelength=list(map(wavelengthFilter,data.iloc[:,0]))#Removes um from wavelength data
-        transmittance=list(data.iloc[:,1])
-
-        combinedData=torch.tensor(list(zip(wavelength, transmittance)), dtype=torch.float32)
-
-        return combinedData,torch.tensor(label),configFilePath
-    
+#55922394
 def kl_divergence(predictions, targets):
     '''
     This function calculates the Kullback-Leibler (KL) divergence between the predictions and the target value.
@@ -168,81 +82,84 @@ def customCrossEntropy(output, target):
 
     return cross_entropy_loss
 
-def testNewAbundances(fileNames,moleculeAbundances):
+def getAbundances(fileName):
     '''
-    This function will update a temporary config file with the predictions from the ml model. 
-    This is for the PSG-based loss, it takes in a batch of 32 different files and abundances. If this
+    This function grabs the molecule abundances from the config files and returns them as a vector
 
     Inputs
-    -----
-    fileNames: The names of the config files
-    moleculeAbundances: The new predicted abundances from the model.
+    ------
+    fileName: The name of the config file.
 
     Returns
     -------
-    combinedData: A tensor that contains the new wavelength and transmittance values for the updated abundances
+    abundances: A vector containing the abundance information
     '''
-    #Fix this functino, doesn't work because stupid batches. really really annoying, can think about using dask
-    #To speed up the process because I'm dealing with about 32 files.
-    #Super annoying, will create something called a "working directory" where I will store the modified config files per batch
-    #Then use batch to run data through them, will need to pretty much rewrite everything here
-    workingDirectory=[]
-    for index,file in enumerate(fileNames):
-        
-        lines=[]
-        with open(file) as f:
-            for line in f:
-                lines.append(line)
-        
-        #C:\Users\Tristan\Downloads\HyPCAR\workingDirectory\working-0.txt
-        workingConfigFilePath=r"C:\Users\Tristan\Downloads\HyPCAR\workingDirectory\working-" +f"{index}.txt"
-        #Deal with atmosphere layers here
-        #Start line is 54
+    abundances=[0.0]*7
+    moleculeNames=["O2", "N2", "CO2", "H2O", "N2O", "CH4", "H2S"]
+    lines=[]
+    with open(fileName) as f:
+        for line in f:
+            lines.append(line)
 
-        abundanceDictionary={}
-        molecules=["O2","N2","H2","CO2","H2O","CH4","NH3"]
-        for i in range(len(moleculeAbundances[index])):
-            abundanceDictionary[molecules[i]]=moleculeAbundances[index][i].cpu().item()
+    abundances=lines[54]
+    abundances=abundances.removeprefix("<ATMOSPHERE-LAYER-1>")
+    abundances=abundances.split(",")
 
-        moleculeWeights={"O2":31.999, "N2":28.02, "H2":2.016,"CO2":44.01, "H2O":18.01528,"CH4":16.04,"NH3":17.03052 }#g/mol
-        averageWeight=0
-        for molecule in abundanceDictionary:
-            averageWeight+=moleculeWeights[molecule]*abundanceDictionary[molecule]
-        
+    if "None" in os.path.basename(fileName):
+        #Special case
+        abundances=list(map(float,abundances[2:9]))#Only gets target values, not background moolecules or
+
+    else:
+        abundances=list(map(float,abundances[2:]))#Remove temperature profile information
+    return abundances
 
 
-        for i in range(50):
-            atmosphereInfo=lines[54+i]
-            atmosphereInfo=atmosphereInfo.removeprefix("<ATMOSPHERE-LAYER-"+str(i+1)+">")
-            atmosphereInfo=atmosphereInfo.removesuffix("\n")
-            atmosphereInfo=atmosphereInfo.split(",")
 
-            atmosphereInfo[2:]=moleculeAbundances[index].tolist()
-            
-    
+def detectMolecules(data):
+    '''
+    This function will pass the data through the detection model and return its raw output
 
-            lines[54+i]="<ATMOSPHERE-LAYER-"+str(i+1)+">"+",".join(map(str,list(atmosphereInfo)))+"\n"
-        
-        nMolecules=7
-
-        HITRANValues={"O2":"HIT[7]","N2":"HIT[22]","H2":"HIT[45]","CO2":"HIT[2]","H2O":"HIT[1]","CH4":"HIT[6]","NH3":"HIT[11]"}
-
-        #Additional parameters to actually run the data properly.
-        lines[42]="<ATMOSPHERE-NGAS>"+str(len(moleculeAbundances[index]))+"\n" #Number of gases are in the atmosphere
-        lines[43]="<ATMOSPHERE-GAS>"+",".join(molecules)+"\n" #What gases are in the atmosphere
-        lines[44]="<ATMOSPHERE-TYPE>"+",".join(HITRANValues[mol] for mol in molecules)+"\n" #HITRAN values for each gas
-        lines[45]="<ATMOSPHERE-ABUN>"+"1,"*(len(moleculeAbundances[index])-1)+"1"+"\n" #Molecule abunadnces. They're all 1, because abundances are defined in vertical profile
-        lines[46]="<ATMOSPHERE-UNIT>"+"scl,"*(len(moleculeAbundances[index])-1)+"scl"+"\n" #Abundance unit
-        lines[49]="<ATMOSPHERE-WEIGHT>"+str(averageWeight)+"\n" #Molecule weight of atmosphere g/mol
-        lines[52]="<ATMOSPHERE-LAYERS-MOLECULES>"+",".join(molecules)+"\n" #Molecule in vertical profile
-
-        with open(workingConfigFilePath,"w") as f:
-            f.writelines(lines)
-        workingDirectory.append(workingConfigFilePath)
-    
-    return get_data_async()#Calls the PSG docker to get the data
+    Inputs
+    ------
+    data: A tensor of batch 32 that contains the wavelength, transmittance data
 
 
+    Returns
+    -------
+    outputs: A vector that represents the detection models output
+    '''
+    #Load the saved model weights
+
+    detect.load_state_dict(torch.load("/home/tristanb/projects/def-pjmann/tristanb/flexibleDetectionModel.pt",weights_only=True))
+    with torch.no_grad():
+        outputs=detect(data)
+
+    return outputs
+
+def wavelengthFilter(string):
+    '''
+    This function removes the um suffix from the wavelength data.
+
+    Inputs
+    ------
+    string: A string to remove um from.
+
+    Returns
+    -------
+    string: A float
+    '''
+    string=string.removesuffix(" um")
+    return float(string)
+
+
+
+class customDataset(Dataset):
+    def __init__(self,samples):
+        self.samples=samples
+    def __len__(self):
+        return len(self.samples)
+    def __getitem__(self, index):
+        return self.samples[index][0],self.samples[index][1],self.samples[index][2]
 
 class testDataset(Dataset):
     def __init__(self,samples):#samples contain a listt of all file paths
@@ -309,9 +226,6 @@ class detectionModel(nn.Module):
         x=torch.sigmoid(self.fc3(x))
         
         return x
-
-
-
 class MultiHeadAttention(nn.Module):
     def __init__(self, input_dim, num_heads):
         super(MultiHeadAttention, self).__init__()
@@ -355,7 +269,6 @@ class MultiHeadAttention(nn.Module):
         out = self.fc_out(weighted_sum)
 
         return out, attention_weights
-
 
 class abundanceModel(nn.Module):#CHange to output uncertainty as well
     def __init__(self):
@@ -419,23 +332,29 @@ class abundanceModel(nn.Module):#CHange to output uncertainty as well
         return abundances, uncertainties, attention_weights
 
 
-    
 
-molecules=["O2","N2","H2","CO2","H2O","CH4","NH3"]
-
-
-random.seed(42)
+if __name__ == '__main__':
+    molecules=["O2","N2","H2","CO2","H2O","CH4","NH3"]
 
 
-testingData=[]
+    random.seed(42)
 
 
-if __name__=="__main__":
+    testingData=[]
 
-    testSplit=0.1
+
+    allSamples=[]
+    allLabels=[]
+
+
+    testSplit=0.10
+
     for atmosphereType in ["A","B","C"]:
-        curFolderPath=r"C:\Users\Tristan\Downloads\HyPCAR3\data"
-        curFolderPath+="\\"+atmosphereType
+        dataPath="data/"+atmosphereType
+
+        curFolderPath=os.path.join(os.environ["SLURM_TMPDIR"],dataPath)
+        configFolderPath=os.path.join(os.environ["SLURM_TMPDIR"],"configFiles")
+
         files=[]
         for path in os.listdir(curFolderPath):
             #Need to get molecule abundances as well, this means that for each file, I need to go to the config file
@@ -443,77 +362,213 @@ if __name__=="__main__":
             #This is how I will get the one-hot vector for the presence
             #Will just write a functionn
 
-            files.append(os.path.join(curFolderPath,path))
+            fileName=path.removesuffix(".csv")
+            configFilePath=os.path.join(configFolderPath,fileName)
+            configFilePath+=".txt"
+
+
+
+            label=getAbundances(configFilePath)
+            files.append((os.path.join(curFolderPath,path),label))
 
         random.shuffle(files)
 
         testingSamples=[]
         for i,data in enumerate(files):
-            path=data
+            path,label=data[0],data[1]
             if i<(len(files)*testSplit):#Adds testing data
-                testingSamples.append((path))
+                testingSamples.append((path,label))
             else:
-                break
+                allSamples.append((path,label))
         testingData.extend(testingSamples)
-
-    print("DONE")
 
 
     random.shuffle(testingData)
-    testingDataset=customDataset(testingData)
-    testingDataloader=DataLoader(testingDataset,batch_size=32,shuffle=True)#Testing data loader
-
-    device=torch.device("cpu")
-
-    model=abundanceModel()
-    model.load_state_dict(torch.load(r"C:\Users\Tristan\Downloads\HyPCAR3\lstmBaseAbundance.pt",weights_only=True))
-    model=model.to(device)
 
 
-    detect=detect=detectionModel()
-    detect.load_state_dict(torch.load(r"C:\Users\Tristan\Downloads\HyPCAR3\flexibleDetectionModel.pt",weights_only=True))
+
+    device=torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    detect=detectionModel()
     detect=detect.to(device)
 
+    print(device)
+
+
+    numEpochs=15
+
+
+
+    '''
+    Consider pre-loading the data set before training even beings. This would make it so that I only ever have to load
+    the data once. Then the batches will be super fast, even for a seperate validation split.
+    '''
+
+    start1=time.time()
+    preLoadedData=[]
+    for dataPath,label in allSamples:#Pre-loads all the data, tqdm provides a progress bar so we can get an idea how long it will take
+
+        configFilePath=os.path.join(os.environ["SLURM_TMPDIR"],"configFiles")
+
+        fileName=os.path.basename(dataPath)
+        fileName=fileName.removesuffix(".csv")
+        configFilePath+=fileName+".txt"
+
+        #Extract data from file
+        data=pd.read_csv(dataPath)
+        wavelength=list(map(wavelengthFilter,data.iloc[:,0]))#Removes um from wavelength data
+        transmittance=list(data.iloc[:,1])
+        combinedData=torch.tensor(list(zip(wavelength, transmittance)), dtype=torch.float32)
+
+        preLoadedData.append((combinedData,torch.tensor(label),configFilePath))
+
+    print(f"Loaded all training data, it took: {time.time()-start1}")
+    random.shuffle(preLoadedData)
+
+
+    nTotal=len(preLoadedData)
+    nTrain=int(0.8*nTotal)
+
+    trainingData=preLoadedData[:nTrain]
+    validationData=preLoadedData[nTrain:]
+
+    #Preloaded data is: data, label, configFile
+    trainingDataset=customDataset(trainingData)
+    validationDataset=customDataset(validationData)
+
+    trainingDataloader=DataLoader(trainingDataset,batch_size=32,shuffle=True)
+    validationDataloader=DataLoader(validationDataset,batch_size=32,shuffle=True)
+
+
+
+    model=abundanceModel().to(device)
+    optimizer=optim.Adam(model.parameters(),lr=0.001)
+
+    torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+
+
+
     criterion=nn.MSELoss()
+
+    for epoch in range(numEpochs):
+        model.train()
+        running_loss = 0.0
+        running_KL_loss = 0.0
+        running_top_k = 0.0
+        running_cross_entropy = 0.0
+
+        for batch in trainingDataloader:
+            data,labels,configs=batch
+
+            data=data.to(device)
+            labels=labels.to(device)
+
+            optimizer.zero_grad()
+
+            detectionOutput=detectMolecules(data)
+
+            outputs,uncertainties,attentionWeights=model(data,detectionOutput)
+
+            loss=criterion(outputs,labels)
+            running_loss+=loss.item()
+            running_KL_loss+=kl_divergence(outputs,labels)
+            running_top_k+=topKAccuracy(outputs,labels,1)
+            running_cross_entropy+=customCrossEntropy(outputs,labels)
+
+
+            loss.backward()
+
+            optimizer.step()
+
+        trainingLoss=running_loss/len(trainingDataloader)
+        klLoss=running_KL_loss/len(trainingDataloader)
+        topKAcc=running_top_k/len(trainingDataloader)
+        crossEntropy=running_cross_entropy/len(trainingDataloader)
+
+
+        #Instead of weighted accuracy, use top-k accuracy and R^2 value.
+        with open("lstmBaseAbundance.txt",'a') as f:
+            f.write(f"Epoch {epoch+1}, Loss: {trainingLoss}, KL Divergence: {klLoss}, Top-K Accuracy: {topKAcc}, Cross Entropy: {crossEntropy}"+"\n")
+
+        print(f"Epoch {epoch+1}, Loss: {trainingLoss}, KL Divergence: {klLoss}, Top-K Accuracy: {topKAcc}, Cross Entropy: {crossEntropy}")
+
+        model.eval()
+        with torch.no_grad():
+            val_loss=0
+            validation_KL_loss=0.0
+
+            validation_top_k=0.0
+            validation_cross_entropy=0.0
+
+            counter=0
+            for index,batch in enumerate(validationDataloader):
+                data,labels,config=batch
+
+                data=data.to(device)
+                labels=labels.to(device)
+
+                optimizer.zero_grad()
+
+                moleculeDetection=detectMolecules(data)
+
+                outputs,uncertainties,attentionWeights=model(data,moleculeDetection)
+
+                loss=criterion(outputs,labels)
+
+
+                val_loss+=loss.item()
+                validation_KL_loss+=kl_divergence(outputs,labels)
+                validation_top_k+=topKAccuracy(outputs,labels,1)
+                validation_cross_entropy+=customCrossEntropy(outputs,labels)
+
+
+
+            valLoss=val_loss/len(validationDataloader)
+            valKL=validation_KL_loss/len(validationDataloader)
+            valTopK=validation_top_k/len(validationDataloader)
+            valCrossEntropy=validation_cross_entropy/len(validationDataloader)
+        with open("lstmBaseAbundance.txt",'a') as f:
+            f.write(f"Validation Loss: {valLoss}, KL Divergence: {valKL}, Top-K Accuracy: {valTopK}, Cross Entropy: {valCrossEntropy}"+"\n")
+        print(f"Validation Loss: {valLoss}, KL Divergence: {valKL}, Top-K Accuracy: {valTopK}, Cross Entropy: {valCrossEntropy}")
+
+    torch.save(model.state_dict(), "lstmBaseAbundance.pt")
     model.eval()
-    detect.eval()
+
+    testingDataset=testDataset(testingData)
+    testingDataloader=DataLoader(testingDataset,batch_size=32,shuffle=True)#Testing data loader
+
     test_loss=0
+    regularLoss=nn.MSELoss()
     test_kl_loss=0.0
     test_top_k=0.0
     test_cross_entropy=0.0
     with torch.no_grad():
-
-
-        total=0
-        totalSamples=0
-        counter=0
-
-        for batch in tqdm(testingDataloader):
-            data,labels,configs=batch
+        for batch in testingDataloader:
+            data,labels=batch
 
             data=data.to(device)
-            labels=labels.to(labels)
-            detectionOutput=detect(data)
-        
+            labels=labels.to(device)
 
-            predAbun,uncertainties,attentionWeights=model(data,detectionOutput)
-            loss=criterion(predAbun,labels)
+
+            moleculeDetection=detectMolecules(data)
+
+            outputs,uncertainties,attentionWeights=model(data,moleculeDetection)
+
+
+            loss=criterion(outputs,labels)
 
 
             test_loss+=loss.item()
-            test_kl_loss+=kl_divergence(predAbun,labels)
-            test_top_k+=topKAccuracy(predAbun,labels,1)
-            test_cross_entropy+=customCrossEntropy(predAbun,labels)
+            test_kl_loss+=kl_divergence(outputs,labels)
+            test_top_k+=topKAccuracy(outputs,labels,1)
+            test_cross_entropy+=customCrossEntropy(outputs,labels)
 
 
         test_loss=test_loss/len(testingDataloader)
         testKL=test_kl_loss/len(testingDataloader)
         testTopK=test_top_k/len(testingDataloader)
         testCrossEntropy=test_cross_entropy/len(testingDataloader)
-        print(f"Testing Loss: {test_loss}, KL Divergence: {testKL}, Top-K Accuracy: {testTopK}, Cross Entropy: {testCrossEntropy}"+"\n")
-        
 
-
-
-
-
+    with open("lstmBaseAbundance.txt",'a') as f:
+        f.write(f"Testing Loss: {test_loss}, KL Divergence: {testKL}, Top-K Accuracy: {testTopK}, Cross Entropy: {testCrossEntropy}"+"\n")
+    # print(f"Testing Loss: {test_loss}, KL Divergence: {testKL}, Top-K Accuracy: {testTopK}, Cross Entropy: {testCrossEntropy}")

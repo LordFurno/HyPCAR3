@@ -16,6 +16,7 @@ from scipy.interpolate import interp1d
 from scipy.ndimage import gaussian_filter1d
 from scipy.signal import savgol_filter
 import seaborn as sns
+import runModels
 def oneHotEncoding(combination):
     '''
     This function will turn molecule combinations into a one-hot encoded vector
@@ -402,6 +403,7 @@ def visualize_attention(
     plt.savefig(r"C:\Users\Tristan\Downloads\HyPCAR3\visuals\earthAttentionHeads.png")
     plt.show()
 
+
 aModel=abundanceModel()
 model=detectionModel()
 
@@ -409,50 +411,64 @@ model=detectionModel()
 model.load_state_dict(torch.load(r"C:\Users\Tristan\Downloads\HyPCAR3\detectionModel.pt",weights_only=True))
 aModel.load_state_dict(torch.load(r"C:\Users\Tristan\Downloads\HyPCAR3\pureCNN.pt",weights_only=True))
 
-# filePath=r"C:\Users\Tristan\Downloads\HyPCAR\table_K2-18-b-Madhusudhan-et-al.-2023 (2).csv"#File path for the data
+filePath=r"C:\Users\Tristan\Downloads\HyPCAR\table_K2-18-b-Madhusudhan-et-al.-2023 (2).csv"#File path for the data
 # filePath=r"C:\Users\Tristan\Downloads\HyPCAR\table_HAT-P-18-b-Fu-et-al.-2022 (1).csv"#File path for the data
-# data=pd.read_csv(filePath)
+# filePath=r"C:\Users\Tristan\Downloads\HyPCAR3\table_GJ-1132-b-Swain-et-al.-2021.csv"
+data=pd.read_csv(filePath)
 
-# wavelength=data["CENTRALWAVELNG"]
-# transmittance=data["PL_TRANDEP"]
+wavelength=list(data["CENTRALWAVELNG"])
+transmittance=list(data["PL_TRANDEP"])
 
-# transmittance=[1-(t/100) for t in transmittance]#Converts depth to transmittance.
-
-# plt.figure(0)#Plot orginial data
-# plt.plot(wavelength,transmittance)
-
-
-# #Adjust the data to have length 785
-# # interp_func=interp1d(np.linspace(0, 1, len(wavelength)), wavelength)
-# # interp_trans=interp1d(np.linspace(0, 1, len(transmittance)), transmittance)
-
-# #Generate 785 points evenly spaced in the range [0, 1]
-# x_new=np.linspace(0, 1, 785)
-
-# # Apply the interpolation function
-# wavelength=interp_func(x_new)
-# transmittance=interp_trans(x_new)
-
-
-
-# #Apply filter
-# transmittance_downsampled = savgol_filter(transmittance_downsampled, window_length=50, polyorder=5)
-data=pd.read_csv(r"C:\Users\Tristan\Downloads\HyPCAR2\earthTransmittance.csv")
-
-wavelength,transmittance=data.iloc[:,0],data.iloc[:,1]
-
-
-plt.figure(1)
-plt.title("Earth Transmittance")
-plt.xlabel("Wavelength (um)")
-plt.ylabel("Transmittance")
-
-plt.plot(wavelength,transmittance)
-plt.savefig(r"C:\Users\Tristan\Downloads\HyPCAR3\visuals\earthTransmittance.png")
+transmittance=[1-(t/100) for t in transmittance]#Converts depth to transmittance.
+print(wavelength)
+print(transmittance)
+# for i in range(784-len(transmittance)):
+#     wavelength.insert(0,0.0)
+#     transmittance.insert(0,0.0)
+plt.figure(0)#Plot orginial data
 input_data=torch.tensor(np.stack([wavelength, transmittance], axis=1), dtype=torch.float32)
 
 #add a batch dimension (1, since it's one example)
 input_data=input_data.unsqueeze(0)
+plt.plot(wavelength,transmittance,color="blue")
+print(runModels.runFlexibleAbundance(input_data,False))
+print("DONE")
+#Adjust the data to have length 785
+interp_func=interp1d(np.linspace(0, 1, len(wavelength)), wavelength)
+interp_trans=interp1d(np.linspace(0, 1, len(transmittance)), transmittance)
+
+#Generate 785 points evenly spaced in the range [0, 1]
+x_new=np.linspace(0, 1, 785)
+
+# Apply the interpolation function
+wavelength=interp_func(x_new)
+transmittance=interp_trans(x_new)
+plt.plot(wavelength,transmittance,color="orange")
+print(len(wavelength))
+input_data=torch.tensor(np.stack([wavelength, transmittance], axis=1), dtype=torch.float32)
+input_data=input_data.unsqueeze(0)
+
+print(runModels.runFlexibleAbundance(input_data,False))
+plt.show()
+
+# #Apply filter
+# transmittance_downsampled = savgol_filter(transmittance_downsampled, window_length=50, polyorder=5)
+# data=pd.read_csv(r"C:\Users\Tristan\Downloads\HyPCAR2\earthTransmittance.csv")
+
+# wavelength,transmittance=data.iloc[:,0],data.iloc[:,1]
+
+
+# plt.figure(1)
+# plt.title("Earth Transmittance")
+# plt.xlabel("Wavelength (um)")
+# plt.ylabel("Transmittance")
+
+# plt.plot(wavelength,transmittance)
+# plt.savefig(r"C:\Users\Tristan\Downloads\HyPCAR3\visuals\earthTransmittance.png")
+# input_data=torch.tensor(np.stack([wavelength, transmittance], axis=1), dtype=torch.float32)
+
+# #add a batch dimension (1, since it's one example)
+# input_data=input_data.unsqueeze(0)
 
 with torch.no_grad():
     model.eval()

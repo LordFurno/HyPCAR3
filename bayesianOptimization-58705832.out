@@ -1,0 +1,590 @@
+created virtual environment CPython3.12.4.final.0-64 in 13476ms
+  creator CPython3Posix(dest=/localscratch/tristanb.58705832.0/env, clear=False, no_vcs_ignore=False, global=False)
+  seeder FromAppData(download=False, pip=bundle, via=copy, app_data_dir=/home/tristanb/.local/share/virtualenv)
+    added seed packages: pip==25.0.1
+  activators BashActivator,CShellActivator,FishActivator,NushellActivator,PowerShellActivator,PythonActivator
+Looking in links: /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/gentoo2023/x86-64-v3, /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/gentoo2023/generic, /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic
+Requirement already satisfied: pip in /localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages (25.0.1)
+Looking in links: /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/gentoo2023/x86-64-v3, /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/gentoo2023/generic, /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/astropy-7.0.0+computecanada-cp312-cp312-linux_x86_64.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/pureCNNRequirements.txt (line 1))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/filelock-3.17.0+computecanada-py3-none-any.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/pureCNNRequirements.txt (line 2))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/fsspec-2025.2.0+computecanada-py3-none-any.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/pureCNNRequirements.txt (line 3))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/jinja2-3.1.5+computecanada-py3-none-any.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/pureCNNRequirements.txt (line 4))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/joblib-1.4.2+computecanada-py3-none-any.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/pureCNNRequirements.txt (line 5))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/MarkupSafe-2.1.5+computecanada-cp312-cp312-linux_x86_64.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/pureCNNRequirements.txt (line 6))
+Requirement already satisfied: mpmath==1.3.0+computecanada in /cvmfs/soft.computecanada.ca/easybuild/software/2023/x86-64-v3/Compiler/gcccore/scipy-stack/2025a/lib/python3.12/site-packages (from -r /home/tristanb/projects/def-pjmann/tristanb/pureCNNRequirements.txt (line 7)) (1.3.0+computecanada)
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/networkx-3.4.2+computecanada-py3-none-any.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/pureCNNRequirements.txt (line 8))
+Requirement already satisfied: numpy==2.2.2+computecanada in /cvmfs/soft.computecanada.ca/easybuild/software/2023/x86-64-v3/Compiler/gcccore/scipy-stack/2025a/lib/python3.12/site-packages (from -r /home/tristanb/projects/def-pjmann/tristanb/pureCNNRequirements.txt (line 9)) (2.2.2+computecanada)
+Requirement already satisfied: packaging==24.2+computecanada in /cvmfs/soft.computecanada.ca/easybuild/software/2023/x86-64-v3/Compiler/gcccore/scipy-stack/2025a/lib/python3.12/site-packages (from -r /home/tristanb/projects/def-pjmann/tristanb/pureCNNRequirements.txt (line 10)) (24.2+computecanada)
+Requirement already satisfied: pandas==2.2.3+computecanada in /cvmfs/soft.computecanada.ca/easybuild/software/2023/x86-64-v3/Compiler/gcccore/scipy-stack/2025a/lib/python3.12/site-packages (from -r /home/tristanb/projects/def-pjmann/tristanb/pureCNNRequirements.txt (line 11)) (2.2.3+computecanada)
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/pyerfa-2.0.1.5+computecanada-cp39-abi3-linux_x86_64.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/pureCNNRequirements.txt (line 12))
+Requirement already satisfied: python_dateutil==2.9.0.post0+computecanada in /cvmfs/soft.computecanada.ca/easybuild/software/2023/x86-64-v3/Compiler/gcccore/scipy-stack/2025a/lib/python3.12/site-packages (from -r /home/tristanb/projects/def-pjmann/tristanb/pureCNNRequirements.txt (line 13)) (2.9.0.post0+computecanada)
+Requirement already satisfied: pytz==2025.1+computecanada in /cvmfs/soft.computecanada.ca/easybuild/software/2023/x86-64-v3/Compiler/gcccore/scipy-stack/2025a/lib/python3.12/site-packages (from -r /home/tristanb/projects/def-pjmann/tristanb/pureCNNRequirements.txt (line 14)) (2025.1+computecanada)
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/gentoo2023/x86-64-v3/PyYAML-6.0.2+computecanada-cp312-cp312-linux_x86_64.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/pureCNNRequirements.txt (line 15))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/gentoo2023/generic/scikit_learn-1.6.1+computecanada-cp312-cp312-linux_x86_64.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/pureCNNRequirements.txt (line 16))
+Requirement already satisfied: scipy==1.15.1+computecanada in /cvmfs/soft.computecanada.ca/easybuild/software/2023/x86-64-v3/Compiler/gcccore/scipy-stack/2025a/lib/python3.12/site-packages (from -r /home/tristanb/projects/def-pjmann/tristanb/pureCNNRequirements.txt (line 17)) (1.15.1+computecanada)
+Requirement already satisfied: six==1.17.0+computecanada in /cvmfs/soft.computecanada.ca/easybuild/software/2023/x86-64-v3/Compiler/gcccore/scipy-stack/2025a/lib/python3.12/site-packages (from -r /home/tristanb/projects/def-pjmann/tristanb/pureCNNRequirements.txt (line 18)) (1.17.0+computecanada)
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/sklearn-0.0+computecanada-py2.py3-none-any.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/pureCNNRequirements.txt (line 19))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/sympy-1.13.1+computecanada-py3-none-any.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/pureCNNRequirements.txt (line 20))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/threadpoolctl-3.5.0+computecanada-py3-none-any.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/pureCNNRequirements.txt (line 21))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/gentoo2023/x86-64-v3/torch-2.6.0+computecanada-cp312-cp312-linux_x86_64.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/pureCNNRequirements.txt (line 22))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/typing_extensions-4.12.2+computecanada-py3-none-any.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/pureCNNRequirements.txt (line 23))
+Requirement already satisfied: tzdata==2025.1+computecanada in /cvmfs/soft.computecanada.ca/easybuild/software/2023/x86-64-v3/Compiler/gcccore/scipy-stack/2025a/lib/python3.12/site-packages (from -r /home/tristanb/projects/def-pjmann/tristanb/pureCNNRequirements.txt (line 24)) (2025.1+computecanada)
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/astropy_iers_data-0.2025.3.17.0.34.53+computecanada-py3-none-any.whl (from astropy==7.0.0+computecanada->-r /home/tristanb/projects/def-pjmann/tristanb/pureCNNRequirements.txt (line 1))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/setuptools-78.1.0+computecanada-py3-none-any.whl (from torch==2.6.0+computecanada->-r /home/tristanb/projects/def-pjmann/tristanb/pureCNNRequirements.txt (line 22))
+Installing collected packages: typing_extensions, threadpoolctl, sympy, setuptools, PyYAML, pyerfa, networkx, MarkupSafe, joblib, fsspec, filelock, astropy-iers-data, scikit_learn, jinja2, astropy, torch, sklearn
+  Attempting uninstall: sympy
+    Found existing installation: sympy 1.13.3+computecanada
+    Not uninstalling sympy at /cvmfs/soft.computecanada.ca/easybuild/software/2023/x86-64-v3/Compiler/gcccore/scipy-stack/2025a/lib/python3.12/site-packages, outside environment /localscratch/tristanb.58705832.0/env
+    Can't uninstall 'sympy'. No files were found to uninstall.
+Successfully installed MarkupSafe-2.1.5+computecanada PyYAML-6.0.2+computecanada astropy-7.0.0+computecanada astropy-iers-data-0.2025.3.17.0.34.53+computecanada filelock-3.17.0+computecanada fsspec-2025.2.0+computecanada jinja2-3.1.5+computecanada joblib-1.4.2+computecanada networkx-3.4.2+computecanada pyerfa-2.0.1.5+computecanada scikit_learn-1.6.1+computecanada setuptools-78.1.0+computecanada sklearn-0.0+computecanada sympy-1.13.1+computecanada threadpoolctl-3.5.0+computecanada torch-2.6.0+computecanada typing_extensions-4.12.2+computecanada
+Looking in links: /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/gentoo2023/x86-64-v3, /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/gentoo2023/generic, /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/ray-2.41.0+computecanada-cp312-cp312-linux_x86_64.whl
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/click-8.1.8+computecanada-py3-none-any.whl (from ray)
+Requirement already satisfied: filelock in /localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages (from ray) (3.17.0+computecanada)
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/jsonschema-4.23.0+computecanada-py3-none-any.whl (from ray)
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/msgpack-1.1.0+computecanada-cp312-cp312-linux_x86_64.whl (from ray)
+Requirement already satisfied: packaging in /cvmfs/soft.computecanada.ca/easybuild/software/2023/x86-64-v3/Compiler/gcccore/scipy-stack/2025a/lib/python3.12/site-packages (from ray) (24.2+computecanada)
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/gentoo2023/x86-64-v3/protobuf-6.30.1+computecanada-cp312-cp312-linux_x86_64.whl (from ray)
+Requirement already satisfied: pyyaml in /localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages (from ray) (6.0.2+computecanada)
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/aiosignal-1.3.2+computecanada-py2.py3-none-any.whl (from ray)
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/frozenlist-1.5.0+computecanada-cp312-cp312-linux_x86_64.whl (from ray)
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/requests-2.32.3+computecanada-py3-none-any.whl (from ray)
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/attrs-25.3.0+computecanada-py3-none-any.whl (from jsonschema->ray)
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/jsonschema_specifications-2024.10.1+computecanada-py3-none-any.whl (from jsonschema->ray)
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/referencing-0.36.2+computecanada-py3-none-any.whl (from jsonschema->ray)
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/gentoo2023/generic/rpds_py-0.21.0+computecanada-cp312-cp312-linux_x86_64.whl (from jsonschema->ray)
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/charset_normalizer-3.4.1+computecanada-cp312-cp312-linux_x86_64.whl (from requests->ray)
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/idna-3.10+computecanada-py3-none-any.whl (from requests->ray)
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/urllib3-2.3.0+computecanada-py3-none-any.whl (from requests->ray)
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/certifi-2025.1.31+computecanada-py3-none-any.whl (from requests->ray)
+Requirement already satisfied: typing-extensions>=4.4.0 in /localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages (from referencing>=0.28.4->jsonschema->ray) (4.12.2+computecanada)
+Installing collected packages: urllib3, rpds-py, protobuf, msgpack, idna, frozenlist, click, charset-normalizer, certifi, attrs, requests, referencing, aiosignal, jsonschema-specifications, jsonschema, ray
+Successfully installed aiosignal-1.3.2+computecanada attrs-25.3.0+computecanada certifi-2025.1.31+computecanada charset-normalizer-3.4.1+computecanada click-8.1.8+computecanada frozenlist-1.5.0+computecanada idna-3.10+computecanada jsonschema-4.23.0+computecanada jsonschema-specifications-2024.10.1+computecanada msgpack-1.1.0+computecanada protobuf-6.30.1+computecanada ray-2.41.0+computecanada referencing-0.36.2+computecanada requests-2.32.3+computecanada rpds-py-0.21.0+computecanada urllib3-2.3.0+computecanada
+Looking in links: /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/gentoo2023/x86-64-v3, /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/gentoo2023/generic, /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic
+Requirement already satisfied: ray[tune] in /localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages (2.41.0+computecanada)
+Requirement already satisfied: click>=7.0 in /localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages (from ray[tune]) (8.1.8+computecanada)
+Requirement already satisfied: filelock in /localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages (from ray[tune]) (3.17.0+computecanada)
+Requirement already satisfied: jsonschema in /localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages (from ray[tune]) (4.23.0+computecanada)
+Requirement already satisfied: msgpack<2.0.0,>=1.0.0 in /localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages (from ray[tune]) (1.1.0+computecanada)
+Requirement already satisfied: packaging in /cvmfs/soft.computecanada.ca/easybuild/software/2023/x86-64-v3/Compiler/gcccore/scipy-stack/2025a/lib/python3.12/site-packages (from ray[tune]) (24.2+computecanada)
+Requirement already satisfied: protobuf!=3.19.5,>=3.15.3 in /localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages (from ray[tune]) (6.30.1+computecanada)
+Requirement already satisfied: pyyaml in /localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages (from ray[tune]) (6.0.2+computecanada)
+Requirement already satisfied: aiosignal in /localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages (from ray[tune]) (1.3.2+computecanada)
+Requirement already satisfied: frozenlist in /localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages (from ray[tune]) (1.5.0+computecanada)
+Requirement already satisfied: requests in /localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages (from ray[tune]) (2.32.3+computecanada)
+Requirement already satisfied: pandas in /cvmfs/soft.computecanada.ca/easybuild/software/2023/x86-64-v3/Compiler/gcccore/scipy-stack/2025a/lib/python3.12/site-packages (from ray[tune]) (2.2.3+computecanada)
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/tensorboardX-2.6.2.2+computecanada-py2.py3-none-any.whl (from ray[tune])
+Requirement already satisfied: pyarrow>=9.0.0 in /cvmfs/soft.computecanada.ca/easybuild/software/2023/x86-64-v3/Compiler/gcccore/arrow/19.0.1/lib/python3.12/site-packages (from ray[tune]) (19.0.1)
+Requirement already satisfied: fsspec in /localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages (from ray[tune]) (2025.2.0+computecanada)
+Requirement already satisfied: numpy in /cvmfs/soft.computecanada.ca/easybuild/software/2023/x86-64-v3/Compiler/gcccore/scipy-stack/2025a/lib/python3.12/site-packages (from tensorboardX>=1.9->ray[tune]) (2.2.2+computecanada)
+Requirement already satisfied: attrs>=22.2.0 in /localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages (from jsonschema->ray[tune]) (25.3.0+computecanada)
+Requirement already satisfied: jsonschema-specifications>=2023.03.6 in /localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages (from jsonschema->ray[tune]) (2024.10.1+computecanada)
+Requirement already satisfied: referencing>=0.28.4 in /localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages (from jsonschema->ray[tune]) (0.36.2+computecanada)
+Requirement already satisfied: rpds-py>=0.7.1 in /localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages (from jsonschema->ray[tune]) (0.21.0+computecanada)
+Requirement already satisfied: python-dateutil>=2.8.2 in /cvmfs/soft.computecanada.ca/easybuild/software/2023/x86-64-v3/Compiler/gcccore/scipy-stack/2025a/lib/python3.12/site-packages (from pandas->ray[tune]) (2.9.0.post0+computecanada)
+Requirement already satisfied: pytz>=2020.1 in /cvmfs/soft.computecanada.ca/easybuild/software/2023/x86-64-v3/Compiler/gcccore/scipy-stack/2025a/lib/python3.12/site-packages (from pandas->ray[tune]) (2025.1+computecanada)
+Requirement already satisfied: tzdata>=2022.7 in /cvmfs/soft.computecanada.ca/easybuild/software/2023/x86-64-v3/Compiler/gcccore/scipy-stack/2025a/lib/python3.12/site-packages (from pandas->ray[tune]) (2025.1+computecanada)
+Requirement already satisfied: charset-normalizer<4,>=2 in /localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages (from requests->ray[tune]) (3.4.1+computecanada)
+Requirement already satisfied: idna<4,>=2.5 in /localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages (from requests->ray[tune]) (3.10+computecanada)
+Requirement already satisfied: urllib3<3,>=1.21.1 in /localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages (from requests->ray[tune]) (2.3.0+computecanada)
+Requirement already satisfied: certifi>=2017.4.17 in /localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages (from requests->ray[tune]) (2025.1.31+computecanada)
+Requirement already satisfied: six>=1.5 in /cvmfs/soft.computecanada.ca/easybuild/software/2023/x86-64-v3/Compiler/gcccore/scipy-stack/2025a/lib/python3.12/site-packages (from python-dateutil>=2.8.2->pandas->ray[tune]) (1.17.0+computecanada)
+Requirement already satisfied: typing-extensions>=4.4.0 in /localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages (from referencing>=0.28.4->jsonschema->ray[tune]) (4.12.2+computecanada)
+Installing collected packages: tensorboardX
+Successfully installed tensorboardX-2.6.2.2+computecanada
+Looking in links: /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/gentoo2023/x86-64-v3, /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/gentoo2023/generic, /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic
+Requirement already satisfied: pyarrow in /cvmfs/soft.computecanada.ca/easybuild/software/2023/x86-64-v3/Compiler/gcccore/arrow/19.0.1/lib/python3.12/site-packages (19.0.1)
+Looking in links: /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/gentoo2023/x86-64-v3, /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/gentoo2023/generic, /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic
+Collecting optuna
+  Using cached optuna-4.2.1-py3-none-any.whl.metadata (17 kB)
+Collecting alembic>=1.5.0 (from optuna)
+  Using cached alembic-1.15.2-py3-none-any.whl.metadata (7.3 kB)
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/colorlog-6.9.0+computecanada-py3-none-any.whl (from optuna)
+Requirement already satisfied: numpy in /cvmfs/soft.computecanada.ca/easybuild/software/2023/x86-64-v3/Compiler/gcccore/scipy-stack/2025a/lib/python3.12/site-packages (from optuna) (2.2.2+computecanada)
+Requirement already satisfied: packaging>=20.0 in /cvmfs/soft.computecanada.ca/easybuild/software/2023/x86-64-v3/Compiler/gcccore/scipy-stack/2025a/lib/python3.12/site-packages (from optuna) (24.2+computecanada)
+Collecting sqlalchemy>=1.4.2 (from optuna)
+  Using cached sqlalchemy-2.0.40-py3-none-any.whl.metadata (9.6 kB)
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/tqdm-4.67.1+computecanada-py3-none-any.whl (from optuna)
+Requirement already satisfied: PyYAML in /localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages (from optuna) (6.0.2+computecanada)
+Collecting Mako (from alembic>=1.5.0->optuna)
+  Using cached mako-1.3.10-py3-none-any.whl.metadata (2.9 kB)
+Requirement already satisfied: typing-extensions>=4.12 in /localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages (from alembic>=1.5.0->optuna) (4.12.2+computecanada)
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/greenlet-3.1.1+computecanada-cp312-cp312-linux_x86_64.whl (from sqlalchemy>=1.4.2->optuna)
+Requirement already satisfied: MarkupSafe>=0.9.2 in /localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages (from Mako->alembic>=1.5.0->optuna) (2.1.5+computecanada)
+Using cached optuna-4.2.1-py3-none-any.whl (383 kB)
+Using cached alembic-1.15.2-py3-none-any.whl (231 kB)
+Using cached sqlalchemy-2.0.40-py3-none-any.whl (1.9 MB)
+Using cached mako-1.3.10-py3-none-any.whl (78 kB)
+Installing collected packages: tqdm, Mako, greenlet, colorlog, sqlalchemy, alembic, optuna
+Successfully installed Mako-1.3.10 alembic-1.15.2 colorlog-6.9.0+computecanada greenlet-3.1.1+computecanada optuna-4.2.1 sqlalchemy-2.0.40 tqdm-4.67.1+computecanada
+2025-04-13 16:06:13,373	INFO usage_lib.py:467 -- Usage stats collection is enabled by default without user confirmation because this terminal is detected to be non-interactive. To disable this, add `--disable-usage-stats` to the command that starts the cluster, or run the following command: `ray disable-usage-stats` before starting the cluster. See https://docs.ray.io/en/master/cluster/usage-stats.html for more details.
+2025-04-13 16:06:13,373	INFO scripts.py:865 -- Local node IP: cdr2478.int.cedar.computecanada.ca
+2025-04-13 16:06:15,529	SUCC scripts.py:902 -- --------------------
+2025-04-13 16:06:15,529	SUCC scripts.py:903 -- Ray runtime started.
+2025-04-13 16:06:15,529	SUCC scripts.py:904 -- --------------------
+2025-04-13 16:06:15,529	INFO scripts.py:906 -- Next steps
+2025-04-13 16:06:15,529	INFO scripts.py:909 -- To add another node to this Ray cluster, run
+2025-04-13 16:06:15,529	INFO scripts.py:912 --   ray start --address='cdr2478.int.cedar.computecanada.ca:34567'
+2025-04-13 16:06:15,529	INFO scripts.py:921 -- To connect to this Ray cluster:
+2025-04-13 16:06:15,529	INFO scripts.py:923 -- import ray
+2025-04-13 16:06:15,529	INFO scripts.py:924 -- ray.init(_node_ip_address='cdr2478.int.cedar.computecanada.ca')
+2025-04-13 16:06:15,529	INFO scripts.py:955 -- To terminate the Ray runtime, run
+2025-04-13 16:06:15,529	INFO scripts.py:956 --   ray stop
+2025-04-13 16:06:15,529	INFO scripts.py:959 -- To view the status of the cluster, use
+2025-04-13 16:06:15,529	INFO scripts.py:960 --   ray status
+2025-04-13 16:06:15,529	INFO scripts.py:1076 -- --block
+2025-04-13 16:06:15,529	INFO scripts.py:1077 -- This command will now block forever until terminated by a signal.
+2025-04-13 16:06:15,529	INFO scripts.py:1080 -- Running subprocesses are monitored and a message will be printed if any of them terminate unexpectedly. Subprocesses exit with SIGTERM will be treated as graceful, thus NOT reported.
+2025-04-13 16:06:27,758	INFO worker.py:1654 -- Connecting to existing Ray cluster at address: cdr2478.int.cedar.computecanada.ca:34567...
+2025-04-13 16:06:27,774	INFO worker.py:1841 -- Connected to Ray cluster.
+[I 2025-04-13 16:14:29,396] A new study created in memory with name: optuna
+2025-04-13 16:15:18,856	ERROR tune_controller.py:1331 -- Trial task failed for trial objective_154c31f9
+Traceback (most recent call last):
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/air/execution/_internal/event_manager.py", line 110, in resolve_future
+    result = ray.get(future)
+             ^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/_private/auto_init_hook.py", line 21, in auto_init_wrapper
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/_private/worker.py", line 2772, in get
+    values, debugger_breakpoint = worker.get_objects(object_refs, timeout=timeout)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/_private/worker.py", line 919, in get_objects
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(RuntimeError): [36mray::ImplicitFunc.train()[39m (pid=268189, ip=cdr2478.int.cedar.computecanada.ca, actor_id=9bafaec9203870ffc7a058ce01000000, repr=objective)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/tune/trainable/trainable.py", line 331, in train
+    raise skipped from exception_cause(skipped)
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/air/_internal/util.py", line 107, in run
+    self._ret = self._target(*self._args, **self._kwargs)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/tune/trainable/function_trainable.py", line 44, in <lambda>
+    training_func=lambda: self._trainable_func(self.config),
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/tune/trainable/function_trainable.py", line 249, in _trainable_func
+    output = fn()
+             ^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/tune/trainable/util.py", line 130, in inner
+    return trainable(config, **fn_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/project/6000478/tristanb/bayesianOptimization.py", line 594, in objective
+    outputs,uncertainty,attentionWeights=model(data,detectionOutput)
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/project/6000478/tristanb/bayesianOptimization.py", line 219, in forward
+    combined=F.relu(self.fc_combined(combined))
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/torch/nn/modules/linear.py", line 125, in forward
+    return F.linear(input, self.weight, self.bias)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: mat1 and mat2 shapes cannot be multiplied (32x192 and 96x128)
+2025-04-13 16:15:22,622	ERROR tune_controller.py:1331 -- Trial task failed for trial objective_b3875155
+Traceback (most recent call last):
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/air/execution/_internal/event_manager.py", line 110, in resolve_future
+    result = ray.get(future)
+             ^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/_private/auto_init_hook.py", line 21, in auto_init_wrapper
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/_private/worker.py", line 2772, in get
+    values, debugger_breakpoint = worker.get_objects(object_refs, timeout=timeout)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/_private/worker.py", line 919, in get_objects
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(RuntimeError): [36mray::ImplicitFunc.train()[39m (pid=268273, ip=cdr2478.int.cedar.computecanada.ca, actor_id=c9f1caa1b8bc4d962b4023ee01000000, repr=objective)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/tune/trainable/trainable.py", line 331, in train
+    raise skipped from exception_cause(skipped)
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/air/_internal/util.py", line 107, in run
+    self._ret = self._target(*self._args, **self._kwargs)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/tune/trainable/function_trainable.py", line 44, in <lambda>
+    training_func=lambda: self._trainable_func(self.config),
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/tune/trainable/function_trainable.py", line 249, in _trainable_func
+    output = fn()
+             ^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/tune/trainable/util.py", line 130, in inner
+    return trainable(config, **fn_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/project/6000478/tristanb/bayesianOptimization.py", line 594, in objective
+    outputs,uncertainty,attentionWeights=model(data,detectionOutput)
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/project/6000478/tristanb/bayesianOptimization.py", line 219, in forward
+    combined=F.relu(self.fc_combined(combined))
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/torch/nn/modules/linear.py", line 125, in forward
+    return F.linear(input, self.weight, self.bias)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: mat1 and mat2 shapes cannot be multiplied (32x128 and 96x128)
+2025-04-13 16:15:35,317	ERROR tune_controller.py:1331 -- Trial task failed for trial objective_25709f06
+Traceback (most recent call last):
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/air/execution/_internal/event_manager.py", line 110, in resolve_future
+    result = ray.get(future)
+             ^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/_private/auto_init_hook.py", line 21, in auto_init_wrapper
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/_private/worker.py", line 2772, in get
+    values, debugger_breakpoint = worker.get_objects(object_refs, timeout=timeout)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/_private/worker.py", line 919, in get_objects
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(RuntimeError): [36mray::ImplicitFunc.train()[39m (pid=268487, ip=cdr2478.int.cedar.computecanada.ca, actor_id=ba79f9eaf0b02387e3ed9d6301000000, repr=objective)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/tune/trainable/trainable.py", line 331, in train
+    raise skipped from exception_cause(skipped)
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/air/_internal/util.py", line 107, in run
+    self._ret = self._target(*self._args, **self._kwargs)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/tune/trainable/function_trainable.py", line 44, in <lambda>
+    training_func=lambda: self._trainable_func(self.config),
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/tune/trainable/function_trainable.py", line 249, in _trainable_func
+    output = fn()
+             ^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/tune/trainable/util.py", line 130, in inner
+    return trainable(config, **fn_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/project/6000478/tristanb/bayesianOptimization.py", line 594, in objective
+    outputs,uncertainty,attentionWeights=model(data,detectionOutput)
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/project/6000478/tristanb/bayesianOptimization.py", line 219, in forward
+    combined=F.relu(self.fc_combined(combined))
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/torch/nn/modules/linear.py", line 125, in forward
+    return F.linear(input, self.weight, self.bias)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: mat1 and mat2 shapes cannot be multiplied (32x192 and 96x128)
+2025-04-13 16:16:08,286	ERROR tune_controller.py:1331 -- Trial task failed for trial objective_747c8e0b
+Traceback (most recent call last):
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/air/execution/_internal/event_manager.py", line 110, in resolve_future
+    result = ray.get(future)
+             ^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/_private/auto_init_hook.py", line 21, in auto_init_wrapper
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/_private/worker.py", line 2772, in get
+    values, debugger_breakpoint = worker.get_objects(object_refs, timeout=timeout)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/_private/worker.py", line 919, in get_objects
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(RuntimeError): [36mray::ImplicitFunc.train()[39m (pid=268660, ip=cdr2478.int.cedar.computecanada.ca, actor_id=c94d808fa3eae4e5a5d19e2f01000000, repr=objective)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/tune/trainable/trainable.py", line 331, in train
+    raise skipped from exception_cause(skipped)
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/air/_internal/util.py", line 107, in run
+    self._ret = self._target(*self._args, **self._kwargs)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/tune/trainable/function_trainable.py", line 44, in <lambda>
+    training_func=lambda: self._trainable_func(self.config),
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/tune/trainable/function_trainable.py", line 249, in _trainable_func
+    output = fn()
+             ^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/tune/trainable/util.py", line 130, in inner
+    return trainable(config, **fn_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/project/6000478/tristanb/bayesianOptimization.py", line 594, in objective
+    outputs,uncertainty,attentionWeights=model(data,detectionOutput)
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/project/6000478/tristanb/bayesianOptimization.py", line 219, in forward
+    combined=F.relu(self.fc_combined(combined))
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/torch/nn/modules/linear.py", line 125, in forward
+    return F.linear(input, self.weight, self.bias)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: mat1 and mat2 shapes cannot be multiplied (32x128 and 96x128)
+2025-04-13 16:16:13,737	ERROR tune_controller.py:1331 -- Trial task failed for trial objective_413c6036
+Traceback (most recent call last):
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/air/execution/_internal/event_manager.py", line 110, in resolve_future
+    result = ray.get(future)
+             ^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/_private/auto_init_hook.py", line 21, in auto_init_wrapper
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/_private/worker.py", line 2772, in get
+    values, debugger_breakpoint = worker.get_objects(object_refs, timeout=timeout)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/_private/worker.py", line 919, in get_objects
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(RuntimeError): [36mray::ImplicitFunc.train()[39m (pid=268809, ip=cdr2478.int.cedar.computecanada.ca, actor_id=8f81f68fa5ebb63a93e00b5501000000, repr=objective)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/tune/trainable/trainable.py", line 331, in train
+    raise skipped from exception_cause(skipped)
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/air/_internal/util.py", line 107, in run
+    self._ret = self._target(*self._args, **self._kwargs)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/tune/trainable/function_trainable.py", line 44, in <lambda>
+    training_func=lambda: self._trainable_func(self.config),
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/tune/trainable/function_trainable.py", line 249, in _trainable_func
+    output = fn()
+             ^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/tune/trainable/util.py", line 130, in inner
+    return trainable(config, **fn_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/project/6000478/tristanb/bayesianOptimization.py", line 594, in objective
+    outputs,uncertainty,attentionWeights=model(data,detectionOutput)
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/project/6000478/tristanb/bayesianOptimization.py", line 219, in forward
+    combined=F.relu(self.fc_combined(combined))
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/torch/nn/modules/linear.py", line 125, in forward
+    return F.linear(input, self.weight, self.bias)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: mat1 and mat2 shapes cannot be multiplied (32x128 and 96x128)
+2025-04-13 16:16:25,310	ERROR tune_controller.py:1331 -- Trial task failed for trial objective_62de531c
+Traceback (most recent call last):
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/air/execution/_internal/event_manager.py", line 110, in resolve_future
+    result = ray.get(future)
+             ^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/_private/auto_init_hook.py", line 21, in auto_init_wrapper
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/_private/worker.py", line 2772, in get
+    values, debugger_breakpoint = worker.get_objects(object_refs, timeout=timeout)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/_private/worker.py", line 919, in get_objects
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(RuntimeError): [36mray::ImplicitFunc.train()[39m (pid=268961, ip=cdr2478.int.cedar.computecanada.ca, actor_id=cefcf252f2113f988e56581101000000, repr=objective)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/tune/trainable/trainable.py", line 331, in train
+    raise skipped from exception_cause(skipped)
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/air/_internal/util.py", line 107, in run
+    self._ret = self._target(*self._args, **self._kwargs)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/tune/trainable/function_trainable.py", line 44, in <lambda>
+    training_func=lambda: self._trainable_func(self.config),
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/tune/trainable/function_trainable.py", line 249, in _trainable_func
+    output = fn()
+             ^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/tune/trainable/util.py", line 130, in inner
+    return trainable(config, **fn_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/project/6000478/tristanb/bayesianOptimization.py", line 594, in objective
+    outputs,uncertainty,attentionWeights=model(data,detectionOutput)
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/project/6000478/tristanb/bayesianOptimization.py", line 219, in forward
+    combined=F.relu(self.fc_combined(combined))
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/torch/nn/modules/linear.py", line 125, in forward
+    return F.linear(input, self.weight, self.bias)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: mat1 and mat2 shapes cannot be multiplied (32x192 and 96x128)
+2025-04-13 16:16:58,054	ERROR tune_controller.py:1331 -- Trial task failed for trial objective_c02db198
+Traceback (most recent call last):
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/air/execution/_internal/event_manager.py", line 110, in resolve_future
+    result = ray.get(future)
+             ^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/_private/auto_init_hook.py", line 21, in auto_init_wrapper
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/_private/worker.py", line 2772, in get
+    values, debugger_breakpoint = worker.get_objects(object_refs, timeout=timeout)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/_private/worker.py", line 919, in get_objects
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(RuntimeError): [36mray::ImplicitFunc.train()[39m (pid=269104, ip=cdr2478.int.cedar.computecanada.ca, actor_id=50fa7d07d726d32797bc6b5001000000, repr=objective)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/tune/trainable/trainable.py", line 331, in train
+    raise skipped from exception_cause(skipped)
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/air/_internal/util.py", line 107, in run
+    self._ret = self._target(*self._args, **self._kwargs)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/tune/trainable/function_trainable.py", line 44, in <lambda>
+    training_func=lambda: self._trainable_func(self.config),
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/tune/trainable/function_trainable.py", line 249, in _trainable_func
+    output = fn()
+             ^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/tune/trainable/util.py", line 130, in inner
+    return trainable(config, **fn_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/project/6000478/tristanb/bayesianOptimization.py", line 594, in objective
+    outputs,uncertainty,attentionWeights=model(data,detectionOutput)
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/project/6000478/tristanb/bayesianOptimization.py", line 219, in forward
+    combined=F.relu(self.fc_combined(combined))
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/torch/nn/modules/linear.py", line 125, in forward
+    return F.linear(input, self.weight, self.bias)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: mat1 and mat2 shapes cannot be multiplied (32x128 and 96x128)
+2025-04-13 16:17:13,390	ERROR tune_controller.py:1331 -- Trial task failed for trial objective_57c1e093
+Traceback (most recent call last):
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/air/execution/_internal/event_manager.py", line 110, in resolve_future
+    result = ray.get(future)
+             ^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/_private/auto_init_hook.py", line 21, in auto_init_wrapper
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/_private/worker.py", line 2772, in get
+    values, debugger_breakpoint = worker.get_objects(object_refs, timeout=timeout)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/_private/worker.py", line 919, in get_objects
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(RuntimeError): [36mray::ImplicitFunc.train()[39m (pid=269391, ip=cdr2478.int.cedar.computecanada.ca, actor_id=0018a2c843cca6b37221ef8201000000, repr=objective)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/tune/trainable/trainable.py", line 331, in train
+    raise skipped from exception_cause(skipped)
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/air/_internal/util.py", line 107, in run
+    self._ret = self._target(*self._args, **self._kwargs)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/tune/trainable/function_trainable.py", line 44, in <lambda>
+    training_func=lambda: self._trainable_func(self.config),
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/tune/trainable/function_trainable.py", line 249, in _trainable_func
+    output = fn()
+             ^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/ray/tune/trainable/util.py", line 130, in inner
+    return trainable(config, **fn_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/project/6000478/tristanb/bayesianOptimization.py", line 594, in objective
+    outputs,uncertainty,attentionWeights=model(data,detectionOutput)
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/project/6000478/tristanb/bayesianOptimization.py", line 219, in forward
+    combined=F.relu(self.fc_combined(combined))
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/localscratch/tristanb.58705832.0/env/lib/python3.12/site-packages/torch/nn/modules/linear.py", line 125, in forward
+    return F.linear(input, self.weight, self.bias)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: mat1 and mat2 shapes cannot be multiplied (32x128 and 96x128)
+slurmstepd: error: *** JOB 58705832 ON cdr2478 CANCELLED AT 2025-04-13T16:29:30 ***

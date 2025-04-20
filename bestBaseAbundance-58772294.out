@@ -1,0 +1,196 @@
+
+Modules based on Lua: Version 8.7.47 2024-07-22 10:04 -04:00
+    by Robert McLay mclay@tacc.utexas.edu
+
+module [options] sub-command [args ...]
+
+Help sub-commands:
+
+
+  help                              prints this message
+  help                module [...]  print help message from module(s)
+
+Loading/Unloading sub-commands:
+
+
+  load | add          module [...]  load module(s)
+  try-load | try-add  module [...]  Add module(s), do not complain if not
+                                    found
+  del | unload        module [...]  Remove module(s), do not complain if not
+                                    found
+  swap | sw | switch  m1 m2         unload m1 and load m2
+  purge                             unload all modules
+  refresh                           reload aliases from current list of
+                                    modules.
+  update                            reload all currently loaded modules.
+
+Listing / Searching sub-commands:
+
+
+  list                              List loaded modules
+  list                s1 s2 ...     List loaded modules that match the
+                                    pattern
+  avail | av                        List available modules
+  avail | av          string        List available modules that contain
+                                    "string".
+  category | cat                    List all categories
+  category | cat      s1 s2 ...     List all categories that match the
+                                    pattern and display their modules
+  overview | ov                     List all available modules by short
+                                    names with number of versions
+  overview | ov       string        List available modules by short names
+                                    with number of versions that contain
+                                    "string"
+  spider                            List all possible modules
+  spider              module        List all possible version of that module
+                                    file
+  spider              string        List all module that contain the
+                                    "string".
+  spider              name/version  Detailed information about that version
+                                    of the module.
+  whatis              module        Print whatis information about module
+  keyword | key       string        Search all name and whatis that contain
+                                    "string".
+
+Searching with Lmod:
+
+
+  All searching (spider, list, avail, keyword) support regular expressions:
+  
+
+  -r spider           '^p'          Finds all the modules that start with
+                                    `p' or `P'
+  -r spider           mpi           Finds all modules that have "mpi" in
+                                    their name.
+  -r spider           'mpi$         Finds all modules that end with "mpi" in
+                                    their name.
+
+Handling a collection of modules:
+
+
+  save | s                          Save the current list of modules to a
+                                    user defined "default" collection.
+  save | s            name          Save the current list of modules to
+                                    "name" collection.
+  reset                             The same as "restore system"
+  restore | r                       Restore modules from the user's
+                                    "default" or system default.
+  restore | r         name          Restore modules from "name" collection.
+  restore             system        Restore module state to system defaults.
+  savelist                          List of saved collections.
+  describe | mcc      name          Describe the contents of a module
+                                    collection.
+  disable             name          Disable (i.e. remove) a collection.
+
+Deprecated commands:
+
+
+  getdefault          [name]        load name collection of modules or
+                                    user's "default" if no name given.
+                                    ===> Use "restore" instead <====
+  setdefault          [name]        Save current list of modules to name if
+                                    given, otherwise save as the default
+                                    list for you the user.
+                                    ===> Use "save" instead. <====
+
+Miscellaneous sub-commands:
+
+
+  is-loaded           modulefile    return a true status if module is loaded
+  is-avail            modulefile    return a true status if module can be
+                                    loaded
+  show                modulefile    show the commands in the module file.
+  use [-a]            path          Prepend or Append path to MODULEPATH.
+  unuse               path          remove path from MODULEPATH.
+  tablelist                         output list of active modules as a lua
+                                    table.
+
+Important Environment Variables:
+
+
+  LMOD_COLORIZE                     If defined to be "YES" then Lmod prints
+                                    properties and warning in color.
+
+
+Lmod Web Sites
+
+  Documentation:    https://lmod.readthedocs.org
+  GitHub:           https://github.com/TACC/Lmod
+  SourceForge:      https://lmod.sf.net
+  TACC Homepage:    https://www.tacc.utexas.edu/research-development/tacc-projects/lmod
+
+  To report a bug please read https://lmod.readthedocs.io/en/latest/075_bug_reporting.html
+
+created virtual environment CPython3.12.4.final.0-64 in 15459ms
+  creator CPython3Posix(dest=/localscratch/tristanb.58772294.0/env, clear=False, no_vcs_ignore=False, global=False)
+  seeder FromAppData(download=False, pip=bundle, via=copy, app_data_dir=/home/tristanb/.local/share/virtualenv)
+    added seed packages: pip==25.0.1
+  activators BashActivator,CShellActivator,FishActivator,NushellActivator,PowerShellActivator,PythonActivator
+Looking in links: /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/gentoo2023/x86-64-v3, /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/gentoo2023/generic, /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic
+Requirement already satisfied: pip in /localscratch/tristanb.58772294.0/env/lib/python3.12/site-packages (25.0.1)
+Looking in links: /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/gentoo2023/x86-64-v3, /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/gentoo2023/generic, /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/astropy-7.0.0+computecanada-cp312-cp312-linux_x86_64.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/pureCNNRequirements.txt (line 1))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/filelock-3.17.0+computecanada-py3-none-any.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/pureCNNRequirements.txt (line 2))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/fsspec-2025.2.0+computecanada-py3-none-any.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/pureCNNRequirements.txt (line 3))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/jinja2-3.1.5+computecanada-py3-none-any.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/pureCNNRequirements.txt (line 4))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/joblib-1.4.2+computecanada-py3-none-any.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/pureCNNRequirements.txt (line 5))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/MarkupSafe-2.1.5+computecanada-cp312-cp312-linux_x86_64.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/pureCNNRequirements.txt (line 6))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/mpmath-1.3.0+computecanada-py3-none-any.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/pureCNNRequirements.txt (line 7))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/networkx-3.4.2+computecanada-py3-none-any.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/pureCNNRequirements.txt (line 8))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/gentoo2023/generic/numpy-2.2.2+computecanada-cp312-cp312-linux_x86_64.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/pureCNNRequirements.txt (line 9))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/packaging-24.2+computecanada-py3-none-any.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/pureCNNRequirements.txt (line 10))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/gentoo2023/x86-64-v3/pandas-2.2.3+computecanada-cp312-cp312-linux_x86_64.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/pureCNNRequirements.txt (line 11))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/pyerfa-2.0.1.5+computecanada-cp39-abi3-linux_x86_64.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/pureCNNRequirements.txt (line 12))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/python_dateutil-2.9.0.post0+computecanada-py2.py3-none-any.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/pureCNNRequirements.txt (line 13))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/pytz-2025.1+computecanada-py2.py3-none-any.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/pureCNNRequirements.txt (line 14))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/gentoo2023/x86-64-v3/PyYAML-6.0.2+computecanada-cp312-cp312-linux_x86_64.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/pureCNNRequirements.txt (line 15))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/gentoo2023/generic/scikit_learn-1.6.1+computecanada-cp312-cp312-linux_x86_64.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/pureCNNRequirements.txt (line 16))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/gentoo2023/generic/scipy-1.15.1+computecanada-cp312-cp312-linux_x86_64.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/pureCNNRequirements.txt (line 17))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/six-1.17.0+computecanada-py2.py3-none-any.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/pureCNNRequirements.txt (line 18))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/sklearn-0.0+computecanada-py2.py3-none-any.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/pureCNNRequirements.txt (line 19))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/sympy-1.13.1+computecanada-py3-none-any.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/pureCNNRequirements.txt (line 20))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/threadpoolctl-3.5.0+computecanada-py3-none-any.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/pureCNNRequirements.txt (line 21))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/gentoo2023/x86-64-v3/torch-2.6.0+computecanada-cp312-cp312-linux_x86_64.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/pureCNNRequirements.txt (line 22))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/typing_extensions-4.12.2+computecanada-py3-none-any.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/pureCNNRequirements.txt (line 23))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/tzdata-2025.1+computecanada-py2.py3-none-any.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/pureCNNRequirements.txt (line 24))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/astropy_iers_data-0.2025.3.17.0.34.53+computecanada-py3-none-any.whl (from astropy==7.0.0+computecanada->-r /home/tristanb/projects/def-pjmann/tristanb/pureCNNRequirements.txt (line 1))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/setuptools-78.1.0+computecanada-py3-none-any.whl (from torch==2.6.0+computecanada->-r /home/tristanb/projects/def-pjmann/tristanb/pureCNNRequirements.txt (line 22))
+Installing collected packages: pytz, mpmath, tzdata, typing_extensions, threadpoolctl, sympy, six, setuptools, PyYAML, packaging, numpy, networkx, MarkupSafe, joblib, fsspec, filelock, astropy-iers-data, scipy, python_dateutil, pyerfa, jinja2, torch, scikit_learn, pandas, astropy, sklearn
+Successfully installed MarkupSafe-2.1.5+computecanada PyYAML-6.0.2+computecanada astropy-7.0.0+computecanada astropy-iers-data-0.2025.3.17.0.34.53+computecanada filelock-3.17.0+computecanada fsspec-2025.2.0+computecanada jinja2-3.1.5+computecanada joblib-1.4.2+computecanada mpmath-1.3.0+computecanada networkx-3.4.2+computecanada numpy-2.2.2+computecanada packaging-24.2+computecanada pandas-2.2.3+computecanada pyerfa-2.0.1.5+computecanada python_dateutil-2.9.0.post0+computecanada pytz-2025.1+computecanada scikit_learn-1.6.1+computecanada scipy-1.15.1+computecanada setuptools-78.1.0+computecanada six-1.17.0+computecanada sklearn-0.0+computecanada sympy-1.13.1+computecanada threadpoolctl-3.5.0+computecanada torch-2.6.0+computecanada typing_extensions-4.12.2+computecanada tzdata-2025.1+computecanada
+cuda
+Loaded all training data, it took: 457.3089849948883
+Epoch 1, Loss: 0.019913442166821088, KL Divergence: 0.3245156191528579, Top-K Accuracy: 0.4494675925925926, Cross Entropy: 1.3847336769104004
+Validation Loss: 0.0185982409886729, KL Divergence: 0.29447647532023424, Top-K Accuracy: 0.4907453109575518, Cross Entropy: 1.3528082370758057
+Epoch 2, Loss: 0.01861137388067113, KL Divergence: 0.2940088532846651, Top-K Accuracy: 0.47979166666666667, Cross Entropy: 1.354224443435669
+Validation Loss: 0.01791845594770905, KL Divergence: 0.28424343725653534, Top-K Accuracy: 0.5143139190523198, Cross Entropy: 1.3425995111465454
+Epoch 3, Loss: 0.01771488538034904, KL Divergence: 0.2803720968998509, Top-K Accuracy: 0.517608024691358, Cross Entropy: 1.3405890464782715
+Validation Loss: 0.017032222016939758, KL Divergence: 0.27034936314274033, Top-K Accuracy: 0.552319842053307, Cross Entropy: 1.3287162780761719
+Epoch 4, Loss: 0.017142712733949777, KL Divergence: 0.27147253725999665, Top-K Accuracy: 0.5384182098765432, Cross Entropy: 1.3316916227340698
+Validation Loss: 0.016641374791421637, KL Divergence: 0.2650958409078735, Top-K Accuracy: 0.5669730997038499, Cross Entropy: 1.323405146598816
+Epoch 5, Loss: 0.016773181681486744, KL Divergence: 0.26644961220062807, Top-K Accuracy: 0.5523148148148148, Cross Entropy: 1.3266677856445312
+Validation Loss: 0.016441129496907642, KL Divergence: 0.26192199620478007, Top-K Accuracy: 0.5658008390918066, Cross Entropy: 1.3202570676803589
+Epoch 6, Loss: 0.01647798177625202, KL Divergence: 0.262436008574786, Top-K Accuracy: 0.5697145061728395, Cross Entropy: 1.3226557970046997
+Validation Loss: 0.016043758742890053, KL Divergence: 0.2583404425366139, Top-K Accuracy: 0.6000431885488647, Cross Entropy: 1.3166459798812866
+Epoch 7, Loss: 0.01593650428727729, KL Divergence: 0.25516608829851506, Top-K Accuracy: 0.5931018518518518, Cross Entropy: 1.3153868913650513
+Validation Loss: 0.015762232581423806, KL Divergence: 0.2517946456344789, Top-K Accuracy: 0.6052258144126358, Cross Entropy: 1.310068964958191
+Epoch 8, Loss: 0.01564843701198697, KL Divergence: 0.25128819586686146, Top-K Accuracy: 0.6019984567901234, Cross Entropy: 1.311505675315857
+Validation Loss: 0.015091706125703727, KL Divergence: 0.24368803606158065, Top-K Accuracy: 0.6270977295162883, Cross Entropy: 1.3020124435424805
+Epoch 9, Loss: 0.015518161241815966, KL Divergence: 0.24991449857015668, Top-K Accuracy: 0.6070601851851852, Cross Entropy: 1.310135006904602
+Validation Loss: 0.015106789259789815, KL Divergence: 0.24407948956614303, Top-K Accuracy: 0.6296890424481737, Cross Entropy: 1.3023964166641235
+Epoch 10, Loss: 0.015387420567258456, KL Divergence: 0.2479782466277664, Top-K Accuracy: 0.6122530864197531, Cross Entropy: 1.3081984519958496
+Validation Loss: 0.01493374666526384, KL Divergence: 0.24172488281545612, Top-K Accuracy: 0.6411031589338598, Cross Entropy: 1.300081729888916
+Epoch 11, Loss: 0.015297507743845567, KL Divergence: 0.2466350080569585, Top-K Accuracy: 0.6155555555555555, Cross Entropy: 1.306854009628296
+Validation Loss: 0.015502990358155165, KL Divergence: 0.24879154688720054, Top-K Accuracy: 0.6120434353405726, Cross Entropy: 1.3070874214172363
+Epoch 12, Loss: 0.015218555543709685, KL Divergence: 0.24555986416560632, Top-K Accuracy: 0.6177314814814815, Cross Entropy: 1.305777668952942
+Validation Loss: 0.01480362430924636, KL Divergence: 0.24026863493194467, Top-K Accuracy: 0.6371853405725567, Cross Entropy: 1.2986266613006592
+Epoch 13, Loss: 0.015075286284755962, KL Divergence: 0.2435456132631243, Top-K Accuracy: 0.6219984567901234, Cross Entropy: 1.303749918937683
+Validation Loss: 0.01471941432293214, KL Divergence: 0.2380938581011726, Top-K Accuracy: 0.6423679664363278, Cross Entropy: 1.296431541442871
+Epoch 14, Loss: 0.015048687042622471, KL Divergence: 0.24341619538304246, Top-K Accuracy: 0.6253395061728395, Cross Entropy: 1.3036326169967651
+Validation Loss: 0.014649598851435894, KL Divergence: 0.23663759472074772, Top-K Accuracy: 0.641966929911155, Cross Entropy: 1.294952392578125
+Epoch 15, Loss: 0.0149694985350203, KL Divergence: 0.24232380497418804, Top-K Accuracy: 0.6259953703703703, Cross Entropy: 1.3025437593460083
+Validation Loss: 0.014936233361813388, KL Divergence: 0.24191821261372523, Top-K Accuracy: 0.6391596742349457, Cross Entropy: 1.3002394437789917
+Traceback (most recent call last):
+  File "/project/6000478/tristanb/bestFineTunedBaseAbundance.py", line 593, in <module>
+    data=data.to(device)
+         ^^^^^^^
+AttributeError: 'tuple' object has no attribute 'to'

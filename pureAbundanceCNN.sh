@@ -3,7 +3,7 @@
 #SBATCH --job-name=pureCNN
 #SBATCH --output=pureCNN-%J.out
 #SBATCH --time=4-00:00:00
-#SBATCH --nstasks=1
+#SBATCH --ntasks=1
 #SBATCH --mem=40G
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=6

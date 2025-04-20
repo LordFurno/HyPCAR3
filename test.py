@@ -357,66 +357,109 @@ class MultiHeadAttention(nn.Module):
         return out, attention_weights
 
 
+
 class abundanceModel(nn.Module):#CHange to output uncertainty as well
     def __init__(self):
         super().__init__()
 
         self.fcDetect=nn.Linear(7, 64)
-        self.lstm=nn.LSTM(input_size=2,hidden_size=32,num_layers=2,batch_first=True,bidirectional=True)
 
 
-        self.attention=MultiHeadAttention(input_dim=64, num_heads=8)
-        
+        self.conv1=nn.Conv1d(in_channels=2, out_channels=256, kernel_size=5, stride=2)
+        self.bn1=nn.BatchNorm1d(256)
+        self.pool1=nn.MaxPool1d(2)
 
-        self.global_pool=nn.AdaptiveAvgPool1d(1)
-        
+        self.conv2=nn.Conv1d(in_channels=256,out_channels=512,kernel_size=7,stride=1)
+        self.bn2=nn.BatchNorm1d(512)
+        self.pool2=nn.MaxPool1d(2)
 
-        self.fc_combined = nn.Linear(128, 128)
-        
-        self.dropout=nn.Dropout(0.5)
-        self.fc2=nn.Linear(128, 64)
-        self.fc3=nn.Linear(64, 32)
-        
-        #Final output branch for abundances 
-        self.fc4=nn.Linear(32, 7)
-        
-        #Uncertainty branch
-        self.fc_uncertainty=nn.Linear(32, 7)
+        self.conv3=nn.Conv1d(in_channels=512,out_channels=256,kernel_size=5,stride=2)
+        self.bn3=nn.BatchNorm1d(256)
+        self.pool3=nn.MaxPool1d(2)
 
-        
+        self.conv4=nn.Conv1d(in_channels=256,out_channels=64,kernel_size=2,stride=2)
+        self.bn4=nn.BatchNorm1d(64)
+        self.pool4=nn.MaxPool1d(2)
+
+        self.dropout1=nn.Dropout(0.329397809173006)
+
+        self.global_pool = nn.AdaptiveAvgPool1d(1)
+
+        self.attention=MultiHeadAttention(input_dim=64, num_heads=16)
+
+
+        self.fc_combined=nn.Linear(128, 128)#Combines both input branches (detection + data)
+
+
+        self.flatten=nn.Flatten()
+
+
+        self.dropout2=nn.Dropout(0.502219550897328)
+        self.fc2=nn.Linear(128,64)
+
+        self.fc3=nn.Linear(64,32)
+        self.fc4=nn.Linear(32,7)#7 molecule present
+
+        #Another branch for uncertaintiy values for each molecule
+        self.fc_uncertainty=nn.Linear(32,7)
+
     def forward(self,x,detectionOutput):
+
         detectionOutput=F.relu(self.fcDetect(detectionOutput))
 
-        lstmOut,hiddenState=self.lstm(x)
 
-        attentionOutput,attention_weights=self.attention(lstmOut)#x remains [batch_size, seq_length, 32]
+        #Permute dimensions to [batch_size, channels, sequence_length]
+        x=x.permute(0, 2, 1)
+        x=F.relu(self.bn1(self.conv1(x)))
+        x=self.pool1(x)
 
-        attentionOutput=attentionOutput.permute(0,2,1)
-        x_pool=self.global_pool(attentionOutput) 
-        x_pool=x_pool.squeeze(-1)
+        x=F.relu(self.bn2(self.conv2(x)))
+        x=self.pool2(x)
+
+        x=F.relu(self.bn3(self.conv3(x)))
+        x=self.pool3(x)
+
+        x=F.relu(self.bn4(self.conv4(x)))
+        x=self.pool4(x)
+
+
+        x=self.dropout1(x)
 
 
 
-        #Combine with detection branch
 
-        combined=torch.cat((x_pool,detectionOutput),dim=1)#[batch_size, 96]
+        x=x.permute(0, 2, 1)
+        x,attention_weights=self.attention(x)
+        x=x.permute(0,2,1)
+        x=self.global_pool(x)
+
+        x=x.squeeze(-1)
+
+
+        combined=torch.cat((x,detectionOutput), dim=1)
         combined=F.relu(self.fc_combined(combined))
-        combined=self.dropout(combined)
         combined=F.relu(self.fc2(combined))
         combined=F.relu(self.fc3(combined))
 
-        
 
-        #Abundance branch: use softmax so that the 7 outputs sum to 1.
+        #Abundance branch
         logits=self.fc4(combined)
+        #Apply softmax to make the output sum to 1 for abundances
         abundances=F.softmax(logits, dim=1)
 
-        #Uncertainty branch: use softplus to ensure positive uncertainty values.
-        uncertaintyRaw=self.fc_uncertainty(combined)
-        uncertainties=F.softplus(uncertaintyRaw)
 
-        #Return outputs as well as attention weights for inspection.
-        return abundances, uncertainties, attention_weights
+        uncertaintyRaw=self.fc_uncertainty(combined)
+        uncertainties=F.softplus(uncertaintyRaw)#Soft plus, since we don't want to bound to 1
+
+        #In www.conf, found in etc php-fpm.d
+        #listen = /tmp/run/php-fpm
+        #And commented out listen.acl_gorups=apache,nginx
+        #listen.moded=0666
+
+        #Changed in etc/php-fpm.conf
+        #Changed pid to equal /tmp/php-fpm.pid
+        return abundances,uncertainties,attention_weights
+
 
 
     
@@ -466,7 +509,7 @@ if __name__=="__main__":
     device=torch.device("cpu")
 
     model=abundanceModel()
-    model.load_state_dict(torch.load(r"C:\Users\Tristan\Downloads\HyPCAR3\lstmBaseAbundance.pt",weights_only=True))
+    model.load_state_dict(torch.load(r"C:\Users\Tristan\Downloads\HyPCAR3\finalBaseAbundance.pt",weights_only=True))
     model=model.to(device)
 
 

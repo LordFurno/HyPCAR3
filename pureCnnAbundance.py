@@ -356,7 +356,8 @@ class abundanceModel(nn.Module):#CHange to output uncertainty as well
 
         #In www.conf, found in etc php-fpm.d
         #listen = /tmp/run/php-fpm
-        #And commented out listen.acl_gorups=apache,nginx
+        #And commented out 
+        #listen.acl_gorups=apache,nginx
         #listen.moded=0666
 
         #Changed in etc/php-fpm.conf

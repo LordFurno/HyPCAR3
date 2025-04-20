@@ -30,30 +30,21 @@ async def execute_command_async(file_path):
         return file_path, ""
 
 
+
+
+
+#3399153
 async def run_commands_async(file_paths):
     tasks=[execute_command_async(file_path) for file_path in file_paths]
     results=await asyncio.gather(*tasks)  
     return results
 
 def get_data_async():
-    # C:\Users\Tristan\Downloads\HyPCAR\workingDirectory\working-0.txt
-    file_paths=[r"C:\Users\Tristan\Downloads\HyPCAR\workingDirectory\working-"+f"{i}.txt" for i in range(32)]
+
+    file_paths=[r"C:\Users\Tristan\Downloads\HyPCAR3\configTemplate.txt" for i in range(32)]
     
     #Run the asynchronous tasks and gather the results
     results=asyncio.run(run_commands_async(file_paths))
-
-    #Extract data
-    # data=[]
-    # for result in results:
-    #     if result[1]:  
-    #         try:
-    #             data_array=np.loadtxt(StringIO(result[1]), comments='#')
-    #             # Extract columns 0 and 1 as a list of tuples
-    #             data_array=list(zip(data_array[:, 0], data_array[:, 1]))[:-1]
-    #             # Convert to PyTorch tensor
-    #             data.append(data_array)
-    #         except Exception as e:
-    #             print(f"Error processing data for {result[0]}: {e}")
 
     data = []
     for result in results:
@@ -80,7 +71,7 @@ def get_data_async():
         data=torch.stack(data)
         return data
     else:
-        return torch.array([])  # Return an empty tensor if no data is processed
+        return torch.tensor([])  # Return an empty tensor if no data is processed
 
 if __name__ == "__main__":
     import time

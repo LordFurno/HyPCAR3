@@ -102,9 +102,11 @@ class detectionModel(nn.Module):
 
         self.dropout1=nn.Dropout(0.4)
 
-        self.flatten=nn.Flatten()
+        self.global_pool = nn.AdaptiveAvgPool1d(1)
 
-        self.fc1=nn.Linear(64,128)
+        
+
+        self.fc1=nn.Linear(32,128)
         self.dropout2=nn.Dropout(0.75)
         self.fc2=nn.Linear(128,64)
         self.fc3=nn.Linear(64,7)#7 molecule present
@@ -126,7 +128,8 @@ class detectionModel(nn.Module):
 
         x=self.dropout1(x)
 
-        x=torch.flatten(x, 1)
+        x=self.global_pool(x)
+        x=torch.flatten(x,1)
 
         x=F.relu(self.fc1(x))
         x=self.dropout2(x)
@@ -137,33 +140,35 @@ class detectionModel(nn.Module):
         return x
     
 
+
 class abundanceModel(nn.Module):#CHange to output uncertainty as well
     def __init__(self):
         super().__init__()
 
-        self.fcDetect=nn.Linear(7, 64)#7 molecules to be detected
+        self.fcDetect=nn.Linear(7, 64)
 
-        
-        self.conv1=nn.Conv1d(in_channels=2, out_channels=128, kernel_size=5, stride=2)
-        self.bn1=nn.BatchNorm1d(128)
+
+        self.conv1=nn.Conv1d(in_channels=2, out_channels=256, kernel_size=5, stride=2)
+        self.bn1=nn.BatchNorm1d(256)
         self.pool1=nn.MaxPool1d(2)
 
-        self.conv2=nn.Conv1d(in_channels=128,out_channels=128,kernel_size=5,stride=2)
-        self.bn2=nn.BatchNorm1d(128)
+        self.conv2=nn.Conv1d(in_channels=256,out_channels=512,kernel_size=7,stride=1)
+        self.bn2=nn.BatchNorm1d(512)
         self.pool2=nn.MaxPool1d(2)
 
-        self.conv3=nn.Conv1d(in_channels=128,out_channels=64,kernel_size=3,stride=2)
-        self.bn3=nn.BatchNorm1d(64)
+        self.conv3=nn.Conv1d(in_channels=512,out_channels=256,kernel_size=5,stride=2)
+        self.bn3=nn.BatchNorm1d(256)
         self.pool3=nn.MaxPool1d(2)
 
-        self.conv4=nn.Conv1d(in_channels=64,out_channels=32,kernel_size=2,stride=2)
-        self.bn4=nn.BatchNorm1d(32)
+        self.conv4=nn.Conv1d(in_channels=256,out_channels=64,kernel_size=2,stride=2)
+        self.bn4=nn.BatchNorm1d(64)
         self.pool4=nn.MaxPool1d(2)
 
-        self.dropout1=nn.Dropout(0.4)
+        self.dropout1=nn.Dropout(0.329397809173006)
 
+        self.global_pool = nn.AdaptiveAvgPool1d(1)
 
-        self.attention=MultiHeadAttention(input_dim=32, num_heads=8)
+        self.attention=MultiHeadAttention(input_dim=64, num_heads=16)
 
 
         self.fc_combined=nn.Linear(128, 128)#Combines both input branches (detection + data)
@@ -172,7 +177,7 @@ class abundanceModel(nn.Module):#CHange to output uncertainty as well
         self.flatten=nn.Flatten()
 
 
-        self.dropout2=nn.Dropout(0.75)
+        self.dropout2=nn.Dropout(0.502219550897328)
         self.fc2=nn.Linear(128,64)
 
         self.fc3=nn.Linear(64,32)
@@ -203,10 +208,16 @@ class abundanceModel(nn.Module):#CHange to output uncertainty as well
 
         x=self.dropout1(x)
 
-        x, attention_weights=self.attention(x.permute(0, 2, 1))  #Switch back to (batch, seq_len, feature_dim)
 
 
-        x=torch.flatten(x, 1)
+
+        x=x.permute(0, 2, 1)
+        x,attention_weights=self.attention(x)
+        x=x.permute(0,2,1)
+        x=self.global_pool(x)
+
+        x=x.squeeze(-1)
+
 
         combined=torch.cat((x,detectionOutput), dim=1)
         combined=F.relu(self.fc_combined(combined))
@@ -231,6 +242,8 @@ class abundanceModel(nn.Module):#CHange to output uncertainty as well
         #Changed in etc/php-fpm.conf
         #Changed pid to equal /tmp/php-fpm.pid
         return abundances,uncertainties,attention_weights
+
+
 
 def classifyAtmosphere(predAbun):
     '''
@@ -408,67 +421,67 @@ aModel=abundanceModel()
 model=detectionModel()
 
 #Load the saved model weights
-model.load_state_dict(torch.load(r"C:\Users\Tristan\Downloads\HyPCAR3\detectionModel.pt",weights_only=True))
-aModel.load_state_dict(torch.load(r"C:\Users\Tristan\Downloads\HyPCAR3\pureCNN.pt",weights_only=True))
+model.load_state_dict(torch.load(r"C:\Users\Tristan\Downloads\HyPCAR3\flexibleDetectionModel.pt",weights_only=True))
+aModel.load_state_dict(torch.load(r"C:\Users\Tristan\Downloads\HyPCAR3\finalBaseAbundance.pt",weights_only=True))
 
-filePath=r"C:\Users\Tristan\Downloads\HyPCAR\table_K2-18-b-Madhusudhan-et-al.-2023 (2).csv"#File path for the data
-# filePath=r"C:\Users\Tristan\Downloads\HyPCAR\table_HAT-P-18-b-Fu-et-al.-2022 (1).csv"#File path for the data
-# filePath=r"C:\Users\Tristan\Downloads\HyPCAR3\table_GJ-1132-b-Swain-et-al.-2021.csv"
-data=pd.read_csv(filePath)
+# filePath=r"C:\Users\Tristan\Downloads\HyPCAR\table_K2-18-b-Madhusudhan-et-al.-2023 (2).csv"#File path for the data
+# # filePath=r"C:\Users\Tristan\Downloads\HyPCAR\table_HAT-P-18-b-Fu-et-al.-2022 (1).csv"#File path for the data
+# # filePath=r"C:\Users\Tristan\Downloads\HyPCAR3\table_GJ-1132-b-Swain-et-al.-2021.csv"
+# data=pd.read_csv(filePath)
 
-wavelength=list(data["CENTRALWAVELNG"])
-transmittance=list(data["PL_TRANDEP"])
+# wavelength=list(data["CENTRALWAVELNG"])
+# transmittance=list(data["PL_TRANDEP"])
 
-transmittance=[1-(t/100) for t in transmittance]#Converts depth to transmittance.
-print(wavelength)
-print(transmittance)
+# transmittance=[1-(t/100) for t in transmittance]#Converts depth to transmittance.
+# print(wavelength)
+# print(transmittance)
 # for i in range(784-len(transmittance)):
 #     wavelength.insert(0,0.0)
 #     transmittance.insert(0,0.0)
-plt.figure(0)#Plot orginial data
-input_data=torch.tensor(np.stack([wavelength, transmittance], axis=1), dtype=torch.float32)
-
-#add a batch dimension (1, since it's one example)
-input_data=input_data.unsqueeze(0)
-plt.plot(wavelength,transmittance,color="blue")
-print(runModels.runFlexibleAbundance(input_data,False))
-print("DONE")
-#Adjust the data to have length 785
-interp_func=interp1d(np.linspace(0, 1, len(wavelength)), wavelength)
-interp_trans=interp1d(np.linspace(0, 1, len(transmittance)), transmittance)
-
-#Generate 785 points evenly spaced in the range [0, 1]
-x_new=np.linspace(0, 1, 785)
-
-# Apply the interpolation function
-wavelength=interp_func(x_new)
-transmittance=interp_trans(x_new)
-plt.plot(wavelength,transmittance,color="orange")
-print(len(wavelength))
-input_data=torch.tensor(np.stack([wavelength, transmittance], axis=1), dtype=torch.float32)
-input_data=input_data.unsqueeze(0)
-
-print(runModels.runFlexibleAbundance(input_data,False))
-plt.show()
-
-# #Apply filter
-# transmittance_downsampled = savgol_filter(transmittance_downsampled, window_length=50, polyorder=5)
-# data=pd.read_csv(r"C:\Users\Tristan\Downloads\HyPCAR2\earthTransmittance.csv")
-
-# wavelength,transmittance=data.iloc[:,0],data.iloc[:,1]
-
-
-# plt.figure(1)
-# plt.title("Earth Transmittance")
-# plt.xlabel("Wavelength (um)")
-# plt.ylabel("Transmittance")
-
-# plt.plot(wavelength,transmittance)
-# plt.savefig(r"C:\Users\Tristan\Downloads\HyPCAR3\visuals\earthTransmittance.png")
+# plt.figure(0)#Plot orginial data
 # input_data=torch.tensor(np.stack([wavelength, transmittance], axis=1), dtype=torch.float32)
 
 # #add a batch dimension (1, since it's one example)
 # input_data=input_data.unsqueeze(0)
+# plt.plot(wavelength,transmittance,color="blue")
+# print(runModels.runFlexibleAbundance(input_data,False))
+# print("DONE")
+# #Adjust the data to have length 785
+# interp_func=interp1d(np.linspace(0, 1, len(wavelength)), wavelength)
+# interp_trans=interp1d(np.linspace(0, 1, len(transmittance)), transmittance)
+
+# #Generate 785 points evenly spaced in the range [0, 1]
+# x_new=np.linspace(0, 1, 785)
+
+# # Apply the interpolation function
+# wavelength=interp_func(x_new)
+# transmittance=interp_trans(x_new)
+# plt.plot(wavelength,transmittance,color="orange")
+
+# input_data=torch.tensor(np.stack([wavelength, transmittance], axis=1), dtype=torch.float32)
+# input_data=input_data.unsqueeze(0)
+
+# print(runModels.runFlexibleAbundance(input_data,False))
+# plt.show()
+
+# #Apply filter
+# transmittance_downsampled = savgol_filter(transmittance_downsampled, window_length=50, polyorder=5)
+data=pd.read_csv(r"C:\Users\Tristan\Downloads\HyPCAR2\earthTransmittance.csv")
+
+wavelength,transmittance=data.iloc[:,0],data.iloc[:,1]
+
+
+plt.figure(1)
+plt.title("Earth Transmittance")
+plt.xlabel("Wavelength (um)")
+plt.ylabel("Transmittance")
+
+plt.plot(wavelength,transmittance)
+plt.savefig(r"C:\Users\Tristan\Downloads\HyPCAR3\visuals\earthTransmittance.png")
+input_data=torch.tensor(np.stack([wavelength, transmittance], axis=1), dtype=torch.float32)
+
+#add a batch dimension (1, since it's one example)
+input_data=input_data.unsqueeze(0)
 
 with torch.no_grad():
     model.eval()
@@ -484,7 +497,7 @@ print(f"Model Output: {output}")
 print(f"Predicted Class: {predicted}")
 
 
-visualize_attention(aOutput[2],wavelength,transmittance)
+# visualize_attention(aOutput[2],wavelength,transmittance)
 
 print(aOutput[0].tolist())
 print(aOutput[1].tolist())
@@ -498,17 +511,18 @@ REAL
 O2: 20.9%
 N2: 78.1%
 H2: NOPE
-CO2: 379.5 ppm
+CO2: 379.5 ppm - 0.03795%
 H2O: 0.35%
-CH4: 1.7 ppm
+CH4: 1.7 ppm - 0.00017%
 NH3: NOPE
 
-PRED:
-O2: YES - 
-N2: YES -13.7%
-H2: NOPE  
-CO2: YES -6.7%
-H2O: YES -44.7%
-CH4: YES -33.4%
-NH3: NOPE
+FINAL BASE ABUNDANCE
+O2: 65.64%
+N2: 33.36%
+H2: NOPE ( 2.8779223795738496e-11)
+CO2: 0.14%
+H2O: 0.86%
+CH4: Very little (5.618113974037442e-09)
+NH3: NOPE (3.2953798023704906e-10)
 '''
+

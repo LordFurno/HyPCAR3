@@ -10,12 +10,70 @@ import torch.optim as optim
 import numpy as np
 import time
 
-import time
-
 import ray
 from ray import tune
-from ray.tune.search import ConcurrencyLimiter
-from ray.tune.search.ax import AxSearch
+
+
+from ray.tune.search.optuna import OptunaSearch
+
+class detectionModel(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.conv1=nn.Conv1d(in_channels=2, out_channels=128, kernel_size=5, stride=2)
+        self.bn1=nn.BatchNorm1d(128)
+        self.pool1=nn.MaxPool1d(2)
+
+        self.conv2=nn.Conv1d(in_channels=128,out_channels=128,kernel_size=5,stride=2)
+        self.bn2=nn.BatchNorm1d(128)
+        self.pool2=nn.MaxPool1d(2)
+
+        self.conv3=nn.Conv1d(in_channels=128,out_channels=64,kernel_size=3,stride=2)
+        self.bn3=nn.BatchNorm1d(64)
+        self.pool3=nn.MaxPool1d(2)
+
+        self.conv4=nn.Conv1d(in_channels=64,out_channels=32,kernel_size=2,stride=2)
+        self.bn4=nn.BatchNorm1d(32)
+        self.pool4=nn.MaxPool1d(2)
+
+        self.dropout1=nn.Dropout(0.4)
+
+        self.global_pool = nn.AdaptiveAvgPool1d(1)
+
+        
+
+        self.fc1=nn.Linear(32,128)
+        self.dropout2=nn.Dropout(0.75)
+        self.fc2=nn.Linear(128,64)
+        self.fc3=nn.Linear(64,7)#7 molecule present
+
+    def forward(self,x):
+        # Permute dimensions to [batch_size, channels, sequence_length]
+        x=x.permute(0, 2, 1)
+        x=F.relu(self.bn1(self.conv1(x)))
+        x=self.pool1(x)
+
+        x=F.relu(self.bn2(self.conv2(x)))
+        x=self.pool2(x)
+
+        x=F.relu(self.bn3(self.conv3(x)))
+        x=self.pool3(x)
+
+        x=F.relu(self.bn4(self.conv4(x)))
+        x=self.pool4(x)
+
+        x=self.dropout1(x)
+
+        x=self.global_pool(x)
+        x=torch.flatten(x,1)
+
+        x=F.relu(self.fc1(x))
+        x=self.dropout2(x)
+        
+        x=F.relu(self.fc2(x))
+        x=torch.sigmoid(self.fc3(x))
+        
+        return x
+    
 
 class MultiHeadAttention(nn.Module):
     def __init__(self, input_dim, num_heads):
@@ -59,7 +117,6 @@ class MultiHeadAttention(nn.Module):
         out = self.fc_out(weighted_sum)
 
         return out, attention_weights
-
 
 class abundanceModel(nn.Module):#Change to output uncertainty as well
     def __init__(self,config):
@@ -112,10 +169,10 @@ class abundanceModel(nn.Module):#Change to output uncertainty as well
 
         self.global_pool = nn.AdaptiveAvgPool1d(1)
 
-        self.attention=MultiHeadAttention(input_dim=32, num_heads=config["Heads"])
+        self.attention=MultiHeadAttention(input_dim=config["Conv4"], num_heads=config["Heads"])
 
 
-        self.fc_combined=nn.Linear(96, 128)#Combines both input branches (detection + data)
+        self.fc_combined=nn.Linear(config["Conv4"]+64, 128)#Combines both input branches (detection + data)
         self.flatten=nn.Flatten()
         self.dropout2=nn.Dropout(config["Drop2"])
         self.fc2=nn.Linear(128,64)
@@ -497,10 +554,10 @@ def evaluate(model,valLoader):
             kl.append(runnningKL/len(valLoader))
             topk.append(runningTopK/len(valLoader))
             ce.append(runningCE/len(valLoader))
-    mse=sum(mse)/len(mse)
-    kl=sum(kl)/len(kl)
-    topk=sum(topk)/len(topk)
-    ce=sum(ce)/len(ce)
+    mse=float(sum(mse)/len(mse))
+    kl=float(sum(kl)/len(kl))
+    topk=float(sum(topk)/len(topk))
+    ce=float(sum(ce)/len(ce))
 
     return mse,kl,topk,ce
 
@@ -543,7 +600,7 @@ def objective(config,trainLoader,valLoader):#Train & evaluate the models
             optimizer.step()
     mseVal,klVal,topkVal,ceVal=evaluate(model,valLoader)
 
-    tune.report(mse=mseVal, kl=klVal, topk=topkVal, ce=ceVal)
+    tune.report({"mse":mseVal, "kl":klVal, "topk":topkVal, "ce":ceVal})
 
 
 def detectMolecules(data):
@@ -561,7 +618,7 @@ def detectMolecules(data):
     '''
     #Load the saved model weights
     
-    detect.load_state_dict(torch.load("/home/tristanb/projects/def-pjmann/tristanb/detectionModel.pt",weights_only=True))
+    detect.load_state_dict(torch.load("/home/tristanb/projects/def-pjmann/tristanb/flexibleDetectionModel.pt",weights_only=True))
     with torch.no_grad():
         outputs=detect(data)
 
@@ -591,7 +648,7 @@ searchSpace={
 
     "Heads": tune.choice([2, 4, 8, 16]),
 
-    "lr": tune.loguniform(np.log(1e-5),np.log(1e-2))
+    "lr": tune.loguniform(1e-5, 1e-2)
 }
 
 
@@ -637,19 +694,20 @@ if __name__=="__main__":
 
     #Connect to the Ray cluster launched in the job submission script
     ray.init(address=f"{os.environ['HEAD_NODE']}:{os.environ['RAY_PORT']}",_node_ip_address=os.environ['HEAD_NODE'])
-
-    searchAlg = AxSearch(
-    metric=["mse", "kl", "ce", "topk"],  
-    mode=["min", "min", "min", "max"])
+    
+    searchAlg = OptunaSearch(
+    metric=["mse", "kl", "topk", "ce"],  
+    mode=["min", "min", "max", "min"])
 
     trainingDataloader,validationDataloader,testingDataloader=loadData()
 
     analysis=tune.run(
         tune.with_parameters(objective, trainLoader=trainingDataloader, valLoader=validationDataloader),
+        config=searchSpace,
         name="ray_tune_multi_objective",
         search_alg=searchAlg,
         num_samples=200,
-        local_dir="/home/tristanb/projects/def-pjmann/tristanb/ray_results",
+        storage_path="/home/tristanb/projects/def-pjmann/tristanb/ray_results",
         resources_per_trial={"cpu": 4, "gpu": 1}
         )
     df=analysis.results_df

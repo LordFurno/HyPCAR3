@@ -424,23 +424,23 @@ model=detectionModel()
 model.load_state_dict(torch.load(r"C:\Users\Tristan\Downloads\HyPCAR3\flexibleDetectionModel.pt",weights_only=True))
 aModel.load_state_dict(torch.load(r"C:\Users\Tristan\Downloads\HyPCAR3\finalBaseAbundance.pt",weights_only=True))
 
-# filePath=r"C:\Users\Tristan\Downloads\HyPCAR\table_K2-18-b-Madhusudhan-et-al.-2023 (2).csv"#File path for the data
+filePath=r"C:\Users\Tristan\Downloads\HyPCAR\table_K2-18-b-Madhusudhan-et-al.-2023 (2).csv"#File path for the data
 # # filePath=r"C:\Users\Tristan\Downloads\HyPCAR\table_HAT-P-18-b-Fu-et-al.-2022 (1).csv"#File path for the data
 # # filePath=r"C:\Users\Tristan\Downloads\HyPCAR3\table_GJ-1132-b-Swain-et-al.-2021.csv"
-# data=pd.read_csv(filePath)
+data=pd.read_csv(filePath)
 
-# wavelength=list(data["CENTRALWAVELNG"])
-# transmittance=list(data["PL_TRANDEP"])
+wavelength=list(data["CENTRALWAVELNG"])
+transmittance=list(data["PL_TRANDEP"])
 
-# transmittance=[1-(t/100) for t in transmittance]#Converts depth to transmittance.
+transmittance=[1-(t/100) for t in transmittance]#Converts depth to transmittance.
 # print(wavelength)
 # print(transmittance)
-# for i in range(784-len(transmittance)):
-#     wavelength.insert(0,0.0)
-#     transmittance.insert(0,0.0)
-# plt.figure(0)#Plot orginial data
-# input_data=torch.tensor(np.stack([wavelength, transmittance], axis=1), dtype=torch.float32)
-
+for i in range(784-len(transmittance)):
+    wavelength.insert(0,0.0)
+    transmittance.insert(0,0.0)
+plt.figure(0)#Plot orginial data
+input_data=torch.tensor(np.stack([wavelength, transmittance], axis=1), dtype=torch.float32)
+# 
 # #add a batch dimension (1, since it's one example)
 # input_data=input_data.unsqueeze(0)
 # plt.plot(wavelength,transmittance,color="blue")
@@ -465,10 +465,11 @@ aModel.load_state_dict(torch.load(r"C:\Users\Tristan\Downloads\HyPCAR3\finalBase
 # plt.show()
 
 # #Apply filter
-# transmittance_downsampled = savgol_filter(transmittance_downsampled, window_length=50, polyorder=5)
-data=pd.read_csv(r"C:\Users\Tristan\Downloads\HyPCAR2\earthTransmittance.csv")
+transmittance = savgol_filter(transmittance, window_length=50, polyorder=5)
+wavelength = savgol_filter(wavelength, window_length=50, polyorder=5)
+# data=pd.read_csv(r"C:\Users\Tristan\Downloads\HyPCAR2\earthTransmittance.csv")
 
-wavelength,transmittance=data.iloc[:,0],data.iloc[:,1]
+# wavelength,transmittance=data.iloc[:,0],data.iloc[:,1]
 
 
 plt.figure(1)
@@ -477,10 +478,10 @@ plt.xlabel("Wavelength (um)")
 plt.ylabel("Transmittance")
 
 plt.plot(wavelength,transmittance)
-plt.savefig(r"C:\Users\Tristan\Downloads\HyPCAR3\visuals\earthTransmittance.png")
+# plt.savefig(r"C:\Users\Tristan\Downloads\HyPCAR3\visuals\earthTransmittance.png")
 input_data=torch.tensor(np.stack([wavelength, transmittance], axis=1), dtype=torch.float32)
 
-#add a batch dimension (1, since it's one example)
+# #add a batch dimension (1, since it's one example)
 input_data=input_data.unsqueeze(0)
 
 with torch.no_grad():
@@ -526,3 +527,20 @@ CH4: Very little (5.618113974037442e-09)
 NH3: NOPE (3.2953798023704906e-10)
 '''
 
+
+'''
+K2-18B
+Abundances:
+O2: 2.99%
+N2: 31.71%
+H2: 2.71%
+CO2: 17.27%
+H2O: 21.22%
+CH4: 19.886%
+NH3: 4.22%
+
+
+
+
+
+'''

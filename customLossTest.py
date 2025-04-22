@@ -15,10 +15,9 @@ from tqdm import tqdm
 from scipy.stats import lognorm,norm,spearmanr, pearsonr
 
 import matplotlib.pyplot as plt
-from psgDocker3 import get_data_async
 import os
 
-from retrying import retry
+from physcicsFineTune.getAsync import get_data_async
 #Use module 3.1.6 for mpi4py
 
 
@@ -618,16 +617,6 @@ class customLoss(nn.Module):
         super(customLoss, self).__init__()
         self.dataBased=nn.MSELoss()
 
-    def spearmanLoss(self,detection,pred):
-        batchSize=detection.shape[0]
-        loss=[]
-        for i in range(batchSize):
-            spearman,pVal=spearmanr(detection[i],pred[i])
-
-            loss.append(1.0-spearman)
-        lossAvg=np.mean(loss)
-        return torch.tensor(lossAvg)
-
 
     def forward(self,predAbun,uncertainty,realAbun,detectionOutput,config,inputTransmittance):#Predicted abundances, actual abundances, config file, real data
         '''
@@ -644,7 +633,17 @@ class customLoss(nn.Module):
         detectionTemp,predTemp=detectionOutput.cpu(),predAbun.cpu()
 
         
-        detectionLoss=self.spearmanLoss(detectionTemp,predTemp)
+        hinge_present=F.relu(0.001 - predAbun)
+
+        present_penalty=(detectionOutput*hinge_present).mean()
+
+        #if detection says “absent”
+        #punish pred_abun > 0.2
+        #hinge_absent = max(0, pred_abun − 0.2)
+        hinge_absent = F.relu(predAbun - 0.2)
+        absent_penalty = ((1.0 - detectionOutput) * hinge_absent).mean()
+        # 4) Combine
+        detectionLoss = (80*present_penalty) + absent_penalty #This shou
         # predAbun=predAbun.to(device)
 
         dataLoss=self.dataBased(predAbun,realAbun)#Ranges from 0 to infinity

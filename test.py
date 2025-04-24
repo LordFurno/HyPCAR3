@@ -21,6 +21,7 @@ import pypsg
 import os
 from psgDocker3 import get_data_async
 from retrying import retry
+import time
 #Use module 3.1.6 for mpi4py
 
 
@@ -524,6 +525,8 @@ if __name__=="__main__":
     test_kl_loss=0.0
     test_top_k=0.0
     test_cross_entropy=0.0
+
+    avg=[]
     with torch.no_grad():
 
 
@@ -538,8 +541,10 @@ if __name__=="__main__":
             labels=labels.to(labels)
             detectionOutput=detect(data)
         
-
+            start=time.time()
             predAbun,uncertainties,attentionWeights=model(data,detectionOutput)
+            total=time.time()-start
+            avg.append(total)
             loss=criterion(predAbun,labels)
 
 
@@ -555,8 +560,9 @@ if __name__=="__main__":
         testCrossEntropy=test_cross_entropy/len(testingDataloader)
         print(f"Testing Loss: {test_loss}, KL Divergence: {testKL}, Top-K Accuracy: {testTopK}, Cross Entropy: {testCrossEntropy}"+"\n")
         
-
-
+    print(min(avg))
+    print(max(avg))
+    print(np.mean(avg))
 
 
 

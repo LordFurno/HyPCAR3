@@ -1,0 +1,189 @@
+created virtual environment CPython3.12.4.final.0-64 in 10450ms
+  creator CPython3Posix(dest=/localscratch/tristanb.58407686.0/env, clear=False, no_vcs_ignore=False, global=False)
+  seeder FromAppData(download=False, pip=bundle, via=copy, app_data_dir=/home/tristanb/.local/share/virtualenv)
+    added seed packages: pip==25.0.1
+  activators BashActivator,CShellActivator,FishActivator,NushellActivator,PowerShellActivator,PythonActivator
+Looking in links: /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/gentoo2023/x86-64-v3, /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/gentoo2023/generic, /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic
+Requirement already satisfied: pip in /localscratch/tristanb.58407686.0/env/lib/python3.12/site-packages (25.0.1)
+Looking in links: /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/gentoo2023/x86-64-v3, /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/gentoo2023/generic, /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/astropy-7.0.0+computecanada-cp312-cp312-linux_x86_64.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/detectionModelRequirements.txt (line 1))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/filelock-3.17.0+computecanada-py3-none-any.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/detectionModelRequirements.txt (line 2))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/fsspec-2025.2.0+computecanada-py3-none-any.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/detectionModelRequirements.txt (line 3))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/jinja2-3.1.5+computecanada-py3-none-any.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/detectionModelRequirements.txt (line 4))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/joblib-1.4.2+computecanada-py3-none-any.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/detectionModelRequirements.txt (line 5))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/MarkupSafe-2.1.5+computecanada-cp312-cp312-linux_x86_64.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/detectionModelRequirements.txt (line 6))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/mpmath-1.3.0+computecanada-py3-none-any.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/detectionModelRequirements.txt (line 7))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/networkx-3.4.2+computecanada-py3-none-any.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/detectionModelRequirements.txt (line 8))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/gentoo2023/generic/numpy-2.2.2+computecanada-cp312-cp312-linux_x86_64.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/detectionModelRequirements.txt (line 9))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/packaging-24.2+computecanada-py3-none-any.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/detectionModelRequirements.txt (line 10))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/gentoo2023/x86-64-v3/pandas-2.2.3+computecanada-cp312-cp312-linux_x86_64.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/detectionModelRequirements.txt (line 11))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/pyerfa-2.0.1.5+computecanada-cp39-abi3-linux_x86_64.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/detectionModelRequirements.txt (line 12))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/python_dateutil-2.9.0.post0+computecanada-py2.py3-none-any.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/detectionModelRequirements.txt (line 13))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/pytz-2025.1+computecanada-py2.py3-none-any.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/detectionModelRequirements.txt (line 14))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/gentoo2023/x86-64-v3/PyYAML-6.0.2+computecanada-cp312-cp312-linux_x86_64.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/detectionModelRequirements.txt (line 15))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/gentoo2023/generic/scikit_learn-1.6.1+computecanada-cp312-cp312-linux_x86_64.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/detectionModelRequirements.txt (line 16))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/gentoo2023/generic/scipy-1.15.1+computecanada-cp312-cp312-linux_x86_64.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/detectionModelRequirements.txt (line 17))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/six-1.17.0+computecanada-py2.py3-none-any.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/detectionModelRequirements.txt (line 18))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/sklearn-0.0+computecanada-py2.py3-none-any.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/detectionModelRequirements.txt (line 19))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/sympy-1.13.1+computecanada-py3-none-any.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/detectionModelRequirements.txt (line 20))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/threadpoolctl-3.5.0+computecanada-py3-none-any.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/detectionModelRequirements.txt (line 21))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/gentoo2023/x86-64-v3/torch-2.6.0+computecanada-cp312-cp312-linux_x86_64.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/detectionModelRequirements.txt (line 22))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/typing_extensions-4.12.2+computecanada-py3-none-any.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/detectionModelRequirements.txt (line 23))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/tzdata-2025.1+computecanada-py2.py3-none-any.whl (from -r /home/tristanb/projects/def-pjmann/tristanb/detectionModelRequirements.txt (line 24))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/astropy_iers_data-0.2025.3.17.0.34.53+computecanada-py3-none-any.whl (from astropy==7.0.0+computecanada->-r /home/tristanb/projects/def-pjmann/tristanb/detectionModelRequirements.txt (line 1))
+Processing /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic/setuptools-78.1.0+computecanada-py3-none-any.whl (from torch==2.6.0+computecanada->-r /home/tristanb/projects/def-pjmann/tristanb/detectionModelRequirements.txt (line 22))
+Installing collected packages: pytz, mpmath, tzdata, typing_extensions, threadpoolctl, sympy, six, setuptools, PyYAML, packaging, numpy, networkx, MarkupSafe, joblib, fsspec, filelock, astropy-iers-data, scipy, python_dateutil, pyerfa, jinja2, torch, scikit_learn, pandas, astropy, sklearn
+Successfully installed MarkupSafe-2.1.5+computecanada PyYAML-6.0.2+computecanada astropy-7.0.0+computecanada astropy-iers-data-0.2025.3.17.0.34.53+computecanada filelock-3.17.0+computecanada fsspec-2025.2.0+computecanada jinja2-3.1.5+computecanada joblib-1.4.2+computecanada mpmath-1.3.0+computecanada networkx-3.4.2+computecanada numpy-2.2.2+computecanada packaging-24.2+computecanada pandas-2.2.3+computecanada pyerfa-2.0.1.5+computecanada python_dateutil-2.9.0.post0+computecanada pytz-2025.1+computecanada scikit_learn-1.6.1+computecanada scipy-1.15.1+computecanada setuptools-78.1.0+computecanada six-1.17.0+computecanada sklearn-0.0+computecanada sympy-1.13.1+computecanada threadpoolctl-3.5.0+computecanada torch-2.6.0+computecanada typing_extensions-4.12.2+computecanada tzdata-2025.1+computecanada
+Loaded data
+cuda
+Epoch 1, Training Loss: 0.07539165513005619, Training Accuracy: 95.88103991596638%
+Epoch 1, Validation Loss: 0.05806449971654836, Validation Accuracy: 96.29551820728291%
+Epoch 2, Training Loss: 0.06160822190362595, Training Accuracy: 96.49317226890756%
+Epoch 2, Validation Loss: 0.05670166829272228, Validation Accuracy: 96.94747899159664%
+Epoch 3, Training Loss: 0.059981264954743284, Training Accuracy: 96.7358193277311%
+Epoch 3, Validation Loss: 0.055514544776330395, Validation Accuracy: 97.01435574229691%
+Epoch 4, Training Loss: 0.05864503418278022, Training Accuracy: 96.87123599439776%
+Epoch 4, Validation Loss: 0.055542515427531566, Validation Accuracy: 96.92717086834733%
+Epoch 5, Training Loss: 0.05766607043954233, Training Accuracy: 96.94607843137256%
+Epoch 5, Validation Loss: 0.05457659444753446, Validation Accuracy: 97.03851540616246%
+Epoch 6, Training Loss: 0.05678607040778825, Training Accuracy: 97.07773109243698%
+Epoch 6, Validation Loss: 0.05241573326800968, Validation Accuracy: 97.3970588235294%
+Epoch 7, Training Loss: 0.05517295151076955, Training Accuracy: 97.24614845938375%
+Epoch 7, Validation Loss: 0.053384094040877385, Validation Accuracy: 97.06827731092437%
+Epoch 8, Training Loss: 0.053958454848102785, Training Accuracy: 97.35810574229691%
+Epoch 8, Validation Loss: 0.05009806792525684, Validation Accuracy: 97.48214285714286%
+Epoch 9, Training Loss: 0.05284057869050907, Training Accuracy: 97.44353991596638%
+Epoch 9, Validation Loss: 0.04710736218145957, Validation Accuracy: 97.84243697478992%
+Epoch 10, Training Loss: 0.05169047655126847, Training Accuracy: 97.51225490196079%
+Epoch 10, Validation Loss: 0.04692964293427911, Validation Accuracy: 97.64740896358543%
+Epoch 11, Training Loss: 0.051044846974637396, Training Accuracy: 97.53895308123249%
+Epoch 11, Validation Loss: 0.045926018558150414, Validation Accuracy: 97.78536414565826%
+Epoch 12, Training Loss: 0.050733960192883384, Training Accuracy: 97.54481792717087%
+Epoch 12, Validation Loss: 0.04730256052139927, Validation Accuracy: 97.82703081232494%
+Epoch 13, Training Loss: 0.05021197651821079, Training Accuracy: 97.56276260504201%
+Epoch 13, Validation Loss: 0.04642435824242877, Validation Accuracy: 97.67787114845939%
+Epoch 14, Training Loss: 0.05011312791486453, Training Accuracy: 97.57746848739495%
+Epoch 14, Validation Loss: 0.04534945394423809, Validation Accuracy: 97.87149859943978%
+Epoch 15, Training Loss: 0.049523142948929295, Training Accuracy: 97.59602591036415%
+Epoch 15, Validation Loss: 0.04568445416423036, Validation Accuracy: 97.78886554621849%
+Epoch 1, Training Loss: 0.0751682209821564, Training Accuracy: 95.86799719887955%
+Epoch 1, Validation Loss: 0.05870462395469932, Validation Accuracy: 96.27310924369748%
+Epoch 2, Training Loss: 0.06104268937718634, Training Accuracy: 96.50568977591037%
+Epoch 2, Validation Loss: 0.058401892338240266, Validation Accuracy: 96.99614845938375%
+Epoch 3, Training Loss: 0.05911290864651913, Training Accuracy: 96.80190826330532%
+Epoch 3, Validation Loss: 0.056953742086303, Validation Accuracy: 97.04901960784314%
+Epoch 4, Training Loss: 0.05802307946780952, Training Accuracy: 96.92148109243698%
+Epoch 4, Validation Loss: 0.05631715577607061, Validation Accuracy: 97.12605042016807%
+Epoch 5, Training Loss: 0.05694062643465312, Training Accuracy: 97.04000350140056%
+Epoch 5, Validation Loss: 0.05431812187912417, Validation Accuracy: 97.3655462184874%
+Epoch 6, Training Loss: 0.055057996715779656, Training Accuracy: 97.24597338935574%
+Epoch 6, Validation Loss: 0.050536094445589125, Validation Accuracy: 97.72303921568627%
+Epoch 7, Training Loss: 0.052499564166806234, Training Accuracy: 97.47575280112045%
+Epoch 7, Validation Loss: 0.050266889837552224, Validation Accuracy: 97.70728291316527%
+Epoch 8, Training Loss: 0.050982629325350415, Training Accuracy: 97.56144957983193%
+Epoch 8, Validation Loss: 0.04830594135083112, Validation Accuracy: 97.73179271708683%
+Epoch 9, Training Loss: 0.05016280934908519, Training Accuracy: 97.61624649859944%
+Epoch 9, Validation Loss: 0.048830644213685805, Validation Accuracy: 97.6782212885154%
+Epoch 10, Training Loss: 0.04929756768559124, Training Accuracy: 97.63086484593838%
+Epoch 10, Validation Loss: 0.047048407900786286, Validation Accuracy: 97.76190476190476%
+Epoch 11, Training Loss: 0.04876729438875747, Training Accuracy: 97.6654411764706%
+Epoch 11, Validation Loss: 0.04784962009492458, Validation Accuracy: 97.72443977591037%
+Epoch 12, Training Loss: 0.04849956276527533, Training Accuracy: 97.67979691876751%
+Epoch 12, Validation Loss: 0.0482186086101494, Validation Accuracy: 97.60749299719888%
+Epoch 13, Training Loss: 0.04811782002517515, Training Accuracy: 97.64723389355743%
+Epoch 13, Validation Loss: 0.0474770203795211, Validation Accuracy: 97.781162464986%
+Epoch 14, Training Loss: 0.047827921766723853, Training Accuracy: 97.66036414565826%
+Epoch 14, Validation Loss: 0.04692095263769814, Validation Accuracy: 97.7983193277311%
+Epoch 15, Training Loss: 0.04742775885025313, Training Accuracy: 97.67253151260505%
+Epoch 15, Validation Loss: 0.04522476059293338, Validation Accuracy: 97.75525210084034%
+Epoch 1, Training Loss: 0.07619198437131869, Training Accuracy: 95.92209383753502%
+Epoch 1, Validation Loss: 0.05953295805436724, Validation Accuracy: 96.42542016806723%
+Epoch 2, Training Loss: 0.060936143070587194, Training Accuracy: 96.57449229691876%
+Epoch 2, Validation Loss: 0.05851138573139906, Validation Accuracy: 96.77310924369748%
+Epoch 3, Training Loss: 0.05902157082843284, Training Accuracy: 96.843662464986%
+Epoch 3, Validation Loss: 0.05680997715642055, Validation Accuracy: 97.07422969187675%
+Epoch 4, Training Loss: 0.05769380203169752, Training Accuracy: 96.99142156862744%
+Epoch 4, Validation Loss: 0.05505041980348966, Validation Accuracy: 97.37570028011204%
+Epoch 5, Training Loss: 0.05556055908004626, Training Accuracy: 97.25113795518207%
+Epoch 5, Validation Loss: 0.05476630933436693, Validation Accuracy: 97.30917366946778%
+Epoch 6, Training Loss: 0.05402966505062638, Training Accuracy: 97.39355742296918%
+Epoch 6, Validation Loss: 0.05043552529578115, Validation Accuracy: 97.65581232492997%
+Epoch 7, Training Loss: 0.052349472251588335, Training Accuracy: 97.51102941176471%
+Epoch 7, Validation Loss: 0.050144655700846044, Validation Accuracy: 97.70098039215686%
+Epoch 8, Training Loss: 0.05116555539124152, Training Accuracy: 97.56285014005603%
+Epoch 8, Validation Loss: 0.04931794281939373, Validation Accuracy: 97.61309523809524%
+Epoch 9, Training Loss: 0.05066288228114775, Training Accuracy: 97.59515056022408%
+Epoch 9, Validation Loss: 0.04756394198018254, Validation Accuracy: 97.71463585434174%
+Epoch 10, Training Loss: 0.05005614170763532, Training Accuracy: 97.61353291316527%
+Epoch 10, Validation Loss: 0.047326398961538195, Validation Accuracy: 97.75805322128852%
+Epoch 11, Training Loss: 0.049375311133689155, Training Accuracy: 97.64119397759103%
+Epoch 11, Validation Loss: 0.04685578029703203, Validation Accuracy: 97.71813725490196%
+Epoch 12, Training Loss: 0.04877901581741468, Training Accuracy: 97.68548669467788%
+Epoch 12, Validation Loss: 0.046436076634380895, Validation Accuracy: 97.75665266106442%
+Epoch 13, Training Loss: 0.04833619960428526, Training Accuracy: 97.67918417366947%
+Epoch 13, Validation Loss: 0.0469180410972559, Validation Accuracy: 97.69187675070027%
+Epoch 14, Training Loss: 0.04831538183847442, Training Accuracy: 97.69082633053222%
+Epoch 14, Validation Loss: 0.047965453165930275, Validation Accuracy: 97.65581232492997%
+Epoch 15, Training Loss: 0.04799259708760598, Training Accuracy: 97.72452731092437%
+Epoch 15, Validation Loss: 0.04678689215916629, Validation Accuracy: 97.71778711484593%
+Epoch 1, Training Loss: 0.07486769753727404, Training Accuracy: 95.9327731092437%
+Epoch 1, Validation Loss: 0.058145323370893794, Validation Accuracy: 96.687675070028%
+Epoch 2, Training Loss: 0.061490787254719466, Training Accuracy: 96.49107142857143%
+Epoch 2, Validation Loss: 0.05717845364930291, Validation Accuracy: 96.8623949579832%
+Epoch 3, Training Loss: 0.05944596569190788, Training Accuracy: 96.78054971988796%
+Epoch 3, Validation Loss: 0.05604179022724137, Validation Accuracy: 97.13305322128852%
+Epoch 4, Training Loss: 0.05827079116741159, Training Accuracy: 96.92892156862744%
+Epoch 4, Validation Loss: 0.05581123852846669, Validation Accuracy: 97.04236694677871%
+Epoch 5, Training Loss: 0.05698378664309013, Training Accuracy: 97.08105742296918%
+Epoch 5, Validation Loss: 0.052145762772975016, Validation Accuracy: 97.60539215686275%
+Epoch 6, Training Loss: 0.054726390484811774, Training Accuracy: 97.3531162464986%
+Epoch 6, Validation Loss: 0.05101111131154147, Validation Accuracy: 97.56197478991596%
+Epoch 7, Training Loss: 0.05303818692384726, Training Accuracy: 97.44275210084034%
+Epoch 7, Validation Loss: 0.048878423116151606, Validation Accuracy: 97.64635854341736%
+Epoch 8, Training Loss: 0.05162997565213956, Training Accuracy: 97.53405112044818%
+Epoch 8, Validation Loss: 0.048251759301067565, Validation Accuracy: 97.70553221288516%
+Epoch 9, Training Loss: 0.05063543595224117, Training Accuracy: 97.59970238095238%
+Epoch 9, Validation Loss: 0.04794700877120098, Validation Accuracy: 97.69327731092437%
+Epoch 10, Training Loss: 0.050098715626415526, Training Accuracy: 97.62359943977592%
+Epoch 10, Validation Loss: 0.04648764296982656, Validation Accuracy: 97.76470588235294%
+Epoch 11, Training Loss: 0.0494965416231357, Training Accuracy: 97.63489145658264%
+Epoch 11, Validation Loss: 0.044828863723258325, Validation Accuracy: 97.7594537815126%
+Epoch 12, Training Loss: 0.048981329510650394, Training Accuracy: 97.67121848739495%
+Epoch 12, Validation Loss: 0.044915156596723724, Validation Accuracy: 97.78256302521008%
+Epoch 13, Training Loss: 0.04872347060753051, Training Accuracy: 97.67524509803921%
+Epoch 13, Validation Loss: 0.04486774598668311, Validation Accuracy: 97.83928571428571%
+Epoch 14, Training Loss: 0.048801293472654425, Training Accuracy: 97.67393207282913%
+Epoch 14, Validation Loss: 0.04516604501936658, Validation Accuracy: 97.81022408963585%
+Epoch 15, Training Loss: 0.04810600994981131, Training Accuracy: 97.69152661064426%
+Epoch 15, Validation Loss: 0.04504821537665146, Validation Accuracy: 97.81197478991596%
+Epoch 1, Training Loss: 0.07421859644093168, Training Accuracy: 95.95246848739495%
+Epoch 1, Validation Loss: 0.05856407012133037, Validation Accuracy: 96.2860644257703%
+Epoch 2, Training Loss: 0.06179261418808179, Training Accuracy: 96.47522759103641%
+Epoch 2, Validation Loss: 0.05726929260016072, Validation Accuracy: 96.98809523809524%
+Epoch 3, Training Loss: 0.05912280849738083, Training Accuracy: 96.83613445378151%
+Epoch 3, Validation Loss: 0.05548566572710543, Validation Accuracy: 97.11834733893558%
+Epoch 4, Training Loss: 0.058224278677747966, Training Accuracy: 96.94660364145658%
+Epoch 4, Validation Loss: 0.05494723337903327, Validation Accuracy: 97.13550420168067%
+Epoch 5, Training Loss: 0.05668751768023689, Training Accuracy: 97.12009803921569%
+Epoch 5, Validation Loss: 0.05173718900291943, Validation Accuracy: 97.52275910364146%
+Epoch 6, Training Loss: 0.054235215069196534, Training Accuracy: 97.38506652661064%
+Epoch 6, Validation Loss: 0.051848577903035806, Validation Accuracy: 97.4250700280112%
+Epoch 7, Training Loss: 0.05217074383310426, Training Accuracy: 97.51207983193277%
+Epoch 7, Validation Loss: 0.04702824687183488, Validation Accuracy: 97.76680672268908%
+Epoch 8, Training Loss: 0.05135445018413057, Training Accuracy: 97.52398459383754%
+Epoch 8, Validation Loss: 0.04687905141828107, Validation Accuracy: 97.74579831932773%
+Epoch 9, Training Loss: 0.05049863551706806, Training Accuracy: 97.5671393557423%
+Epoch 9, Validation Loss: 0.04686148431115583, Validation Accuracy: 97.75560224089637%
+Epoch 10, Training Loss: 0.04964884033362728, Training Accuracy: 97.61292016806723%
+Epoch 10, Validation Loss: 0.04744455977123888, Validation Accuracy: 97.8469887955182%
+Epoch 11, Training Loss: 0.04948866053799386, Training Accuracy: 97.61467086834733%
+Epoch 11, Validation Loss: 0.04879874643824045, Validation Accuracy: 97.60224089635854%
+Epoch 12, Training Loss: 0.048894607035132744, Training Accuracy: 97.64670868347339%
+Epoch 12, Validation Loss: 0.0455239114088609, Validation Accuracy: 97.79341736694678%
+Epoch 13, Training Loss: 0.048709934359945944, Training Accuracy: 97.63322829131653%
+Epoch 13, Validation Loss: 0.04499685558636545, Validation Accuracy: 97.77135854341736%
+Epoch 14, Training Loss: 0.048109336406592845, Training Accuracy: 97.66010154061625%
+Epoch 14, Validation Loss: 0.04577901861539074, Validation Accuracy: 97.81162464985995%
+Epoch 15, Training Loss: 0.04793595669729471, Training Accuracy: 97.66815476190476%
+Epoch 15, Validation Loss: 0.04478537092825361, Validation Accuracy: 97.83158263305322%
+Test Loss: 0.04529759925603866, Test Accuracy: 97.82063492063492%, Test F1 Score: 0.9469965937223092

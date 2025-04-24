@@ -8,10 +8,17 @@ import torch.nn as nn
 import torch.nn.functional as F
 from tqdm import tqdm
 import matplotlib.pyplot as plt
-from retrying import retry
-from sklearn.metrics import precision_score, recall_score, f1_score,multilabel_confusion_matrix, roc_auc_score
-import seaborn as sns
-
+import os
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.metrics import (
+    roc_curve,
+    auc,
+    precision_recall_curve,
+    average_precision_score,
+    brier_score_loss,
+)
+from sklearn.calibration import calibration_curve
 random.seed(42)
 def oneHotEncoding(combination):
     '''
@@ -207,7 +214,7 @@ detect.eval()
     
 trueLabels=[]
 predictions=[]
-
+probs=[]
 with torch.no_grad():
     for batch in testingDataloader:
         data,labels,config=batch
@@ -221,46 +228,71 @@ with torch.no_grad():
 
         trueLabels.append(labels.cpu().numpy())
         predictions.append(predicted.cpu().numpy())
-        
+        probs.append(outputs.cpu().numpy())
+
 trueLabels= np.array(trueLabels)
 predictions = np.array(predictions)
+probs=np.array(probs)
 trueLabels = np.concatenate(trueLabels, axis=0)  # Shape (720, 7)
 predictions = np.concatenate(predictions, axis=0) 
+probs=np.concatenate(probs,axis=0)
 
-print(trueLabels.shape)
 
-print(predictions.shape)
 
-# Compute the confusion matrix
-# Optionally, plot the multilabel confusion matrix
-# mcm is a 3D array: for each label, it contains a confusion matrix (TP, FP, FN, TN)
-mcm = multilabel_confusion_matrix(trueLabels, predictions)
-fig, axes = plt.subplots(1, len(mcm), figsize=(20, 6))
-fig.patch.set_facecolor('#11183b')
-molecules=["O2","N2","H2","CO2","H2O","CH4","NH3"]
-for i, ax in enumerate(axes):
-    sns.heatmap(
-        mcm[i], annot=True, fmt='d', cmap='Blues', ax=ax,
-        xticklabels=['Pred Neg', 'Pred Pos'],
-        yticklabels=['True Neg', 'True Pos'], square=True,
-        cbar=(i == len(axes) - 1),  # Only include color bar for the last plot
-        annot_kws={"size": 14}  # Font size for annotations
-    )
-    
-    if i == len(axes) - 1:  # Only the last heatmap has a color bar
-        cbar = ax.collections[0].colorbar
-        cbar.ax.yaxis.set_tick_params(color='white', labelsize=14)  # Set tick color and size
-        plt.setp(plt.getp(cbar.ax.axes, 'yticklabels'), color='white', fontsize=14)  # Tick label color and size
-    
-    ax.set_title(f"Class {molecules[i]}", fontsize=16)  # Title font size
-    ax.tick_params(colors="white", labelsize=14)  # Tick label size
-    ax.yaxis.label.set_color("white")  # Make y-axis label white
-    ax.xaxis.label.set_color("white")  # Make x-axis label white
-    ax.set_xlabel(ax.get_xlabel(), fontsize=14)  # x-axis label font size
-    ax.set_ylabel(ax.get_ylabel(), fontsize=14)  # y-axis label font size
-    ax.title.set_color("white")
-plt.savefig(r"C:\Users\Tristan\Downloads\HyPCAR3\visuals\detectionConfusionMatrix.png", dpi=300, bbox_inches="tight")
-plt.show()
+save_dir = 'evaluation_plots'
+os.makedirs(save_dir, exist_ok=True)
+
+n_classes = trueLabels.shape[1]
+molecules=['O2','N2','H2','CO2','H2O','CH4','NH3']
+
+for i, name in enumerate(molecules):
+    yt = trueLabels[:, i]
+    ys = probs[:, i]
+
+    # 1) ROC Curve
+    fpr, tpr, _ = roc_curve(yt, ys)
+    roc_auc = auc(fpr, tpr)
+
+    plt.figure()
+    plt.plot(fpr, tpr, label=f'AUC = {roc_auc:.3f}')
+    plt.plot([0, 1], [0, 1], '--', label='chance')
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title(f'ROC Curve — {name}')
+    plt.legend(loc='lower right')
+    plt.tight_layout()
+    plt.savefig(os.path.join(save_dir, f'roc_curve_{name}.png'))
+    plt.close()
+
+    # 2) Precision–Recall Curve
+    precision, recall, _ = precision_recall_curve(yt, ys)
+    ap = average_precision_score(yt, ys)
+
+    plt.figure()
+    plt.plot(recall, precision, label=f'AP = {ap:.3f}')
+    plt.xlabel('Recall')
+    plt.ylabel('Precision')
+    plt.title(f'Precision–Recall Curve — {name}')
+    plt.legend(loc='lower left')
+    plt.tight_layout()
+    plt.savefig(os.path.join(save_dir, f'pr_curve_{name}.png'))
+    plt.close()
+
+    # 3) Calibration (Reliability) Curve
+    prob_true, prob_pred = calibration_curve(yt, ys, n_bins=10)
+    bs = brier_score_loss(yt, ys)
+    print(f"{name}: {bs}")
+
+    plt.figure()
+    plt.plot(prob_pred, prob_true, 'o-', label='calibration')
+    plt.plot([0, 1], [0, 1], '--', label='perfect')
+    plt.xlabel('Mean predicted probability')
+    plt.ylabel('Fraction of positives')
+    plt.title(f'Calibration — {name}  (Brier = {bs:.3f})')
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig(os.path.join(save_dir, f'calibration_{name}.png'))
+    plt.close()
 
 
 

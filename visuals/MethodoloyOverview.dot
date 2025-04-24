@@ -1,20 +1,139 @@
-digraph Methodology {
-    rankdir=LR;  // sets the layout direction from left to right
-    graph [bgcolor="#0d0d0d"];
-    node [shape=box, style=rounded, fontname="Helvetica", fontsize=10, fillcolor="#E8F4FA", style=filled];
+digraph projectOverview {
+    graph[
+        rankdir=LR,
+        label="HyPCAR Overview",
+        labelloc=t,
+        fontsize=40,
+        margin=0.3,
+        nodesep=0.75,
+        ranksep=0.75,
+        splines=true,
+        compound=true,
+        fontname="roboto"
+    ];
 
-    // Define nodes
-    DataGeneration [label="Data Generation"];
-    TrainDetection [label="Train Detection Model"];
-    CombineInputs [label="Combine:\nDetection Model Outputs\n+ Raw Data"];
-    TrainAbundance [label="Train Abundance Model"];
-    FineTune [label="Fine-tune Abundance Model"];
-    CustomLoss [label="Custom-loss Function"];
+    node[
+        shape=box,
+        style="rounded,filled",
+        fontname="roboto",
+        fontsize=16,
+        penwidth=2,
+        margin=0.3
+    ];
 
-    // Define flow
-    DataGeneration -> TrainDetection [color="white"];
-    TrainDetection -> CombineInputs [color="white"];
-    CombineInputs -> TrainAbundance [color="white"];
-    CustomLoss -> FineTune [color="white"];
-    TrainAbundance -> FineTune [color="white"];
+
+    subgraph cluster_dataGeneration {
+        label=<<B>Data Generation</B>>;
+        fontsize=30;
+        style="rounded,filled";
+        fillcolor="#dfbdfc";
+        color="#8800ff";
+        margin=20;
+        penwidth=2;
+
+        DG4[
+           
+            shape=record,
+            label="{Transmittance Data\nGeneration|• Generate Atmospheric Parameters\n• Generate Planetary Parameters\n •Generate Stellar Parameters}",
+            fontsize=25,
+            fillcolor="#dfbdfc",
+            color="#8800ff",
+            penwidth=2
+           
+           
+        ];
+
+
+    }
+
+    subgraph cluster_detection{
+        label=<<B>Detection Model</B>>
+        fontsize=30;
+        penwidth=2;
+        style="rounded,filled";
+        fillcolor="#CAE8FF";
+        color="#007ACC";
+        margin=15;
+        DM1[
+            shape=record,
+            label="{Detection Model\nCNN|• Input: Transmittance Spectra\n• Output: Molecule Presence Probs}",
+            fontsize=25,
+            fillcolor="#CAE8FF",
+            color="#007ACC",
+            penwidth=2
+        ];
+    }
+
+
+    subgraph cluster_abundance{
+        label=<<B>Abundance Model</B>>
+        fontsize=30;
+        penwidth=2;
+        style="rounded,filled";
+        fillcolor="#FFEDB2";
+        color="#FFA500";
+        margin=15;
+        AM1[
+            shape=record,
+            label="{Abundance Model\nCNN With Multi-Head Attention|• Input: Detection Probs\n   + Transmittance Spectra\n• Output: Abundances\n   + Uncertainty}",
+            fontsize=25,
+            fillcolor="#FFEDB2",
+            color="#FFA500",
+            penwidth=2
+        ];    
+    }
+
+
+   
+
+    subgraph cluster_mopte {
+        label=<<B>MOPTE Optimization</B>>;
+        fontsize=30;
+        penwidth=2;
+        style="rounded,filled";
+        fillcolor="#DFF1D8";
+        color="#66B032";
+        margin=15;
+
+        MO1[
+            shape=record,
+            label="{MOPTE Optimizer|• Bayesian Optimization Algorithm\n• Minimizes/Maximizes Various Objectives\n• Outputs: Fine-tuned Hyperparameters}",
+            fontsize=25,
+            fillcolor="#DFF1D8",
+            color="#66B032",
+            penwidth=2
+        ];
+    }
+
+
+    subgraph cluster_physics {
+        label=<<B>Physics Fine-Tuning</B>>;
+        fontsize=30;
+        penwidth=2;
+        style="rounded,filled";
+        fillcolor="#FFD3E0";
+        color="#FF69B4";
+        margin=15;
+
+        PF1[
+            shape=record,
+            label="{Loss Function|• Three-Components\n• Enforces Physical Constraints\n• Improves Physical Realism}",
+            fontsize=25,
+            fillcolor="#FFD3E0",
+            color="#FF69B4",
+            penwidth=2
+        ];
+    }
+   
+   
+    DG4->DM1 [ltail=cluster_dataGeneration,  label="Spectra", fontsize=25];
+    DG4->AM1 [ltail=cluster_dataGeneration, label="Spectra", fontsize=25];
+    
+    
+    DM1->AM1 [ltail=cluster_detection lhead=cluster_abundance label="Molecule Probabilities", fontsize=25];
+    AM1->MO1 [lhead=cluster_mopte, label="Inital Model Architecture", fontsize=25 constraint=false, labeldistance=5];
+    MO1->PF1 [ltail=cluster_mopte, lhead=cluster_physics, label="Final Base Model", fontsize=25];
+    PF1->AM1 [style=dashed, color=gray, label="Backpropagation\n(Physical Loss)", fontsize=25];
+    // { rank=same;DM1;AM1;ltail=cluster_detection;lhead=cluster_abundance }
+
 }

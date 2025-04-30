@@ -26,11 +26,12 @@ for i in range(1,len(nums)):
 # Set figure size explicitly
 plt.figure(figsize=(12, 8))  # Width x Height in inches
 plt.bar(years,cumulative,color="#007ACC",width=0.8)
-plt.title("Cumulative Discovery of Exoplanets Over Time",fontsize=16,fontweight="bold")
-plt.xlabel("Discovery Year",fontsize=14)
-plt.ylabel("Total Number of Exoplanets",fontsize=14)
+plt.title("Cumulative Discovery of Exoplanets Over Time",fontsize=25,fontweight="bold")
+plt.xlabel("Discovery Year",fontsize=20)
+plt.ylabel("Total Number of Exoplanets",fontsize=20)
 plt.grid(axis="y",color="gray",linestyle="--",linewidth=0.5,alpha=0.7)
-plt.xticks(years,fontsize=10,rotation=45)
+plt.xticks(years,fontsize=15,rotation=45)
+plt.yticks(fontsize=15)
 plt.tight_layout()
 
 # Save the figure with the specified DPI for better quality

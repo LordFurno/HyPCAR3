@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 from retrying import retry
 from sklearn.metrics import precision_score, recall_score, f1_score,multilabel_confusion_matrix, roc_auc_score
 import seaborn as sns
-
+import matplotlib as mpl
 random.seed(42)
 def oneHotEncoding(combination):
     '''
@@ -230,37 +230,51 @@ predictions = np.concatenate(predictions, axis=0)
 print(trueLabels.shape)
 
 print(predictions.shape)
+molecules = ["O2","N2","H2","CO2","H2O","CH4","NH3"]
 
-# Compute the confusion matrix
-# Optionally, plot the multilabel confusion matrix
-# mcm is a 3D array: for each label, it contains a confusion matrix (TP, FP, FN, TN)
+# Compute confusion matrix
 mcm = multilabel_confusion_matrix(trueLabels, predictions)
-fig, axes = plt.subplots(1, len(mcm), figsize=(20, 6))
-fig.patch.set_facecolor('#11183b')
-molecules=["O2","N2","H2","CO2","H2O","CH4","NH3"]
-for i, ax in enumerate(axes):
+
+# Determine the maximum count across all confusion matrices for proper normalization
+vmax = max(cm.max() for cm in mcm)
+norm = mpl.colors.Normalize(vmin=0, vmax=vmax)
+
+# Choose a colormap (you can experiment with others such as 'viridis', 'cividis', etc.)
+cmap = mpl.cm.plasma
+
+# Plot setup
+fig, axes = plt.subplots(1, len(molecules), figsize=(22, 6), gridspec_kw={'wspace': 0.3})
+
+# Plot heatmaps for each molecule using raw counts
+for ax, cm, mol in zip(axes, mcm, molecules):
     sns.heatmap(
-        mcm[i], annot=True, fmt='d', cmap='Blues', ax=ax,
-        xticklabels=['Pred Neg', 'Pred Pos'],
-        yticklabels=['True Neg', 'True Pos'], square=True,
-        cbar=(i == len(axes) - 1),  # Only include color bar for the last plot
-        annot_kws={"size": 14}  # Font size for annotations
+        cm,
+        annot=True,
+        fmt="d",  # Display integer counts
+        cmap=cmap,
+        norm=norm,
+        cbar=False,
+        square=True,
+        xticklabels=["Pred Neg", "Pred Pos"],
+        yticklabels=["True Neg", "True Pos"],
+        annot_kws={"size": 12},
+        ax=ax
     )
-    
-    if i == len(axes) - 1:  # Only the last heatmap has a color bar
-        cbar = ax.collections[0].colorbar
-        cbar.ax.yaxis.set_tick_params(color='white', labelsize=14)  # Set tick color and size
-        plt.setp(plt.getp(cbar.ax.axes, 'yticklabels'), color='white', fontsize=14)  # Tick label color and size
-    
-    ax.set_title(f"Class {molecules[i]}", fontsize=16)  # Title font size
-    ax.tick_params(colors="white", labelsize=14)  # Tick label size
-    ax.yaxis.label.set_color("white")  # Make y-axis label white
-    ax.xaxis.label.set_color("white")  # Make x-axis label white
-    ax.set_xlabel(ax.get_xlabel(), fontsize=14)  # x-axis label font size
-    ax.set_ylabel(ax.get_ylabel(), fontsize=14)  # y-axis label font size
-    ax.title.set_color("white")
-plt.savefig(r"C:\Users\Tristan\Downloads\HyPCAR3\visuals\detectionConfusionMatrix.png", dpi=300, bbox_inches="tight")
+    ax.set_title(mol, fontsize=14)
+    ax.tick_params(labelsize=12)
+    ax.set_xlabel("")
+    ax.set_ylabel("")
+
+# Add a single shared colorbar with count formatting
+cbar_ax = fig.add_axes([0.92, 0.15, 0.015, 0.7])  # [left, bottom, width, height]
+sm = mpl.cm.ScalarMappable(cmap=cmap, norm=norm)
+sm.set_array([])
+# Use a default formatter that shows integers
+cbar = fig.colorbar(sm, cax=cbar_ax)
+cbar.set_label("Count of Samples", fontsize=12)
+cbar.ax.tick_params(labelsize=12)
+
+# Title and layout
+fig.suptitle("HyPCAR Detection Stage – Raw Confusion Matrices", fontsize=18, y=0.8)
+plt.savefig("test.png")
 plt.show()
-
-
-

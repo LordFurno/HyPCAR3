@@ -3,7 +3,7 @@ digraph projectOverview {
         rankdir=LR,
         label="HyPCAR Overview",
         labelloc=t,
-        fontsize=40,
+        fontsize=50,
         margin=0.3,
         nodesep=0.75,
         ranksep=0.75,
@@ -24,7 +24,7 @@ digraph projectOverview {
 
     subgraph cluster_dataGeneration {
         label=<<B>Data Generation</B>>;
-        fontsize=30;
+        fontsize=45;
         style="rounded,filled";
         fillcolor="#dfbdfc";
         color="#8800ff";
@@ -35,7 +35,7 @@ digraph projectOverview {
            
             shape=record,
             label="{Transmittance Data\nGeneration|• Generate Atmospheric Parameters\n• Generate Planetary Parameters\n •Generate Stellar Parameters}",
-            fontsize=25,
+            fontsize=40,
             fillcolor="#dfbdfc",
             color="#8800ff",
             penwidth=2
@@ -48,7 +48,7 @@ digraph projectOverview {
 
     subgraph cluster_detection{
         label=<<B>Detection Model</B>>
-        fontsize=30;
+        fontsize=45;
         penwidth=2;
         style="rounded,filled";
         fillcolor="#CAE8FF";
@@ -57,7 +57,7 @@ digraph projectOverview {
         DM1[
             shape=record,
             label="{Detection Model\nCNN|• Input: Transmittance Spectra\n• Output: Molecule Presence Probs}",
-            fontsize=25,
+            fontsize=40,
             fillcolor="#CAE8FF",
             color="#007ACC",
             penwidth=2
@@ -67,7 +67,7 @@ digraph projectOverview {
 
     subgraph cluster_abundance{
         label=<<B>Abundance Model</B>>
-        fontsize=30;
+        fontsize=45;
         penwidth=2;
         style="rounded,filled";
         fillcolor="#FFEDB2";
@@ -76,7 +76,7 @@ digraph projectOverview {
         AM1[
             shape=record,
             label="{Abundance Model\nCNN With Multi-Head Attention|• Input: Detection Probs\n   + Transmittance Spectra\n• Output: Abundances\n   + Uncertainty}",
-            fontsize=25,
+            fontsize=40,
             fillcolor="#FFEDB2",
             color="#FFA500",
             penwidth=2
@@ -88,7 +88,7 @@ digraph projectOverview {
 
     subgraph cluster_mopte {
         label=<<B>MOPTE Optimization</B>>;
-        fontsize=30;
+        fontsize=45;
         penwidth=2;
         style="rounded,filled";
         fillcolor="#DFF1D8";
@@ -98,7 +98,7 @@ digraph projectOverview {
         MO1[
             shape=record,
             label="{MOPTE Optimizer|• Bayesian Optimization Algorithm\n• Minimizes/Maximizes Various Objectives\n• Outputs: Fine-tuned Hyperparameters}",
-            fontsize=25,
+            fontsize=40,
             fillcolor="#DFF1D8",
             color="#66B032",
             penwidth=2
@@ -108,7 +108,7 @@ digraph projectOverview {
 
     subgraph cluster_physics {
         label=<<B>Physics Fine-Tuning</B>>;
-        fontsize=30;
+        fontsize=45;
         penwidth=2;
         style="rounded,filled";
         fillcolor="#FFD3E0";
@@ -118,7 +118,7 @@ digraph projectOverview {
         PF1[
             shape=record,
             label="{Loss Function|• Three-Components\n• Enforces Physical Constraints\n• Improves Physical Realism}",
-            fontsize=25,
+            fontsize=40,
             fillcolor="#FFD3E0",
             color="#FF69B4",
             penwidth=2
@@ -126,14 +126,15 @@ digraph projectOverview {
     }
    
    
-    DG4->DM1 [ltail=cluster_dataGeneration,  label="Spectra", fontsize=25];
-    DG4->AM1 [ltail=cluster_dataGeneration, label="Spectra", fontsize=25];
+    DG4->DM1 [ltail=cluster_dataGeneration,  label="Spectra", fontsize=35];
+    DG4->AM1 [ltail=cluster_dataGeneration, label="Spectra", fontsize=35];
     
     
-    DM1->AM1 [ltail=cluster_detection lhead=cluster_abundance label="Molecule Probabilities", fontsize=25];
-    AM1->MO1 [lhead=cluster_mopte, label="Inital Model Architecture", fontsize=25 constraint=false, labeldistance=5];
-    MO1->PF1 [ltail=cluster_mopte, lhead=cluster_physics, label="Final Base Model", fontsize=25];
-    PF1->AM1 [style=dashed, color=gray, label="Backpropagation\n(Physical Loss)", fontsize=25];
+    DM1->AM1 [ltail=cluster_detection lhead=cluster_abundance label="Molecule Probabilities", fontsize=35];
+    AM1->MO1 [lhead=cluster_mopte, label="Inital Model Architecture", fontsize=35 constraint=false, labeldistance=5];
+    MO1->PF1 [ltail=cluster_mopte, lhead=cluster_physics, label="Final Base Model", fontsize=35];
+    PF1->AM1 [style=dashed, color=gray, label="Backpropagation\n(Physical Loss)", fontsize=35];
     // { rank=same;DM1;AM1;ltail=cluster_detection;lhead=cluster_abundance }
 
 }
+#dot -Tpng -gDPI=1000 MethodoloyOverview.dot -o hypcarOverview.png

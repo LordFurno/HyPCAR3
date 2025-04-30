@@ -115,7 +115,7 @@ def getAbundances(fileName):
     abundances: A vector containing the abundance information
     '''
     abundances=[0.0]*7
-    moleculeNames=["O2", "N2", "CO2", "H2O", "N2O", "CH4", "H2S"]
+    moleculeNames=["O2","N2","H2","CO2","H2O","CH4","NH3"]
     lines=[]
     with open(fileName) as f:
         for line in f:
@@ -767,7 +767,8 @@ class hypcarLoss(nn.Module):
         #if detection says “present”
         #punish pred_abun<0.001
         #hinge_present = max(0, 0.001 − predAbun)
-
+        if batch%5!=0:
+            return self.dataBased(predAbun,realAbun)
         hinge_present=F.relu(0.001 - predAbun)
 
         present_penalty=(detectionOutput*hinge_present).mean()
@@ -881,7 +882,7 @@ if __name__ == '__main__':
     print(device)
 
 
-    numEpochs=10
+    numEpochs=3
 
 
 
@@ -992,7 +993,7 @@ if __name__ == '__main__':
 
 
         #Instead of weighted accuracy, use top-k accuracy and R^2 value. 
-        with open("hypcarAbundanceModel.txt",'a') as f:
+        with open("novelLoss.txt",'a') as f:
             f.write(f"Epoch {epoch+1}, Loss: {trainingLoss}, KL Divergence: {klLoss}, Top-K Accuracy: {topKAcc}, Cross Entropy: {crossEntropy}"+"\n")
 
         print(f"Epoch {epoch+1}, Loss: {trainingLoss}, KL Divergence: {klLoss}, Top-K Accuracy: {topKAcc}, Cross Entropy: {crossEntropy}")
@@ -1015,9 +1016,9 @@ if __name__ == '__main__':
 
                 optimizer.zero_grad()
 
-                moleculeDetection=detectMolecules(data)
+                detectionOutput=detectMolecules(data)
 
-                outputs,uncertainties,attentionWeights=model(data,moleculeDetection)
+                outputs,uncertainties,attentionWeights=model(data,detectionOutput)
 
                 loss=criterion(outputs,uncertainties,labels,detectionOutput,configs,data,counter)
 
@@ -1033,11 +1034,11 @@ if __name__ == '__main__':
             valKL=validation_KL_loss/len(validationDataloader)
             valTopK=validation_top_k/len(validationDataloader)
             valCrossEntropy=validation_cross_entropy/len(validationDataloader)
-            with open("hypcarAbundanceModel.txt",'a') as f:
+            with open("novelLoss.txt",'a') as f:
                 f.write(f"Validation Loss: {valLoss}, KL Divergence: {valKL}, Top-K Accuracy: {valTopK}, Cross Entropy: {valCrossEntropy}"+"\n")
             print(f"Validation Loss: {valLoss}, KL Divergence: {valKL}, Top-K Accuracy: {valTopK}, Cross Entropy: {valCrossEntropy}")
 
-    torch.save(model.state_dict(), "hypcarAbundanceModel.pt")
+    torch.save(model.state_dict(), "novelLoss.pt")
     model.eval()
 
     testingDataset=testDataset(testingData)
@@ -1056,9 +1057,9 @@ if __name__ == '__main__':
             labels=labels.to(device)
 
             
-            moleculeDetection=detectMolecules(data)
+            detectionOutput=detectMolecules(data)
             
-            outputs,attentionWeights=model(data,moleculeDetection)
+            outputs,uncertainties,attentionWeights=model(data,detectionOutput)
 
 
             loss=regularLoss(outputs,labels)
@@ -1075,6 +1076,6 @@ if __name__ == '__main__':
         testTopK=test_top_k/len(testingDataloader)
         testCrossEntropy=test_cross_entropy/len(testingDataloader)
 
-    with open("hypcarAbundanceModel.txt",'a') as f:
+    with open("novelLoss.txt",'a') as f:
         f.write(f"Testing Loss: {test_loss}, KL Divergence: {testKL}, Top-K Accuracy: {testTopK}, Cross Entropy: {testCrossEntropy}"+"\n")
     # print(f"Testing Loss: {test_loss}, KL Divergence: {testKL}, Top-K Accuracy: {testTopK}, Cross Entropy: {testCrossEntropy}")

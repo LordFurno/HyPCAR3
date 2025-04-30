@@ -1,0 +1,132 @@
+digraph projectOverview {
+    graph[
+        rankdir=TB,
+        label="HyPCAR Overview",
+        labelloc=t,
+        fontsize=120,
+        margin=1.0,
+        nodesep=1.0,
+        ranksep=5.0,
+        splines=true,
+        compound=true,
+        fontname="roboto"
+    ];
+
+    node[
+        shape=box,
+        style="rounded,filled",
+        fontname="roboto",
+        fontsize=70,
+        penwidth=8,
+        margin=1.0
+    ];
+
+    edge[
+        fontname="roboto",
+        fontsize=60,
+        penwidth=4
+    ];
+
+    // ─── Data Generation ────────────────────────────────────────────────
+    subgraph cluster_dataGeneration {
+        label=<<B>Data Generation</B>>;
+        fontsize=80;
+        style="rounded,filled";
+        fillcolor="#dfbdfc";
+        color="#8800ff";
+        margin=60;
+        penwidth=8;
+
+        DG4[
+            shape=record,
+            label="{Transmittance Data\nGeneration|• Generate Atmospheric Parameters\n• Generate Planetary Parameters\n• Generate Stellar Parameters}",
+            fontsize=70,
+            fillcolor="#dfbdfc",
+            color="#8800ff"
+        ];
+    }
+
+    // ─── Detection Model ────────────────────────────────────────────────
+    subgraph cluster_detection {
+        label=<<B>Detection Model</B>>;
+        fontsize=80;
+        style="rounded,filled";
+        fillcolor="#CAE8FF";
+        color="#007ACC";
+        margin=50;
+        penwidth=8;
+
+        DM1[
+            shape=record,
+            label="{Detection Model\nCNN|• Input: Transmittance Spectra\n• Output: Molecule Presence Probs}",
+            fontsize=70,
+            fillcolor="#CAE8FF",
+            color="#007ACC"
+        ];
+    }
+
+    // ─── Abundance Model ────────────────────────────────────────────────
+    subgraph cluster_abundance {
+        label=<<B>Abundance Model</B>>;
+        fontsize=80;
+        style="rounded,filled";
+        fillcolor="#FFEDB2";
+        color="#FFA500";
+        margin=50;
+        penwidth=8;
+
+        AM1[
+            shape=record,
+            label="{Abundance Model\nCNN With Multi-Head Attention|• Input: Detection Probs\n  + Transmittance Spectra\n• Output: Abundances\n  + Uncertainty}",
+            fontsize=70,
+            fillcolor="#FFEDB2",
+            color="#FFA500"
+        ];
+    }
+
+    // ─── MOPTE Optimization ────────────────────────────────────────────
+    subgraph cluster_mopte {
+        label=<<B>MOPTE Optimization</B>>;
+        fontsize=80;
+        style="rounded,filled";
+        fillcolor="#DFF1D8";
+        color="#66B032";
+        margin=50;
+        penwidth=8;
+
+        MO1[
+            shape=record,
+            label="{MOPTE Optimizer|• Bayesian Optimization Algorithm\n• Minimizes/Maximizes Various Objectives\n• Outputs: Fine-tuned Hyperparameters}",
+            fontsize=70,
+            fillcolor="#DFF1D8",
+            color="#66B032"
+        ];
+    }
+
+    // ─── Physics Fine-Tuning ─────────────────────────────────────────────
+    subgraph cluster_physics {
+        label=<<B>Physics Fine-Tuning</B>>;
+        fontsize=80;
+        style="rounded,filled";
+        fillcolor="#FFD3E0";
+        color="#FF69B4";
+        margin=50;
+        penwidth=8;
+
+        PF1[
+            shape=record,
+            label="{Loss Function|• Three-Components\n• Enforces Physical Constraints\n• Improves Physical Realism}",
+            fontsize=70,
+            fillcolor="#FFD3E0",
+            color="#FF69B4"
+        ];
+    }
+
+    // ─── Edges ───────────────────────────────────────────────────────────
+    DG4 -> DM1 [label="Spectra"];
+    DG4 -> AM1 [label="Spectra"];
+    DM1 -> AM1 [label="Molecule Probabilities"];
+    AM1 -> MO1 [label="Initial Model Architecture"];    
+    MO1 -> PF1 [label="Final Base Model"]; 
+    PF1 -> AM1 [style=dashed, color=gray, label="Backpropagation\n(Physical Loss)"];
+}

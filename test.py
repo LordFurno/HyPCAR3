@@ -505,7 +505,7 @@ if __name__=="__main__":
 
     random.shuffle(testingData)
     testingDataset=customDataset(testingData)
-    testingDataloader=DataLoader(testingDataset,batch_size=32,shuffle=True)#Testing data loader
+    testingDataloader=DataLoader(testingDataset,batch_size=1,shuffle=True)#Testing data loader
 
     device=torch.device("cpu")
 
@@ -545,6 +545,46 @@ if __name__=="__main__":
             predAbun,uncertainties,attentionWeights=model(data,detectionOutput)
             total=time.time()-start
             avg.append(total)
+            print("REAL:")
+            print(labels)
+            print("ABUNDANCSE:")
+            print(predAbun)
+            print("DETECTION:")
+            print(detectionOutput)
+            print("UNCERTAINTIES:")
+            print(uncertainties)
+            print(configs)
+            temp=data[0].tolist()
+            plt.style.use("seaborn-v0_8-darkgrid")
+
+
+            plt.figure(figsize=(12, 7))
+
+
+            wavelength = [val[0] for val in temp]
+            transmittance = [val[1] for val in temp]
+
+ 
+            plt.plot(wavelength, transmittance, color='navy', linewidth=2.5, marker='o', markersize=6)
+
+        
+            plt.xlabel("Wavelength (μm)", fontsize=20)
+            plt.ylabel("Transmittance", fontsize=20)
+            plt.title("Transmittance Spectra", fontsize=22, fontweight='bold')
+
+
+            plt.xticks(fontsize=18)
+            plt.yticks(fontsize=18)
+
+            plt.grid(True, which="major", linestyle='--', linewidth=0.8, alpha=0.7)
+
+            # Adjust the layout to prevent clipping
+            plt.tight_layout()
+
+            # Display the plot
+            plt.show(block=True)
+
+            # break
             loss=criterion(predAbun,labels)
 
 

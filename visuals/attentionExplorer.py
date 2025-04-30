@@ -303,130 +303,93 @@ def calculateChiSquared(yPred,yReal,sigma):
     chiVal=total/totalPoints
     return chiVal.item()
 
-molecules=["O2","N2","H2","CO2","H2O","CH4","NH3"]
 
 
-random.seed(42)
 
+def loadExample(csvPath=None):
+    if csvPath==None:
+        possibleFolders=list(os.listdir(r"C:\Users\Tristan\Downloads\HyPCAR3\data"))
+        possibleFolders.remove("None")
+        folder=random.choice(possibleFolders)
+        folderPath=os.path.join(r"C:\Users\Tristan\Downloads\HyPCAR3\data",folder)
 
-testingData=[]
+        file=random.choice(list(os.listdir(folderPath)))
+        newCsvPath=os.path.join(folderPath,file)
+        data=pd.read_csv(newCsvPath)
+    else:
+        data=pd.read_csv(csvPath)
 
+    wv,tr=list(map(wavelengthFilter,data.iloc[:,0])),list(data.iloc[:,1])
+    input_data=torch.tensor(np.stack([wv, tr], axis=1), dtype=torch.float32)
 
-if __name__=="__main__":
+    # #add a batch dimension (1, since it's one example)
+    input_data=input_data.unsqueeze(0)
 
-    testSplit=0.1
-    for atmosphereType in ["A","B","C"]:
-        curFolderPath=r"C:\Users\Tristan\Downloads\HyPCAR3\data"
-        curFolderPath+="\\"+atmosphereType
-        files=[]
-        for path in os.listdir(curFolderPath):
-            #Need to get molecule abundances as well, this means that for each file, I need to go to the config file
-            #Then extract the abundances there
-            #This is how I will get the one-hot vector for the presence
-            #Will just write a functionn
-
-            files.append(os.path.join(curFolderPath,path))
-
-        random.shuffle(files)
-
-        testingSamples=[]
-        for i,data in enumerate(files):
-            path=data
-            if i<(len(files)*testSplit):#Adds testing data
-                testingSamples.append((path))
-            else:
-                break
-        testingData.extend(testingSamples)
-
-    print("DONE")
-
-
-    random.shuffle(testingData)
-    testingDataset=customDataset(testingData)
-    testingDataloader=DataLoader(testingDataset,batch_size=32,shuffle=True)#Testing data loader
-
-    device=torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    detect=detectionModel()
+    detect.load_state_dict(torch.load(
+        r"C:\Users\Tristan\Downloads\HyPCAR3\flexibleDetectionModel.pt",
+        weights_only=True))
+    detect.eval()
 
     model=abundanceModel()
-    model.load_state_dict(torch.load(r"C:\Users\Tristan\Downloads\HyPCAR3\finalBaseAbundance.pt",weights_only=True))
-    model=model.to(device)
-
-
-    detect=detect=detectionModel()
-    detect.load_state_dict(torch.load(r"C:\Users\Tristan\Downloads\HyPCAR3\flexibleDetectionModel.pt",weights_only=True))
-    detect=detect.to(device)
-
-
+    model.load_state_dict(torch.load(
+        r"C:\Users\Tristan\Downloads\HyPCAR3\finalBaseAbundance.pt",
+        weights_only=True))
     model.eval()
-    detect.eval()
+
     with torch.no_grad():
-        for batch in tqdm(testingDataloader):
-            data,labels,configs=batch
-            data=data.to(device)
-            labels=labels.to(device)
+        detectionOutput=detect(input_data)
+        predAbun,uncertainty,attentionWeights=model(input_data,detectionOutput)
+
+    attn=attentionWeights.cpu().numpy()[0]         # (H, Q, K)
+
+    H,Q,K=attn.shape
+    wv,tr=torch.tensor(wv),torch.tensor(tr)
+    N=wv.shape[0]
+
+    bins=np.floor(np.arange(N) * K / N).astype(int).clip(0, K-1)
+
+    molecules = ["O2","N2","H2","CO2","H2O","CH4","NH3"]
+
+    if csvPath==None:
+        file=file.removesuffix(".csv")
+        file+=".txt"
+        print(file)
+        config=os.path.join(r"C:\Users\Tristan\Downloads\HyPCAR3\configFiles",file)
+    else:
+
+        file=os.path.basename(csvPath)
+        file=file.removesuffix(".csv")
+        file+=".txt"
+        config=os.path.join(r"C:\Users\Tristan\Downloads\HyPCAR3\configFiles",os.path.basename(csvPath))
+
+    labels=getAbundances(config)
+
+    print("REAL")
+    for idx, mol in enumerate(molecules):
+        print(f"{mol}: {labels[idx]*100:.2f}%")
+    print("\nPRED")
+    for idx, mol in enumerate(molecules):
+        print(f"{mol}: {predAbun[0][idx]*100:.2f}%")
 
 
-            detectionOutput=detect(data)
-            predAbun,uncertainties,attentionWeights=model(data, detectionOutput)
-            #attentionWeights is now (1, 16, 5, 5)
-
-            #Code for plotly thing
-            #attn=attentionWeights.cpu().numpy()[0] 
+    return attn, wv, tr, bins, molecules
 
 
-            #wav=data[0,:,0].cpu().numpy()
-            #tr =data[0,:,1].cpu().numpy()
+loadExample()
+#C:\Users\Tristan\Downloads\HyPCAR3\configFiles\B_26832.txt
 
-            #N=wav.shape[0]
-            #bins=np.floor(np.arange(N) * 5 / N).astype(int)
-            #bins=np.clip(bins, 0, 4)
-            #break
+#0.0,0.206901151769119,0.0,0.3802324699115363,0.1730153319450976,0.23985104637424715,0.0
+#C:\Users\Tristan\Downloads\HyPCAR3\Data\B\B_26832.csv
 
-
-            raw=attentionWeights[0]                        
-
-            
-            N=data.shape[1]
-            bins=np.floor(np.arange(N) * 5 / N).astype(int)
-            bins=np.clip(bins, 0, 4)
-
-            wav=data[0,:,0].cpu().numpy()
-            tr=data[0,:,1].cpu().numpy()
-
-
-            fig,axes = plt.subplots(4,4, figsize=(16,12))
-            axes=axes.flatten()
-            for h in range(raw.shape[0]):
-                #per-head token weights
-                w=raw[h].mean(dim=0).cpu().numpy()  # (5,)
-                colors=w[bins]                      # (N,)
-                sc=axes[h].scatter(wav, tr, c=colors, cmap="viridis", s=20)
-                axes[h].set_title(f"Head {h+1}")
-                axes[h].set_xticks([])
-                axes[h].set_yticks([])
-                plt.colorbar(sc, ax=axes[h], fraction=0.046, pad=0.04)
-            plt.tight_layout()
-            plt.show()
-
-
-
-
-            print("REAL")
-            for idx, mol in enumerate(molecules):
-                print(f"{mol}: {labels[0][idx]*100:.2f}%")
-            print("\nPRED")
-            for idx, mol in enumerate(molecules):
-                print(f"{mol}: {predAbun[0][idx]*100:.2f}%")
-            print(f"\nUncertainties: {uncertainties[0].tolist()}")
-
-            break
-    
-# import dash
-# from dash import dcc, html, Input, Output
+# from dash import Dash, dcc, html, Input, Output
 # import plotly.express as px
-# H, Q, K = attn.shape  # expected (16,5,5)
-# app = dash.Dash(__name__)
+# from tqdm import tqdm
+# attn, wav, tr, bins, molecules = loadExample()
+# H, Q, K = attn.shape
 
+# # now define the app
+# app = Dash(__name__)
 # app.layout = html.Div([
 #     html.H2("HyPCAR Attention Explorer"),
 #     html.Div([
@@ -443,7 +406,6 @@ if __name__=="__main__":
 #             value=0
 #         ),
 #     ], style={'width':'20%', 'display':'inline-block', 'verticalAlign':'top'}),
-
 #     html.Div([
 #         dcc.Graph(id='heatmap'),
 #         dcc.Graph(id='bar-chart'),
@@ -459,38 +421,26 @@ if __name__=="__main__":
 #     Input('query-dd','value'),
 # )
 # def update_plots(head, query):
-#     # slice out the exact 5-token weights
-#     vec = attn[head, query, :]  # shape (5,)
-
-#     # 1) heatmap (1×5)
-#     hm = px.imshow(
-#         vec.reshape(1,K),
-#         labels={'x':'Key Token','y':'','color':'Weight'},
-#         x=[f'K{k}' for k in range(K)],
-#         y=[f'H{head+1},Q{query}'],
-#         color_continuous_scale='viridis'
-#     )
+#     vec = attn[head, query, :]      # shape (K,)
+#     # heatmap
+#     hm = px.imshow(vec.reshape(1, K),
+#                    labels={'x':'Key Token','color':'Weight'},
+#                    x=[f'K{k}' for k in range(K)],
+#                    y=[f'H{head+1},Q{query+1}'],
+#                    color_continuous_scale='viridis')
 #     hm.update_yaxes(showticklabels=False)
-
-#     # 2) bar chart
-#     bc = px.bar(
-#         x=[f'K{k}' for k in range(K)],
-#         y=vec,
-#         labels={'x':'Key Token','y':'Attention Weight'},
-#         title=f'Head {head+1}, Query {query}'
-#     )
-
-#     # 3) binned scatter
-#     colors = vec[bins]  # map each of the N points → its token weight
-#     sc = px.scatter(
-#         x=wav, y=tr, color=colors,
-#         color_continuous_scale='viridis',
-#         labels={'color':'Token Weight'},
-#         title='Spectrum colored by exact token-weights'
-#     )
+#     # bar chart
+#     bc = px.bar(x=[f'K{k}' for k in range(K)], y=vec,
+#                 labels={'x':'Key Token','y':'Attention Weight'},
+#                 title=f'Head {head+1}, Query {query+1}')
+#     # binned scatter
+#     color_vals = vec[bins]
+#     sc = px.scatter(x=wav, y=tr, color=color_vals,
+#                     color_continuous_scale='viridis',
+#                     labels={'color':'Token Weight'},
+#                     title='Spectrum colored by token weight')
 #     sc.update_traces(marker={'size':6})
-
 #     return hm, bc, sc
 
-# if __name__ == "__main__":
+# if __name__ == '__main__':
 #     app.run(debug=True)

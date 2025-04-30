@@ -1,114 +1,161 @@
-digraph projectOverview {
-    graph[
-        rankdir=LR,
-        label="HyPCAR Overview",
-        labelloc=t,
-        fontsize=40,
-        margin=0.3,
-        nodesep=0.75,
-        ranksep=0.75,
-        splines=true,
-        compound=true,
-        fontname="roboto"
-    ];
+digraph HyPCAR {
+  rankdir=TB;
+  graph [
+    label="HyPCAR Data Generation",
+    labelloc=t,
+    fontsize=200,
+    margin=0.5,
+    nodesep=1.2,
+    ranksep=1.2,
+    splines=true,
+    compound=true,
+    fontname="roboto",
+    bgcolor="white"
+  ];
+  
+  node [
+    fontname="Roboto",
+    fontsize=100,
+    shape=box,
+    style=rounded,
+    penwidth=2.5,
+    margin="0.7,0.4",
+    height=0.9,
+    width=3.2
+  ];
+  
+  edge [
+    fontname="Roboto",
+    fontsize=80,
+    penwidth=2.5,
+    arrowsize=1.6,
+    minlen=3,
+    labelangle=0,
+    labeldistance=2.0
+  ];
+  
+  // ─── Elevate Decision Nodes ───────────────────────────────────────
+  // { rank=source; atmoCheck; mixCheck; }
+  
+  // ─── Initial Parameters ─────────────────────────────────────────────────────────
+  subgraph cluster_DataGen {
+    label=<<B>Initial Parameters</B>>;
+    labelloc=t;
+    fontsize=100;
+    color="#A385E8";
+    style=filled;
+    fillcolor="#F3E5FF";
+    margin=20;
+    padding=20;
+    
+    atmoType [ label="Atmosphere Type\n(A1, A2, B, C, None)", shape=oval, style=filled, fillcolor="#D1C4E9", fontsize=90 ];
+    starType [ label="Stellar Type\n(M, G, K)", shape=oval, style=filled, fillcolor="#D1C4E9", fontsize=90 ];
+    lhsSample [ label="Sample Parameters\n(LHS)", style=filled, fillcolor="#E1BEE7", fontsize=90 ];
+  }
+  
+  // ─── Stellar Parameters ───────────────────────────────────────────────────────
+  subgraph cluster_Stellar {
+    label=<<B>Stellar Parameters</B>>;
+    labelloc=t;
+    fontsize=100;
+    color="#64B5F6";
+    style=filled;
+    fillcolor="#E3F2FD";
+    margin=20;
+    padding=20;
+    
+    radTemp   [ label="Determine Stellar\nRadius & Temperature", style=filled, fillcolor="#BBDEFB", fontsize=90 ];
+    starLum   [ label="Calculate Star\nLuminosity\n(4πR²σT⁴)", style=filled, fillcolor="#BBDEFB", fontsize=90 ];
+    smaBounds [ label="Calculate Habitable\nZone Bounds", style=filled, fillcolor="#BBDEFB", fontsize=90 ];
+  }
+  
+  // ─── Planetary Parameters ────────────────────────────────────────────────────
+  subgraph cluster_Planetary {
+    label=<<B>Planetary Parameters</B>>;
+    labelloc=t;
+    fontsize=100;
+    color="#FFB74D";
+    style=filled;
+    fillcolor="#FFF3E0";
+    margin=20;
+    padding=20;
+    
+    genPlanet [ label="Generate Planetary\nParameters", style=filled, fillcolor="#FFE0B2", fontsize=90 ];
+    pt        [ label="Calculate Pressure–\nTemperature Profile", style=filled, fillcolor="#FFE0B2", fontsize=90 ];
+  }
+  
+  // ─── Atmospheric Parameters ───────────────────────────────────────────────────
+  subgraph cluster_AtmChem {
+    label=<<B>Atmospheric Parameters</B>>;
+    labelloc=t;
+    fontsize=100;
+    color="#4DB6AC";
+    style=filled;
+    fillcolor="#E0F2F1";
+    margin=20;
+    padding=20;
+    
+    hconSample    [ label="Sample Elemental\nAbundances", style=filled, fillcolor="#B2DFDB", fontsize=90 ];
+    calcAbundance [ label="Calculate Molecular\nAbundances", style=filled, fillcolor="#B2DFDB", fontsize=90 ];
+  }
+  
+  // ─── Checks ────────────────────────────────────────────────────────────────
+  subgraph cluster_Decisions {
+    label=<<B>Checks</B>>;
+    labelloc=t;
+    fontsize=100;
+    color="#FFF176";
+    style=filled;
+    fillcolor="#FFFBCC";
+    margin=20;
+    padding=20;
+    
+    atmoCheck [ label="Check Atmospheric\nViability", style=filled, fillcolor="#FFF59D", fontsize=90 ];
+    mixCheck [ label="Validate Mixing\nRatios", style=filled, fillcolor="#FFF59D", fontsize=90 ];
+  }
+  
+  // ─── Radiative Transfer & Output ─────────────────────────────────────────────
+  subgraph cluster_Radiative {
+    label=<<B>Radiative Transfer</B>>;
+    labelloc=t;
+    fontsize=100;
+    color="#F48FB1";
+    style=filled;
+    fillcolor="#FCE4EC";
+    margin=20;
+    padding=20;
+    
+    psg     [ label="Run Radiative\nTransfer (PSG)", style=filled, fillcolor="#F8BBD0", fontsize=90 ];
+    spectra [ label="Transmittance\nSpectra", shape=oval, style=filled, fillcolor="#C8E6C9", fontsize=90 ];
+  }
+  
+  // ─── Edges ───────────────────────────────────────────────────────────────────
+  starType    -> lhsSample;
+  atmoType    -> hconSample;
+  lhsSample   -> radTemp;
+  radTemp     -> starLum;
+  starLum     -> smaBounds;
+  smaBounds   -> genPlanet;
+  genPlanet   -> atmoCheck;
 
-    node[
-        shape=box,
-        style="rounded,filled",
-        fontname="roboto",
-        fontsize=16,
-        penwidth=2,
-        margin=0.3
-    ];
+    // Decision Edges: straight, ported, no overlap
+  atmoCheck:s -> genPlanet:n [style=dashed, color="#E53935", fontcolor="#E53935", penwidth=5,
+      label="No", labelfontname="Roboto", fontsize=140, labeldistance=2.0, labelangle=0];
+  atmoCheck:e -> pt:w       [color="#43A047", fontcolor="#43A047", penwidth=5,
+      label="Yes", labelfontname="Roboto", fontsize=140, labeldistance=2.0, labelangle=0];
 
-    // Data Generation Cluster
-    subgraph cluster_dataGeneration {
-        label=<<B>Data Generation</B>>;
-        fontsize=30;
-        style="rounded,filled";
-        fillcolor="#ffbd5b";
-        color="#ffc400";
-        margin=20;
-        penwidth=2;
+  hconSample -> mixCheck;
+  mixCheck:s -> calcAbundance:n [style=dashed, color="#E53935", fontcolor="#E53935", penwidth=5,
+      label="No", labelfontname="Roboto", fontsize=140, labeldistance=2.0, labelangle=0];
+  mixCheck:e -> calcAbundance:w [color="#43A047", fontcolor="#43A047", penwidth=5,
+      label="Yes", labelfontname="Roboto", fontsize=140, labeldistance=2.0, labelangle=0];
 
-        DG1[label="Generate Stellar\nParameters"];
-        DG2[label="Generate Planetary\nParameters"];
-        DG3[label="Generate Atmospheric\nParameters"];
-        DG4[label="Radiative Transfer\nModel"];
-
-        DG1 -> DG4;
-        DG2 -> DG4;
-        DG3 -> DG4;
-    }
-
-    // Detection Model (Standalone)
-    DM1[
-        shape=record,
-        label="{Detection Model\nCNN|• Input: Transmittance\n   Spectra\n• Output: Molecule\n   Presence Probs}",
-        fontsize=14,
-        fillcolor="#CAE8FF",
-        color="#007ACC",
-        penwidth=2
-    ];
-
-    // Abundance Estimator (Standalone)
-    AM1[
-        shape=record,
-        label="{Abundance Estimator|• Input: Detection Probs\n   + Transmittance Spectra\n• Output: Abundances\n   + Uncertainty}",
-        fontsize=14,
-        fillcolor="#FFEDB2",
-        color="#FFA500",
-        penwidth=2
-    ];
-
-    // MOPTE Optimization Cluster
-    subgraph cluster_mopte {
-        label=<<B>MOPTE Optimization</B>>;
-        fontsize=30;
-        penwidth=2;
-        style="rounded,filled";
-        fillcolor="#DFF1D8";
-        color="#66B032";
-        margin=20;
-
-        MO1[
-            shape=record,
-            label="{MOPTE Optimizer|• Uses Evolutionary Algorithm\n• Penalizes Physically Implausible\n  Combinations\n• Outputs: Refined Parameters}",
-            fontsize=14,
-            fillcolor="#DFF1D8",
-            color="#66B032",
-            penwidth=2
-        ];
-    }
-
-    // Physics Fine-Tuning Cluster
-    subgraph cluster_physics {
-        label=<<B>Physics Fine-Tuning</B>>;
-        fontsize=30;
-        penwidth=2;
-        style="rounded,filled";
-        fillcolor="#FFD3E0";
-        color="#FF69B4";
-        margin=20;
-
-        PF1[
-            shape=record,
-            label="{Physics Module|• Applies PSG-based Loss\n• Enforces Conservation Laws\n• Improves Physical Plausibility}",
-            fontsize=14,
-            fillcolor="#FFD3E0",
-            color="#FF69B4",
-            penwidth=2
-        ];
-    }
-
-    // Connections
-    DG4 -> DM1 [ltail=cluster_dataGeneration, label="Spectra", fontsize=12];
-    DG4 -> AM1 [ltail=cluster_dataGeneration, label="Spectra", fontsize=12];
-    DM1 -> AM1 [label="Molecule Probabilities", fontsize=12];
-    AM1 -> MO1 [lhead=cluster_mopte, label="Initial Abundances", fontsize=12];
-    MO1 -> PF1 [ltail=cluster_mopte, lhead=cluster_physics, minlen=2, label="Optimized Parameters", fontsize=12];
-    PF1 -> AM1 [style=dashed, color=gray, label="Backprop\n(Physical Loss)", fontsize=12];
-
-    // Alignment
-    { rank = same; DM1; AM1; }
+  // ─── Radiative Transfer Connections ───────────────────────────────────────
+  genPlanet -> psg;
+  pt        -> psg;
+  radTemp   -> psg;
+  starLum   -> psg;
+  starType  -> psg;
+  calcAbundance -> psg;
+  psg       -> spectra;
 }

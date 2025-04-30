@@ -47,4 +47,5 @@ apptainer exec instance://psg /usr/sbin/httpd -D FOREGROUND &
 apptainer exec instance://psg /usr/sbin/php-fpm
 
 python hypcarAbundanceModel.py
+apptainer instance stop psg
 

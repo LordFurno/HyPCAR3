@@ -364,83 +364,134 @@ def loadExample(csvPath=None):
         config=os.path.join(r"C:\Users\Tristan\Downloads\HyPCAR3\configFiles",os.path.basename(csvPath))
 
     labels=getAbundances(config)
-
+    
     print("REAL")
     for idx, mol in enumerate(molecules):
         print(f"{mol}: {labels[idx]*100:.2f}%")
     print("\nPRED")
     for idx, mol in enumerate(molecules):
         print(f"{mol}: {predAbun[0][idx]*100:.2f}%")
-
+    with open(r"C:\Users\Tristan\Downloads\HyPCAR3\visuals\tempData.csv","w") as f:
+        for i in range(len(wv)):
+            f.write(str(wv[i].item())+","+str(tr[i].item())+"\n")
+        print("DONE")
+        
 
     return attn, wv, tr, bins, molecules
 
 
-loadExample()
+def convertCMtoUM(cm):#Convrets cm^-1 to microns
+    return 10000/cm 
+
+
+# loadExample()
 #C:\Users\Tristan\Downloads\HyPCAR3\configFiles\B_26832.txt
+#C_12270.txt good example for looking at attention, not the best/perfect results
+#
 
 #0.0,0.206901151769119,0.0,0.3802324699115363,0.1730153319450976,0.23985104637424715,0.0
 #C:\Users\Tristan\Downloads\HyPCAR3\Data\B\B_26832.csv
 
-# from dash import Dash, dcc, html, Input, Output
-# import plotly.express as px
-# from tqdm import tqdm
-# attn, wav, tr, bins, molecules = loadExample()
-# H, Q, K = attn.shape
+from dash import Dash, dcc, html, Input, Output
+import plotly.express as px
+from tqdm import tqdm
 
-# # now define the app
-# app = Dash(__name__)
-# app.layout = html.Div([
-#     html.H2("HyPCAR Attention Explorer"),
-#     html.Div([
-#         html.Label("Head:"),
-#         dcc.Dropdown(
-#             id='head-dd',
-#             options=[{'label': f'Head {h+1}', 'value': h} for h in range(H)],
-#             value=0
-#         ),
-#         html.Label("Query:"),
-#         dcc.Dropdown(
-#             id='query-dd',
-#             options=[{'label': f'Query {q}', 'value': q} for q in range(Q)],
-#             value=0
-#         ),
-#     ], style={'width':'20%', 'display':'inline-block', 'verticalAlign':'top'}),
-#     html.Div([
-#         dcc.Graph(id='heatmap'),
-#         dcc.Graph(id='bar-chart'),
-#         dcc.Graph(id='binned-scatter'),
-#     ], style={'width':'75%', 'display':'inline-block', 'padding':'0 20'}),
-# ])
+molecules = ["O2","N2","H2","CO2","H2O","CH4","NH3"]
 
-# @app.callback(
-#     Output('heatmap', 'figure'),
-#     Output('bar-chart', 'figure'),
-#     Output('binned-scatter', 'figure'),
-#     Input('head-dd','value'),
-#     Input('query-dd','value'),
-# )
-# def update_plots(head, query):
-#     vec = attn[head, query, :]      # shape (K,)
-#     # heatmap
-#     hm = px.imshow(vec.reshape(1, K),
-#                    labels={'x':'Key Token','color':'Weight'},
-#                    x=[f'K{k}' for k in range(K)],
-#                    y=[f'H{head+1},Q{query+1}'],
-#                    color_continuous_scale='viridis')
-#     hm.update_yaxes(showticklabels=False)
-#     # bar chart
-#     bc = px.bar(x=[f'K{k}' for k in range(K)], y=vec,
-#                 labels={'x':'Key Token','y':'Attention Weight'},
-#                 title=f'Head {head+1}, Query {query+1}')
-#     # binned scatter
-#     color_vals = vec[bins]
-#     sc = px.scatter(x=wav, y=tr, color=color_vals,
-#                     color_continuous_scale='viridis',
-#                     labels={'color':'Token Weight'},
-#                     title='Spectrum colored by token weight')
-#     sc.update_traces(marker={'size':6})
-#     return hm, bc, sc
+attn, wav, tr, bins, molecules = loadExample()
+H, Q, K = attn.shape
 
-# if __name__ == '__main__':
-#     app.run(debug=True)
+
+#     df = pd.DataFrame(getTable(table))
+#     df['Molecule']   = mol
+#     df['Wavelength'] = 1e4 / df['nu']  # convert cm⁻¹ → μm
+#     abs_lines.append(df[['Molecule','Wavelength']])
+# abs_lines = pd.concat(abs_lines, ignore_index=True)
+
+# ─── 2) Build the Dash app ────────────────────────────────────────────────────
+app = Dash(__name__)
+app.layout = html.Div([
+    html.H2("HyPCAR Attention Explorer w/ HITRAN Lines"),
+
+    html.Div([
+        html.Label("Head:"),
+        dcc.Dropdown(
+            id='head-dd',
+            options=[{'label':f'Head {h+1}','value':h} for h in range(H)],
+            value=0
+        ),
+
+        html.Label("Query:"),
+        dcc.Dropdown(
+            id='query-dd',
+            options=[{'label':f'Query {q+1}','value':q} for q in range(Q)],
+            value=0
+        ),
+
+        html.Label("Overlay Lines:"),
+        dcc.Checklist(
+            id='mol-checklist',
+            options=[{'label':m,'value':m} for m in molecules],
+            value=[],
+            inline=True
+        ),
+
+        html.Br(),
+        html.A("Download HITRAN lines CSV",
+               href="#",
+               id="download-link")
+    ], style={'width':'22%','display':'inline-block','verticalAlign':'top'}),
+
+    html.Div([
+        dcc.Graph(id='heatmap', style={'height':'250px'}),
+        dcc.Graph(id='bar-chart', style={'height':'250px'}),
+        dcc.Graph(id='binned-scatter', style={'height':'400px'}),
+    ], style={'width':'75%','display':'inline-block','padding':'0 20'}),
+])
+
+@app.callback(
+    Output('heatmap','figure'),
+    Output('bar-chart','figure'),
+    Output('binned-scatter','figure'),
+    Input('head-dd','value'),
+    Input('query-dd','value'),
+    Input('mol-checklist','value'),
+)
+def update_plots(head, query, selected_mols):
+    # 5-vector of that (head,query)
+    vec = attn[head, query, :]
+
+    # 1) Heatmap
+    hm = px.imshow(
+        vec.reshape(1,K),
+        labels={'x':'Key Token','y':'','color':'Weight'},
+        x=[f'K{k}' for k in range(K)],
+        y=[f'H{head+1},Q{query+1}'],
+        color_continuous_scale='viridis', zmin=0, zmax=1
+    )
+    hm.update_yaxes(showticklabels=False)
+
+    # 2) Bar chart
+    bc = px.bar(
+        x=[f'K{k}' for k in range(K)], y=vec,
+        labels={'x':'Key Token','y':'Attention'},
+        title=f'Head {head+1}, Query {query+1}',
+        range_y=[0,1]
+    )
+
+    # 3) Binned scatter
+    colors = vec[bins]  # map each point → its token weight
+    sc = px.scatter(
+        x=wav, y=tr, color=colors,
+        color_continuous_scale='viridis',
+        labels={'color':'Token Weight'},
+        title='Spectrum colored by attention'
+    )
+    sc.update_traces(marker={'size':6})
+
+
+
+    return hm, bc, sc
+
+if __name__=='__main__':
+    app.run(debug=True)

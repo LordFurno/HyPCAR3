@@ -23,18 +23,19 @@ def oneHotEncoding(combination):
 
     Inputs
     ------
-    combination: Tuple that contains all molecules present
+    combination: Tuple containing the abundances of the molecules in this order: "O2","N2","H2","CO2","H2O","CH4","NH3"
 
     Returns
     -------
     vector: One-hot encoded vector of 1's and 0's
     '''
 
-    #The order of the molecules are: "O2", "N2", "CO2", "H2O", "N2O", "CH4", "H2S"
+    #The order of the molecules are: "O2","N2","H2","CO2","H2O","CH4","NH3"
     vector=[0.]*7
-    moleculeIndexes={"O2":0, "N2":1, "CO2":2, "H2O":3, "N2O":4, "CH4":5, "H2S":6}
-    for molecule in combination:
-        vector[moleculeIndexes[molecule]]=1.0
+    for i,abundance in enumerate(combination):
+        #At what point should a molecule be considered present? I don't know need to think about that
+        if abundance>0.001:
+            vector[i]=1.0
     return torch.tensor(vector) 
 
 def wavelengthFilter(string):
@@ -424,7 +425,8 @@ model=detectionModel()
 model.load_state_dict(torch.load(r"C:\Users\Tristan\Downloads\HyPCAR3\flexibleDetectionModel.pt",weights_only=True))
 aModel.load_state_dict(torch.load(r"C:\Users\Tristan\Downloads\HyPCAR3\finalBaseAbundance.pt",weights_only=True))
 
-filePath=r"C:\Users\Tristan\Downloads\HyPCAR\table_K2-18-b-Madhusudhan-et-al.-2023 (2).csv"#File path for the data
+# filePath=r"C:\Users\Tristan\Downloads\HyPCAR\table_K2-18-b-Madhusudhan-et-al.-2023 (2).csv"#File path for the data
+filePath=r"C:\Users\Tristan\Downloads\HyPCAR3\table_LHS-1140-b-Cadieux-et-al.-2024.csv"
 # # filePath=r"C:\Users\Tristan\Downloads\HyPCAR\table_HAT-P-18-b-Fu-et-al.-2022 (1).csv"#File path for the data
 # # filePath=r"C:\Users\Tristan\Downloads\HyPCAR3\table_GJ-1132-b-Swain-et-al.-2021.csv"
 data=pd.read_csv(filePath)
@@ -434,15 +436,27 @@ transmittance=list(data["PL_TRANDEP"])
 
 transmittance=[1-(t/100) for t in transmittance]#Converts depth to transmittance.
 # print(wavelength)
-# print(transmittance)
+print(transmittance[0])
 for i in range(784-len(transmittance)):
-    wavelength.insert(0,0.0)
-    transmittance.insert(0,0.0)
-plt.figure(0)#Plot orginial data
+    wavelength=[0.65338]+wavelength
+    transmittance=[1-(0.52107/100)]+transmittance
+# interp_func=interp1d(np.linspace(0, 1, len(wavelength)), wavelength)
+# interp_trans=interp1d(np.linspace(0, 1, len(transmittance)), transmittance)
+# x_new=np.linspace(0, 1, 785)
+
+# # Apply the interpolation function
+# wavelength=interp_func(x_new)
+# transmittance=interp_trans(x_new)
+#[[0.01649525575339794, 0.3519033193588257, 0.049478862434625626, 0.020929547026753426, 0.23563598096370697, 0.15869036316871643, 0.16686668992042542]]
+#[[0.06854549050331116, 0.2966659963130951, 0.1246875673532486, 0.017096178606152534, 0.2049204409122467, 0.15106253325939178, 0.13702185451984406]]
+# transmittance = savgol_filter(transmittance, window_length=5, polyorder=5)
+# wavelength = savgol_filter(wavelength, window_length=5, polyorder=5)
+# plt.plot(wavelength,transmittance)
+
 input_data=torch.tensor(np.stack([wavelength, transmittance], axis=1), dtype=torch.float32)
 # 
 # #add a batch dimension (1, since it's one example)
-# input_data=input_data.unsqueeze(0)
+input_data=input_data.unsqueeze(0)
 # plt.plot(wavelength,transmittance,color="blue")
 # print(runModels.runFlexibleAbundance(input_data,False))
 # print("DONE")
@@ -465,30 +479,44 @@ input_data=torch.tensor(np.stack([wavelength, transmittance], axis=1), dtype=tor
 # plt.show()
 
 # #Apply filter
-transmittance = savgol_filter(transmittance, window_length=50, polyorder=5)
-wavelength = savgol_filter(wavelength, window_length=50, polyorder=5)
-# data=pd.read_csv(r"C:\Users\Tristan\Downloads\HyPCAR2\earthTransmittance.csv")
+# transmittance = savgol_filter(transmittance, window_length=50, polyorder=5)
+# wavelength = savgol_filter(wavelength, window_length=50, polyorder=5)
+data=pd.read_csv(r"C:\Users\Tristan\Downloads\HyPCAR2\earthTransmittance.csv")
 
-# wavelength,transmittance=data.iloc[:,0],data.iloc[:,1]
+wavelength,transmittance=data.iloc[:,0],data.iloc[:,1]
 
+data2=pd.read_csv("baseAbundanceEarth.csv")
+wavelength2,transmittance2=data2.iloc[:,0],data2.iloc[:,1]
+
+data3=pd.read_csv("tunedEarth.csv")
+wavelength3,transmittance3=data3.iloc[:,0],data3.iloc[:,1]
 
 plt.figure(1)
 plt.title("Earth Transmittance")
 plt.xlabel("Wavelength (um)")
 plt.ylabel("Transmittance")
+plt.plot(wavelength,transmittance,color="blue")
+plt.plot(wavelength2,transmittance2,linestyle="--",color="orange")
+plt.plot(wavelength3,transmittance3,linestyle="--",color="green")
 
-plt.plot(wavelength,transmittance)
-# plt.savefig(r"C:\Users\Tristan\Downloads\HyPCAR3\visuals\earthTransmittance.png")
+# # plt.savefig(r"C:\Users\Tristan\Downloads\HyPCAR3\visuals\earthTransmittance.png")
 input_data=torch.tensor(np.stack([wavelength, transmittance], axis=1), dtype=torch.float32)
-
-# #add a batch dimension (1, since it's one example)
+# input_data2=torch.tensor(np.stack([wavelength2,transmittance2],axis=1),dtype=torch.float32)
+# print(input_data2)
+# print(input_data)
+# phys_mse = torch.mean((input_data-input_data2)**2).item()
+# print(phys_mse)
+# # #add a batch dimension (1, since it's one example)
 input_data=input_data.unsqueeze(0)
 
 with torch.no_grad():
     model.eval()
     aModel.eval()
     output=model(input_data)
-
+    print("HERE:")
+    print(output)
+    test=torch.tensor([[0.0, 1.0, 0.0, 1.0, 1.0, 0.0,
+         0.0]])
     aOutput=aModel(input_data,output)
 
 
@@ -525,22 +553,15 @@ CO2: 0.14%
 H2O: 0.86%
 CH4: Very little (5.618113974037442e-09)
 NH3: NOPE (3.2953798023704906e-10)
-'''
 
 
 '''
-K2-18B
-Abundances:
-O2: 2.99%
-N2: 31.71%
-H2: 2.71%
-CO2: 17.27%
-H2O: 21.22%
-CH4: 19.886%
-NH3: 4.22%
 
 
+'''
+LHS 1140B
 
-
+Val: 0.019258489832282066, 0.30832624435424805, 0.05459008738398552, 0.024095920845866203, 0.25379401445388794, 0.1625288426876068, 0.17740638554096222
+Uncertainty: 0.32078495621681213, 0.6767081022262573, 0.5994249582290649, 0.5880318284034729, 0.5760899782180786, 0.5738149285316467, 0.7441630363464355
 
 '''

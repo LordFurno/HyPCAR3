@@ -510,7 +510,7 @@ if __name__=="__main__":
     device=torch.device("cpu")
 
     model=abundanceModel()
-    model.load_state_dict(torch.load(r"C:\Users\Tristan\Downloads\HyPCAR3\finalBaseAbundance.pt",weights_only=True))
+    model.load_state_dict(torch.load(r"C:\Users\Tristan\Downloads\HyPCAR3\setWeightAbundance2.pt",weights_only=True))
     model=model.to(device)
 
 
@@ -545,44 +545,44 @@ if __name__=="__main__":
             predAbun,uncertainties,attentionWeights=model(data,detectionOutput)
             total=time.time()-start
             avg.append(total)
-            print("REAL:")
-            print(labels)
-            print("ABUNDANCSE:")
-            print(predAbun)
-            print("DETECTION:")
-            print(detectionOutput)
-            print("UNCERTAINTIES:")
-            print(uncertainties)
-            print(configs)
-            temp=data[0].tolist()
-            plt.style.use("seaborn-v0_8-darkgrid")
+            # print("REAL:")
+            # print(labels)
+            # print("ABUNDANCSE:")
+            # print(predAbun)
+            # print("DETECTION:")
+            # print(detectionOutput)
+            # print("UNCERTAINTIES:")
+            # print(uncertainties)
+            # print(configs)
+            # temp=data[0].tolist()
+            # plt.style.use("seaborn-v0_8-darkgrid")
 
 
-            plt.figure(figsize=(12, 7))
+            # plt.figure(figsize=(12, 7))
 
 
-            wavelength = [val[0] for val in temp]
-            transmittance = [val[1] for val in temp]
+            # wavelength = [val[0] for val in temp]
+            # transmittance = [val[1] for val in temp]
 
  
-            plt.plot(wavelength, transmittance, color='navy', linewidth=2.5, marker='o', markersize=6)
+            # plt.plot(wavelength, transmittance, color='navy', linewidth=2.5, marker='o', markersize=6)
 
         
-            plt.xlabel("Wavelength (μm)", fontsize=20)
-            plt.ylabel("Transmittance", fontsize=20)
-            plt.title("Transmittance Spectra", fontsize=22, fontweight='bold')
+            # plt.xlabel("Wavelength (μm)", fontsize=20)
+            # plt.ylabel("Transmittance", fontsize=20)
+            # plt.title("Transmittance Spectra", fontsize=22, fontweight='bold')
 
 
-            plt.xticks(fontsize=18)
-            plt.yticks(fontsize=18)
+            # plt.xticks(fontsize=18)
+            # plt.yticks(fontsize=18)
 
-            plt.grid(True, which="major", linestyle='--', linewidth=0.8, alpha=0.7)
+            # plt.grid(True, which="major", linestyle='--', linewidth=0.8, alpha=0.7)
 
-            # Adjust the layout to prevent clipping
-            plt.tight_layout()
+            # # Adjust the layout to prevent clipping
+            # plt.tight_layout()
 
-            # Display the plot
-            plt.show(block=True)
+            # # Display the plot
+            # plt.show(block=True)
 
             # break
             loss=criterion(predAbun,labels)

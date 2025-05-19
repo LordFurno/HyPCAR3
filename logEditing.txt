@@ -1,39 +1,184 @@
-concurrent.futures.process._RemoteTraceback:
-"""
-Traceback (most recent call last):
-  File "/cvmfs/soft.computecanada.ca/easybuild/software/2023/x86-64-v3/Compiler/gcccore/python/3.12.4/lib/python3.12/concurrent/futures/process.py", line 263, in _process_worker
-    r = call_item.fn(*call_item.args, **call_item.kwargs)
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/cvmfs/soft.computecanada.ca/easybuild/software/2023/x86-64-v3/Compiler/gcccore/python/3.12.4/lib/python3.12/concurrent/futures/process.py", line 212, in _process_chunk
-    return [fn(*args) for args in chunk]
-            ^^^^^^^^^
-  File "/project/6000478/bobb/testDocker.py", line 49, in run_one_sim
-    raise RuntimeError(f"Unexpected data shape {arr.shape} for {file_path}")
-RuntimeError: Unexpected data shape (785, 9) for configTemplate.txt
-"""
 
-The above exception was the direct cause of the following exception:
+def loadHITRANData(molecule):
 
-Traceback (most recent call last):
-  File "/project/6000478/bobb/testDocker.py", line 84, in <module>
-    main()
-  File "/project/6000478/bobb/testDocker.py", line 76, in main
-    data = batch_run(file_list)
-           ^^^^^^^^^^^^^^^^^^^^
-  File "/project/6000478/bobb/testDocker.py", line 64, in batch_run
-    tensors = list(executor.map(run_one_sim, file_list))
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/cvmfs/soft.computecanada.ca/easybuild/software/2023/x86-64-v3/Compiler/gcccore/python/3.12.4/lib/python3.12/concurrent/futures/process.py", line 642, in _chain_from_iterable_of_lists
-    for element in iterable:
-  File "/cvmfs/soft.computecanada.ca/easybuild/software/2023/x86-64-v3/Compiler/gcccore/python/3.12.4/lib/python3.12/concurrent/futures/_base.py", line 619, in result_iterator
-    yield _result_or_cancel(fs.pop())
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/cvmfs/soft.computecanada.ca/easybuild/software/2023/x86-64-v3/Compiler/gcccore/python/3.12.4/lib/python3.12/concurrent/futures/_base.py", line 317, in _result_or_cancel
-    return fut.result(timeout)
-           ^^^^^^^^^^^^^^^^^^^
-  File "/cvmfs/soft.computecanada.ca/easybuild/software/2023/x86-64-v3/Compiler/gcccore/python/3.12.4/lib/python3.12/concurrent/futures/_base.py", line 456, in result
-    return self.__get_result()
-           ^^^^^^^^^^^^^^^^^^^
-  File "/cvmfs/soft.computecanada.ca/easybuild/software/2023/x86-64-v3/Compiler/gcccore/python/3.12.4/lib/python3.12/concurrent/futures/_base.py", line 401, in __get_result
-    raise self._exception
-RuntimeError: Unexpected data shape (785, 9) for configTemplate.txt
+    #Calculate Wavenumber bounds from spectrum (cm⁻¹)
+    nu_min = 1e4 / wav.max().item()
+    nu_max = 1e4 / wav.min().item()
+    molIds={'H2O': 1, 'CO2': 2, 'O3': 3, 'N2O': 4, 'CO': 5, 'CH4': 6, 'O2': 7, 'NO': 8, 'SO2': 9, 'NO2': 10, 'NH3': 11, 'HNO3': 12, 'OH': 13, 'HF': 14, 'HCl': 15, 'HBr': 16, 'HI': 17, 'ClO': 18, 'OCS': 19, 'H2CO': 20, 'HOCl': 21, 'N2': 22, 'HCN': 23, 'CH3Cl': 24, 'H2O2': 25, 'C2H2': 26, 'C2H6': 27, 'PH3': 28, 'COF2': 29, 'SF6': 30, 'H2S': 31, 'HCOOH': 32, 'HO2': 33, 'O': 34, 'ClONO2': 35, 'NO+': 36, 'HOBr': 37, 'C2H4': 38, 'CH3OH': 39, 'CH3Br': 40, 'CH3CN': 41, 'CF4': 42, 'C4H3': 43, 'HC3N': 44, 'H2': 45, 'CS': 46, 'SO3': 47, 'C2N2': 48, 'COC12': 49, 'SO': 50, 'CH3F': 51, 'GeH4': 52, 'CS2': 53, 'CH3I': 54, 'NF3': 55}
+    mol_id = molIds[molecule]
+    hapi.fetch(molecule, mol_id, 1, nu_min, nu_max)
+
+def getLineCenters(mol,nuMin,nuMax):
+    molIds = {'H2O':1,'CO2':2,'O3':3,'N2O':4,'CO':5,
+              'CH4':6,'O2':7,'NO':8,'SO2':9,'NO2':10,
+              'NH3':11,'HNO3':12,'OH':13,'HF':14}
+
+    loadHITRANData(mol)
+    pressure,temp=getAtmoVal(config)
+    nuGrid=np.linspace(nuMin, nuMax, 784)  
+    nu,coef=hapi.absorptionCoefficient_Lorentz(SourceTables=mol,HITRAN_units=False,WavenumberGrid=nuGrid)
+    nu,transMol=hapi.transmittanceSpectrum(nu, coef)
+
+    nu=1e4/nu
+    os.remove(r"C:\Users\bob\Downloads\HyPCAR3"+f"\\{mol}.data")
+    os.remove(r"C:\Users\bob\Downloads\HyPCAR3"+f"\\{mol}.header")
+    return nu,transMol
+
+        
+    
+
+molecules = ["O2","N2","H2","CO2","H2O","CH4","NH3"]
+
+attn, wav, tr, bins, molecules,config = loadExample()
+H, Q, K = attn.shape
+
+# Calculate the wavenumber bounds from the spectrum
+nu_min = 1e4 / wav.max().item()
+nu_max = 1e4 / wav.min().item()
+# print(getAtmoVal(config))
+# Optionally, fetch HITRAN data if needed
+# loadHITRANData(molecules, wav)
+
+# Only do this if you don't have data
+# sim = {}
+# for mol in molecules:
+#     wav_sim, tr_sim = getLineCenters(mol, nu_min, nu_max)
+#     sim[mol] = (wav_sim, tr_sim)
+#     #Save the data, so we don't have to keep doing this
+#     folder=r"C:\Users\bob\Downloads\HyPCAR3\resultAnalysis\molecularTransmittance"
+#     fn=os.path.join(folder,f"{mol}.csv")
+#     with open(fn,"w") as f:
+#         for i in range(len(wav_sim)):
+#             f.write(str(wav_sim[i])+","+str(tr_sim[i])+"\n")
+    
+#B_8104.txt is really good example
+sim={}
+fingerprints={}
+for mol in molecules:
+    folder=r"C:\Users\bob\Downloads\HyPCAR3\resultAnalysis\molecularTransmittance"
+    fn=os.path.join(folder,f"{mol}.csv")
+    molData=pd.read_csv(fn,header=None)
+
+    wv2,tr2=molData.iloc[:,0],molData.iloc[:,1]
+    sim[mol]=(wv2,tr2)
+
+    fp = np.array([tr2[bins==k].mean() for k in range(K) ])
+    fingerprints[mol] = fp
+
+# ─── 2) Compute head×molecule correlation matrix ──────────────────────────────
+# use head’s avg attention over queries
+
+head_attn = attn.mean(axis=1) if attn.ndim == 3 else attn  # shape (H, K)
+corr = pd.DataFrame(
+    {
+        mol: [np.corrcoef(head_attn[h, :], fp)[0, 1] for h in range(H)]
+        for mol, fp in fingerprints.items()
+    },
+    index=[f"Head {h+1}" for h in range(H)]
+)
+
+# ─── 3) Dash app ──────────────────────────────────────────────────────────────
+app = Dash(__name__)
+app.layout = html.Div([
+    html.H2("Molecule-First Attention Explorer"),
+
+    html.Div([
+        html.Label("Molecule:"),
+        dcc.Dropdown(
+            id='mol-dd',
+            options=[{'label':m,'value':m} for m in molecules],
+            value=molecules[0],
+            clearable=False
+        ),
+        html.Br(),
+
+        html.Label("Head (sorted by correlation):"),
+        dcc.Dropdown(id='head-dd', clearable=False),
+
+        html.Br(),
+        html.Label("Query:"),
+        dcc.Dropdown(
+            id='query-dd',
+            options=[{'label':f'Query {q+1}','value':q} for q in range(Q)],
+            value=0,
+            clearable=False
+        ),
+    ], style={'width':'25%','display':'inline-block','verticalAlign':'top','padding':'20px'}),
+
+    html.Div([
+        dcc.Graph(id='heatmap', style={'height':'250px'}),
+        dcc.Graph(id='bar-chart', style={'height':'250px'}),
+        dcc.Graph(id='binned-scatter', style={'height':'400px'}),
+    ], style={'width':'70%','display':'inline-block','padding':'20px'}),
+])
+
+# ─── Populate Head dropdown whenever molecule changes ────────────────────────
+@app.callback(
+    Output('head-dd','options'),
+    Output('head-dd','value'),
+    Input('mol-dd','value'),
+)
+def update_heads(mol):
+    # sort heads by corr descending
+    scores = corr[mol].sort_values(ascending=False)
+    opts = [
+        {'label':f"{head} (r={scores[head]:.2f})", 'value':int(head.split()[1])-1}
+        for head in scores.index
+    ]
+    return opts, opts[0]['value']
+
+# ─── Main visualization callback ─────────────────────────────────────────────
+@app.callback(
+    Output('heatmap','figure'),
+    Output('bar-chart','figure'),
+    Output('binned-scatter','figure'),
+    Input('head-dd','value'),
+    Input('query-dd','value'),
+    Input('mol-dd','value'),
+)
+def update_plots(head, query, mol):
+    vec = attn[head, query, :]
+
+    # 1) Heatmap
+    hm = px.imshow(
+        vec.reshape(1, K),
+        x=[f'K{k}' for k in range(K)],
+        y=[f'H{head+1},Q{query+1}'],
+        color_continuous_scale='viridis', zmin=0, zmax=1,
+        labels={'x':'Token','y':'','color':'Weight'}
+    )
+    hm.update_yaxes(showticklabels=False)
+
+    # 2) Bar chart
+    bc = px.bar(
+        x=[f'K{k}' for k in range(K)],
+        y=vec,
+        range_y=[0,1],
+        labels={'x':'Token','y':'Attention'},
+        title=f'Head {head+1}, Query {query+1}'
+    )
+
+    # 3) Binned scatter
+    colors = vec[bins]
+    sc = px.scatter(
+        x=wav, y=tr,
+        color=colors,
+        color_continuous_scale='viridis',
+        labels={'color':'Token Weight'},
+        title=f'Spectrum & Attention vs {mol}'
+    ).update_traces(marker={'size':6})
+
+    # 4) Overlay full envelope for selected molecule
+    wav_env, tr_env = sim[mol]
+    sc.add_trace(go.Scatter(
+        x=wav_env, y=tr_env,
+        mode='lines',
+        name=f'{mol} envelope (r={corr.loc[f"Head {head+1}",mol]:.2f})',
+        line=dict(dash='dash', width=2),
+        opacity=0.6
+    ))
+
+    return hm, bc, sc
+
+if __name__=='__main__':
+    app.run(debug=True)

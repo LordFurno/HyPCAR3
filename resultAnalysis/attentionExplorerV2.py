@@ -6,7 +6,6 @@ import numpy as np
 import random
 import torch.nn as nn
 import torch.nn.functional as F
-from tqdm import tqdm
 
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -79,7 +78,7 @@ class customDataset(Dataset):
 
 
         configFilePath=r"C:\Users\Tristan\Downloads\HyPCAR3\configFiles\\"
-        # configFilePath="/home/tristanb/scratch/configFiles/"
+        #configFilePath="/home/tristanb/scratch/configFiles/"
         fileName=os.path.basename(filePath)
         fileName=fileName.removesuffix(".csv")
         configFilePath+=fileName+".txt"
@@ -126,7 +125,7 @@ class detectionModel(nn.Module):
         self.fc3=nn.Linear(64,7)#7 molecule present
 
     def forward(self,x):
-        # Permute dimensions to [batch_size, channels, sequence_length]
+        #Permute dimensions to [batch_size, channels, sequence_length]
         x=x.permute(0, 2, 1)
         x=F.relu(self.bn1(self.conv1(x)))
         x=self.pool1(x)
@@ -165,33 +164,33 @@ class MultiHeadAttention(nn.Module):
     def forward(self, x):
         batch_size, seq_length, input_dim = x.size()
 
-        # Linear projections for Q, K, V
+        #Linear projections for Q, K, V
         Q = self.query(x)
         K = self.key(x)
         V = self.value(x)
 
-        # Split into heads
+        #Split into heads
         Q = Q.view(batch_size, seq_length, self.num_heads, input_dim // self.num_heads)
         K = K.view(batch_size, seq_length, self.num_heads, input_dim // self.num_heads)
         V = V.view(batch_size, seq_length, self.num_heads, input_dim // self.num_heads)
 
-        # Transpose to (batch, heads, seq_len, feature_dim)
+        #Transpose to (batch, heads, seq_len, feature_dim)
         Q = Q.permute(0, 2, 1, 3)
         K = K.permute(0, 2, 1, 3)
         V = V.permute(0, 2, 1, 3)
 
-        # Scaled dot-product attention
+        #Scaled dot-product attention
         scores = torch.matmul(Q, K.transpose(-1, -2)) / (input_dim ** 0.5)
         attention_weights = self.softmax(scores)
 
-        # Weighted sum of values
+        #Weighted sum of values
         weighted_sum = torch.matmul(attention_weights, V)
 
-        # Concatenate heads and apply linear projection
+        #Concatenate heads and apply linear projection
         weighted_sum = weighted_sum.permute(0, 2, 1, 3).contiguous()
         weighted_sum = weighted_sum.view(batch_size, seq_length, input_dim)
 
-        # Output linear layer
+        #Output linear layer
         out = self.fc_out(weighted_sum)
 
         return out, attention_weights
@@ -329,7 +328,7 @@ def loadExample(csvPath=None,configPath=None):
 
         model=abundanceModel()
         model.load_state_dict(torch.load(
-            r"C:\Users\Tristan\Downloads\HyPCAR3\finalBaseAbundance.pt",
+            r"C:\Users\Tristan\Downloads\HyPCAR3\setWeightAbundance.pt",
             weights_only=True))
         model.eval()
 
@@ -337,8 +336,12 @@ def loadExample(csvPath=None,configPath=None):
             detectionOutput=detect(input_data)
             predAbun,uncertainty,attentionWeights=model(input_data,detectionOutput)
 
-        attn=attentionWeights.cpu().numpy()[0]         # (H, Q, K)
+        attn=attentionWeights.cpu().numpy()[0]         #(H, Q, K)
         molecules = ["O2","N2","H2","CO2","H2O","CH4","NH3"]
+        print("PRED")
+        for idx, mol in enumerate(molecules):
+            print(f"{mol}: {predAbun[0][idx]*100:.2f}%")
+            print(f"Uncertainty: {uncertainty[0][idx]}")
         H,Q,K=attn.shape
         wv,tr=torch.tensor(wv),torch.tensor(tr)
         N=wv.shape[0]
@@ -377,12 +380,13 @@ def loadExample(csvPath=None,configPath=None):
         r"C:\Users\Tristan\Downloads\HyPCAR3\setWeightAbundance.pt",
         weights_only=True))
     model.eval()
-
+    import time
+    start=time.time()
     with torch.no_grad():
         detectionOutput=detect(input_data)
         predAbun,uncertainty,attentionWeights=model(input_data,detectionOutput)
-
-    attn=attentionWeights.cpu().numpy()[0]         # (H, Q, K)
+    print(time.time()-start)
+    attn=attentionWeights.cpu().numpy()[0]         #(H, Q, K)
 
     H,Q,K=attn.shape
     wv,tr=torch.tensor(wv),torch.tensor(tr)
@@ -412,6 +416,9 @@ def loadExample(csvPath=None,configPath=None):
     print("\nPRED")
     for idx, mol in enumerate(molecules):
         print(f"{mol}: {predAbun[0][idx]*100:.2f}%")
+        print(f"{mol}: {uncertainty[0][idx]} Uncertainty")
+
+
     with open(r"C:\Users\Tristan\Downloads\HyPCAR3\visuals\tempData.csv","w") as f:
         for i in range(len(wv)):
             f.write(str(wv[i].item())+","+str(tr[i].item())+"\n")
@@ -446,12 +453,12 @@ def read_hapi_table(mol, db_path='HAPI_DB'):
     
     headerPath="C:\\Users\\Tristan\\Downloads\\HyPCAR3\\HAPI_DB\\"+ f"{mol}.header"
     dataPath="C:\\Users\\Tristan\\Downloads\\HyPCAR3\\HAPI_DB\\"+ f"{mol}.data"
-    # 2) load header JSON
+    #2) load header JSON
     with open(headerPath, 'r') as f:
         header = json.load(f)
 
     order= header['order']
-    pos= header['position']    # start indices (0-based)
+    pos= header['position']    #start indices (0-based)
 
     line_len = None
     with open(dataPath, 'r') as f_dat:
@@ -470,7 +477,7 @@ def read_hapi_table(mol, db_path='HAPI_DB'):
             next_start = pos[order[i+1]]
             width = next_start - start
         else:
-            width = line_len - start  # rest of line
+            width = line_len - start  #rest of line
         widths.append(width)
 
 
@@ -522,12 +529,19 @@ NH3: 0.00%
 
 Fine Tuned:
 O2: 11.54%
+O2: 0.07302048057317734 Uncertainty
 N2: 54.74%
+N2: 0.23366165161132812 Uncertainty
 H2: 0.00%
+H2: 0.1850724071264267 Uncertainty
 CO2: 18.56%
+CO2: 0.05876367911696434 Uncertainty
 H2O: 15.17%
+H2O: 0.04903728514909744 Uncertainty
 CH4: 0.00%
+CH4: 0.0732705295085907 Uncertainty
 NH3: 0.00%
+NH3: 0.12598568201065063 Uncertainty
 
 PRED
 O2: 12.21%
@@ -540,30 +554,33 @@ NH3: 0.00%
 
 '''
 
-molecules=["O2","N2","H2","CO2","H2O","CH4","NH3"]
 
-attn,wav,tr,bins,molecules,config=loadExample(r"C:\Users\Tristan\Downloads\HyPCAR3\data\B\B_8104.csv")
-# attn,wav,tr,bins,molecules,config=loadExample(r"C:\Users\Tristan\Downloads\HyPCAR3\earthTransmittance.csv",r"C:\Users\Tristan\Downloads\HyPCAR3\earthConfigTemplate.txt")
+
+#attn,wav,tr,bins,molecules,config=loadExample(r"C:\Users\Tristan\Downloads\HyPCAR3\data\B\B_8104.csv")
+#attn,wav,tr,bins,molecules,config=loadExample()
+#attn,wav,tr,bins,molecules,config=loadExample(r"C:\Users\Tristan\Downloads\HyPCAR3\earthTransmittance.csv",r"C:\Users\Tristan\Downloads\HyPCAR3\earthConfigTemplate.txt")
+attn,wav,tr,bins,molecules,config=loadExample(r"C:\Users\Tristan\Downloads\HyPCAR3\marsSpectrum.csv",r"C:\Users\Tristan\Downloads\HyPCAR3\earthConfigTemplate.txt")
+
 H,Q,K=attn.shape
 
-# Calculate the wavenumber bounds from the spectrum
+#Calculate the wavenumber bounds from the spectrum
 nu_min=1e4/wav.max().item()
 nu_max=1e4/wav.min().item()
 
-# print(getAtmoVal(config))
+#print(getAtmoVal(config))
 
 
-# #Only do this if you don't have data
-# sim = {}
-# for mol in molecules:
-#     wav_sim, tr_sim = getLineCenters(mol, nu_min, nu_max)
-#     sim[mol] = (wav_sim, tr_sim)
-#     #Save the data, so we don't have to keep doing this
-#     folder=r"C:\Users\Tristan\Downloads\HyPCAR3\resultAnalysis\molecularTransmittance"
-#     fn=os.path.join(folder,f"{mol}.csv")
-#     with open(fn,"w") as f:
-#         for i in range(len(wav_sim)):
-#             f.write(str(wav_sim[i])+","+str(tr_sim[i])+"\n")
+#Only do this if you don't have data
+sim = {}
+#for mol in molecules:
+#    wav_sim, tr_sim = getLineCenters(mol, nu_min, nu_max)
+#    sim[mol] = (wav_sim, tr_sim)
+#    #Save the data, so we don't have to keep doing this
+#    folder=r"C:\Users\Tristan\Downloads\HyPCAR3\resultAnalysis\molecularTransmittance"
+#    fn=os.path.join(folder,f"{mol}.csv")
+#    with open(fn,"w") as f:
+#        for i in range(len(wav_sim)):
+#            f.write(str(wav_sim[i])+","+str(tr_sim[i])+"\n")
     
 #B_8104.txt is really good example
 #C:\Users\Tristan\Downloads\HyPCAR3\data\B\B_8104.csv
@@ -582,7 +599,7 @@ for mol in molecules:
 
 
 #Corrleate average attention (over queries) with molecular absorption features
-head_attn=attn.mean(axis=1) if attn.ndim==3 else attn   # shape (H, K)
+head_attn=attn.mean(axis=1) if attn.ndim==3 else attn   #shape (H, K)
 
 corr_dict = {}
 for mol,fp in fingerprints.items():

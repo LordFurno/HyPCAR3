@@ -237,62 +237,119 @@ trueLabels = np.concatenate(trueLabels, axis=0)  # Shape (720, 7)
 predictions = np.concatenate(predictions, axis=0) 
 probs=np.concatenate(probs,axis=0)
 
-
-
-save_dir = 'evaluation_plots'
-os.makedirs(save_dir, exist_ok=True)
-
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.metrics import f1_score, roc_curve, auc
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+classes = ["O2", "N2", "H2", "CO2", "H2O", "CH4", "NH3"]
 n_classes = trueLabels.shape[1]
-molecules=['O2','N2','H2','CO2','H2O','CH4','NH3']
 
-for i, name in enumerate(molecules):
-    yt = trueLabels[:, i]
-    ys = probs[:, i]
+# 1) Per-class F1-score bar chart
+f1s = [f1_score(trueLabels[:, i], predictions[:, i]) for i in range(n_classes)]
 
-    # 1) ROC Curve
-    fpr, tpr, _ = roc_curve(yt, ys)
+fig, ax = plt.subplots(figsize=(6, 3))
+ax.bar(classes, f1s, color=plt.cm.tab10(range(n_classes)))
+ax.set_ylim(0, 1)
+ax.set_ylabel("F1 Score", fontsize=14)
+ax.set_title("Per-Class F1 Scores (Detection Model)", fontsize=16)
+ax.grid(axis="y", linestyle="--", alpha=0.5)
+ax.spines["top"].set_visible(False)
+ax.spines["right"].set_visible(False)
+plt.tight_layout(pad=1)
+plt.savefig("f1_scores_detection.png", dpi=300, bbox_inches="tight")
+plt.show()
+
+# 2) ROC curves with zoomed inset
+fig, ax = plt.subplots(figsize=(5, 5))
+for i, cls in enumerate(classes):
+    fpr, tpr, _ = roc_curve(trueLabels[:, i], probs[:, i])
     roc_auc = auc(fpr, tpr)
+    ax.plot(fpr, tpr, label=f"{cls} (AUC={roc_auc:.2f})", lw=1.5)
 
-    plt.figure()
-    plt.plot(fpr, tpr, label=f'AUC = {roc_auc:.3f}')
-    plt.plot([0, 1], [0, 1], '--', label='chance')
-    plt.xlabel('False Positive Rate')
-    plt.ylabel('True Positive Rate')
-    plt.title(f'ROC Curve — {name}')
-    plt.legend(loc='lower right')
-    plt.tight_layout()
-    plt.savefig(os.path.join(save_dir, f'roc_curve_{name}.png'))
-    plt.close()
+# Diagonal reference line
+ax.plot([0, 1], [0, 1], "k--", lw=1)
+ax.set_xlabel("False Positive Rate", fontsize=14)
+ax.set_ylabel("True Positive Rate", fontsize=14)
+ax.set_title("ROC Curves for Detection Model", fontsize=16)
+ax.legend(loc="lower right", fontsize=8, ncol=2)
+ax.grid(linestyle="--", alpha=0.5)
+ax.spines["top"].set_visible(False)
+ax.spines["right"].set_visible(False)
 
-    # 2) Precision–Recall Curve
-    precision, recall, _ = precision_recall_curve(yt, ys)
-    ap = average_precision_score(yt, ys)
+# Inset zoom
+axins = inset_axes(ax, width="40%", height="40%", loc="upper left",
+                   bbox_to_anchor=(0.05, 0.05, 1, 1), bbox_transform=ax.transAxes)
+for i in range(n_classes):
+    fpr, tpr, _ = roc_curve(trueLabels[:, i], predictions[:, i])
+    axins.plot(fpr, tpr, lw=1.5, color=plt.cm.tab10(i))
+axins.plot([0, 0.1], [0, 0.1], "k--", lw=1)
+axins.set_xlim(0, 0.1)
+axins.set_ylim(0.9, 1.0)
+axins.set_xticks([0, 0.05, 0.1])
+axins.set_yticks([0.9, 0.95, 1.0])
+axins.grid(linestyle=":", alpha=0.7)
+axins.spines["top"].set_visible(False)
+axins.spines["right"].set_visible(False)
 
-    plt.figure()
-    plt.plot(recall, precision, label=f'AP = {ap:.3f}')
-    plt.xlabel('Recall')
-    plt.ylabel('Precision')
-    plt.title(f'Precision–Recall Curve — {name}')
-    plt.legend(loc='lower left')
-    plt.tight_layout()
-    plt.savefig(os.path.join(save_dir, f'pr_curve_{name}.png'))
-    plt.close()
+plt.tight_layout(pad=2)
+plt.savefig("roc_inset_detection.png", dpi=300, bbox_inches="tight")
+plt.show()
 
-    # 3) Calibration (Reliability) Curve
-    prob_true, prob_pred = calibration_curve(yt, ys, n_bins=10)
-    bs = brier_score_loss(yt, ys)
-    print(f"{name}: {bs}")
 
-    plt.figure()
-    plt.plot(prob_pred, prob_true, 'o-', label='calibration')
-    plt.plot([0, 1], [0, 1], '--', label='perfect')
-    plt.xlabel('Mean predicted probability')
-    plt.ylabel('Fraction of positives')
-    plt.title(f'Calibration — {name}  (Brier = {bs:.3f})')
-    plt.legend()
-    plt.tight_layout()
-    plt.savefig(os.path.join(save_dir, f'calibration_{name}.png'))
-    plt.close()
+# save_dir = 'evaluation_plots'
+# os.makedirs(save_dir, exist_ok=True)
+
+# n_classes = trueLabels.shape[1]
+# molecules=['O2','N2','H2','CO2','H2O','CH4','NH3']
+
+# for i, name in enumerate(molecules):
+#     yt = trueLabels[:, i]
+#     ys = probs[:, i]
+
+#     # 1) ROC Curve
+#     fpr, tpr, _ = roc_curve(yt, ys)
+#     roc_auc = auc(fpr, tpr)
+
+#     plt.figure()
+#     plt.plot(fpr, tpr, label=f'AUC = {roc_auc:.3f}')
+#     plt.plot([0, 1], [0, 1], '--', label='chance')
+#     plt.xlabel('False Positive Rate')
+#     plt.ylabel('True Positive Rate')
+#     plt.title(f'ROC Curve — {name}')
+#     plt.legend(loc='lower right')
+#     plt.tight_layout()
+#     plt.savefig(os.path.join(save_dir, f'roc_curve_{name}.png'))
+#     plt.close()
+
+#     # 2) Precision–Recall Curve
+#     precision, recall, _ = precision_recall_curve(yt, ys)
+#     ap = average_precision_score(yt, ys)
+
+#     plt.figure()
+#     plt.plot(recall, precision, label=f'AP = {ap:.3f}')
+#     plt.xlabel('Recall')
+#     plt.ylabel('Precision')
+#     plt.title(f'Precision–Recall Curve — {name}')
+#     plt.legend(loc='lower left')
+#     plt.tight_layout()
+#     plt.savefig(os.path.join(save_dir, f'pr_curve_{name}.png'))
+#     plt.close()
+
+#     # 3) Calibration (Reliability) Curve
+#     prob_true, prob_pred = calibration_curve(yt, ys, n_bins=10)
+#     bs = brier_score_loss(yt, ys)
+#     print(f"{name}: {bs}")
+
+#     plt.figure()
+#     plt.plot(prob_pred, prob_true, 'o-', label='calibration')
+#     plt.plot([0, 1], [0, 1], '--', label='perfect')
+#     plt.xlabel('Mean predicted probability')
+#     plt.ylabel('Fraction of positives')
+#     plt.title(f'Calibration — {name}  (Brier = {bs:.3f})')
+#     plt.legend()
+#     plt.tight_layout()
+#     plt.savefig(os.path.join(save_dir, f'calibration_{name}.png'))
+#     plt.close()
 
 
 

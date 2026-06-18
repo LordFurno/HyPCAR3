@@ -45,7 +45,7 @@ def topKAccuracy(output,target,k=1):
     '''
     _,topKPred = output.topk(k, dim=1)
 
-    # Get the indices of the top k true abundances
+    #Get the indices of the top k true abundances
     _,topKTarget = target.topk(k, dim=1)
 
     #Compare predictions with true targets
@@ -68,16 +68,16 @@ def customCrossEntropy(output, target):
     cross_entropy_loss: The average cross-entropy loss for the batch.
     '''
 
-    # Apply log to predictions (log-softmax is typically used to stabilize computation)
-    log_predictions=torch.log(output + 1e-9)  # Adding a small value to prevent log(0)
+    #Apply log to predictions (log-softmax is typically used to stabilize computation)
+    log_predictions=torch.log(output + 1e-9)  #Adding a small value to prevent log(0)
 
-    # Element-wise multiplication of log_predictions with targets
+    #Element-wise multiplication of log_predictions with targets
     elementwise_loss=-target * log_predictions
 
-    # Sum over the molecules (dim=1) to get the loss for each example in the batch
+    #Sum over the molecules (dim=1) to get the loss for each example in the batch
     cross_entropy_loss=torch.sum(elementwise_loss, dim=1)
 
-    # Average over the batch
+    #Average over the batch
     cross_entropy_loss=torch.mean(cross_entropy_loss)
 
     return cross_entropy_loss
@@ -200,7 +200,7 @@ class detectionModel(nn.Module):
         self.fc3=nn.Linear(64,7)#7 molecule present
 
     def forward(self,x):
-        # Permute dimensions to [batch_size, channels, sequence_length]
+        #Permute dimensions to [batch_size, channels, sequence_length]
         x=x.permute(0, 2, 1)
         x=F.relu(self.bn1(self.conv1(x)))
         x=self.pool1(x)
@@ -239,33 +239,33 @@ class MultiHeadAttention(nn.Module):
     def forward(self, x):
         batch_size, seq_length, input_dim = x.size()
 
-        # Linear projections for Q, K, V
+        #Linear projections for Q, K, V
         Q = self.query(x)
         K = self.key(x)
         V = self.value(x)
 
-        # Split into heads
+        #Split into heads
         Q = Q.view(batch_size, seq_length, self.num_heads, input_dim // self.num_heads)
         K = K.view(batch_size, seq_length, self.num_heads, input_dim // self.num_heads)
         V = V.view(batch_size, seq_length, self.num_heads, input_dim // self.num_heads)
 
-        # Transpose to (batch, heads, seq_len, feature_dim)
+        #Transpose to (batch, heads, seq_len, feature_dim)
         Q = Q.permute(0, 2, 1, 3)
         K = K.permute(0, 2, 1, 3)
         V = V.permute(0, 2, 1, 3)
 
-        # Scaled dot-product attention
+        #Scaled dot-product attention
         scores = torch.matmul(Q, K.transpose(-1, -2)) / (input_dim ** 0.5)
         attention_weights = self.softmax(scores)
 
-        # Weighted sum of values
+        #Weighted sum of values
         weighted_sum = torch.matmul(attention_weights, V)
 
-        # Concatenate heads and apply linear projection
+        #Concatenate heads and apply linear projection
         weighted_sum = weighted_sum.permute(0, 2, 1, 3).contiguous()
         weighted_sum = weighted_sum.view(batch_size, seq_length, input_dim)
 
-        # Output linear layer
+        #Output linear layer
         out = self.fc_out(weighted_sum)
 
         return out, attention_weights
@@ -312,7 +312,7 @@ class abundanceModel(nn.Module):#CHange to output uncertainty as well
         self.fc3=nn.Linear(64, 32)
 
         self.fc4=nn.Linear(32, 7)#Abundance branch: predicts 7 molecule values.
-        self.fc_uncertainty=nn.Linear(32, 7)  # Uncertainty branch.
+        self.fc_uncertainty=nn.Linear(32, 7)  #Uncertainty branch.
 
     def forward(self,x,detectionOutput):
         detectionOutput=F.relu(self.fcDetect(detectionOutput))
@@ -586,4 +586,4 @@ if __name__ == '__main__':
 
     with open("transformerBaseAbundance.txt",'a') as f:
         f.write(f"Testing Loss: {test_loss}, KL Divergence: {testKL}, Top-K Accuracy: {testTopK}, Cross Entropy: {testCrossEntropy}"+"\n")
-    # print(f"Testing Loss: {test_loss}, KL Divergence: {testKL}, Top-K Accuracy: {testTopK}, Cross Entropy: {testCrossEntropy}")
+    #print(f"Testing Loss: {test_loss}, KL Divergence: {testKL}, Top-K Accuracy: {testTopK}, Cross Entropy: {testCrossEntropy}")

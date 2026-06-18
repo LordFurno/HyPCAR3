@@ -65,7 +65,7 @@ def topKAccuracy(output,target,k=1):
     '''
     _,topKPred = output.topk(k, dim=1)
     
-    # Get the indices of the top k true abundances
+    #Get the indices of the top k true abundances
     _,topKTarget = target.topk(k, dim=1)
     
     #Compare predictions with true targets
@@ -88,16 +88,16 @@ def customCrossEntropy(output, target):
     cross_entropy_loss: The average cross-entropy loss for the batch.
     '''
 
-    # Apply log to predictions (log-softmax is typically used to stabilize computation)
-    log_predictions=torch.log(output + 1e-9)  # Adding a small value to prevent log(0)
+    #Apply log to predictions (log-softmax is typically used to stabilize computation)
+    log_predictions=torch.log(output + 1e-9)  #Adding a small value to prevent log(0)
     
-    # Element-wise multiplication of log_predictions with targets
+    #Element-wise multiplication of log_predictions with targets
     elementwise_loss=-target * log_predictions
     
-    # Sum over the molecules (dim=1) to get the loss for each example in the batch
+    #Sum over the molecules (dim=1) to get the loss for each example in the batch
     cross_entropy_loss=torch.sum(elementwise_loss, dim=1)
     
-    # Average over the batch
+    #Average over the batch
     cross_entropy_loss=torch.mean(cross_entropy_loss)
     
     return cross_entropy_loss
@@ -280,7 +280,7 @@ class detectionModel(nn.Module):
         self.fc3=nn.Linear(64,7)#7 molecule present
 
     def forward(self,x):
-        # Permute dimensions to [batch_size, channels, sequence_length]
+        #Permute dimensions to [batch_size, channels, sequence_length]
         x=x.permute(0, 2, 1)
         x=F.relu(self.bn1(self.conv1(x)))
         x=self.pool1(x)
@@ -319,33 +319,33 @@ class MultiHeadAttention(nn.Module):
     def forward(self, x):
         batch_size, seq_length, input_dim = x.size()
 
-        # Linear projections for Q, K, V
+        #Linear projections for Q, K, V
         Q = self.query(x)
         K = self.key(x)
         V = self.value(x)
 
-        # Split into heads
+        #Split into heads
         Q = Q.view(batch_size, seq_length, self.num_heads, input_dim // self.num_heads)
         K = K.view(batch_size, seq_length, self.num_heads, input_dim // self.num_heads)
         V = V.view(batch_size, seq_length, self.num_heads, input_dim // self.num_heads)
 
-        # Transpose to (batch, heads, seq_len, feature_dim)
+        #Transpose to (batch, heads, seq_len, feature_dim)
         Q = Q.permute(0, 2, 1, 3)
         K = K.permute(0, 2, 1, 3)
         V = V.permute(0, 2, 1, 3)
 
-        # Scaled dot-product attention
+        #Scaled dot-product attention
         scores = torch.matmul(Q, K.transpose(-1, -2)) / (input_dim ** 0.5)
         attention_weights = self.softmax(scores)
 
-        # Weighted sum of values
+        #Weighted sum of values
         weighted_sum = torch.matmul(attention_weights, V)
 
-        # Concatenate heads and apply linear projection
+        #Concatenate heads and apply linear projection
         weighted_sum = weighted_sum.permute(0, 2, 1, 3).contiguous()
         weighted_sum = weighted_sum.view(batch_size, seq_length, input_dim)
 
-        # Output linear layer
+        #Output linear layer
         out = self.fc_out(weighted_sum)
 
         return out, attention_weights
@@ -473,10 +473,10 @@ def soft_prior_mean(predAbun, tau=1e-2):
     N = 2*N2 + NH3
 
     #soft gates for A1/A2/B
-    condA = H - (2*O + 4*C)             # >0 means A1/A2 region
-    condA_gate = torch.sigmoid(condA / tau)   # sA in [0,1]
+    condA = H - (2*O + 4*C)             #>0 means A1/A2 region
+    condA_gate = torch.sigmoid(condA / tau)   #sA in [0,1]
 
-    condA2 = condA - (3*N - (H - 2*O - 4*C))  # >0 means A1, <=0 means A2
+    condA2 = condA - (3*N - (H - 2*O - 4*C))  #>0 means A1, <=0 means A2
     gateA1 = condA_gate * torch.sigmoid( condA2 / tau)
     gateA2 = condA_gate * (1 - torch.sigmoid(condA2 / tau))
 
@@ -496,37 +496,37 @@ def soft_prior_mean(predAbun, tau=1e-2):
     #A1:
     D_A1 = H - N - 2*C + 1e-6
     mu_A1 = torch.stack([
-        torch.zeros_like(H),              # O2
-        torch.zeros_like(H),              # N2
-        (H - 2*O - 4*C - 3*N)/D_A1,       # H2
-        torch.zeros_like(H),              # CO2
-        2*O / D_A1,                       # H2O
-        2*C / D_A1,                       # CH4
-        2*N / D_A1                        # NH3
+        torch.zeros_like(H),              #O2
+        torch.zeros_like(H),              #N2
+        (H - 2*O - 4*C - 3*N)/D_A1,       #H2
+        torch.zeros_like(H),              #CO2
+        2*O / D_A1,                       #H2O
+        2*C / D_A1,                       #CH4
+        2*N / D_A1                        #NH3
     ], dim=1)
 
     #A2:
     D_A2 = H + 2*C + 3*N + 4*O + 1e-6
     mu_A2 = torch.stack([
-        torch.zeros_like(H),              # O2
-        (3*N + 4*C + 2*O - H)/D_A2,       # N2
-        torch.zeros_like(H),              # H2
-        torch.zeros_like(H),              # CO2
-        6*O / D_A2,                       # H2O
-        6*C / D_A2,                       # CH4
-        (2*H - 8*C - 4*O)/D_A2            # NH3
+        torch.zeros_like(H),              #O2
+        (3*N + 4*C + 2*O - H)/D_A2,       #N2
+        torch.zeros_like(H),              #H2
+        torch.zeros_like(H),              #CO2
+        6*O / D_A2,                       #H2O
+        6*C / D_A2,                       #CH4
+        (2*H - 8*C - 4*O)/D_A2            #NH3
     ], dim=1)
 
     #B:
     D_B = H + 2*O + 2*N + 1e-6
     mu_B = torch.stack([
-        (2*O - H - 4*C)/D_B,              # O2
-        2*N / D_B,                        # N2
-        torch.zeros_like(H),              # H2
-        4*C / D_B,                        # CO2
-        2*H / D_B,                        # H2O
-        torch.zeros_like(H),              # CH4
-        torch.zeros_like(H)               # NH3
+        (2*O - H - 4*C)/D_B,              #O2
+        2*N / D_B,                        #N2
+        torch.zeros_like(H),              #H2
+        4*C / D_B,                        #CO2
+        2*H / D_B,                        #H2O
+        torch.zeros_like(H),              #CH4
+        torch.zeros_like(H)               #NH3
     ], dim=1)
 
     #C: hydrogen-poor with side-conditions
@@ -545,25 +545,25 @@ def soft_prior_mean(predAbun, tau=1e-2):
     cond_Cgraph = torch.sigmoid((C - (0.25*H + 0.5*O)) / tau)
 
     mu_C = torch.stack([
-        torch.zeros_like(H),                            # O2
-        muN2,                                           # N2
-        torch.zeros_like(H),                            # H2
-        muCO2 * (1 - cond_H2rich),                      # CO2
-        muH2O * (1 - cond_Cgraph),                      # H2O
-        muCH4 * (1 - cond_O2rich),                      # CH4
-        torch.zeros_like(H)                             # NH3
+        torch.zeros_like(H),                            #O2
+        muN2,                                           #N2
+        torch.zeros_like(H),                            #H2
+        muCO2 * (1 - cond_H2rich),                      #CO2
+        muH2O * (1 - cond_Cgraph),                      #H2O
+        muCH4 * (1 - cond_O2rich),                      #CH4
+        torch.zeros_like(H)                             #NH3
     ], dim=1)
-    # normalize C‐regime mix so sum to 1
+    #normalize C‐regime mix so sum to 1
     mu_C = mu_C / (mu_C.sum(dim=1, keepdim=True) + 1e-12)
 
-    # 6) uniform fallback
+    #6) uniform fallback
     mu_U = torch.full_like(predAbun, 1.0 / M)
 
-    # 7) final mixture
-    gates = torch.stack([gateA1, gateA2, gateB, gateC, gateU], dim=1)  # [B,5]
-    mus   = torch.stack([mu_A1, mu_A2, mu_B, mu_C, mu_U], dim=2)      # [B,7,5]
+    #7) final mixture
+    gates = torch.stack([gateA1, gateA2, gateB, gateC, gateU], dim=1)  #[B,5]
+    mus   = torch.stack([mu_A1, mu_A2, mu_B, mu_C, mu_U], dim=2)      #[B,7,5]
 
-    mu = torch.sum(mus * gates.unsqueeze(1), dim=2)  # [B,7]
+    mu = torch.sum(mus * gates.unsqueeze(1), dim=2)  #[B,7]
     return mu
 
 
@@ -572,23 +572,23 @@ def calculatePrior(predAbun, sigmaPrior):
     Vectorized truncated-Gaussian prior using soft_prior_mean.
     Returns mean NLL over batch and species.
     """
-    # 1) get smooth prior mean
-    mu = soft_prior_mean(predAbun)  # [B,7]
+    #1) get smooth prior mean
+    mu = soft_prior_mean(predAbun)  #[B,7]
 
-    # 2) truncated normal cdf gap
+    #2) truncated normal cdf gap
     normal = torch.distributions.Normal(0., 1.)
     a = (0.0 - mu)           / sigmaPrior
     b = (1.0 - mu)           / sigmaPrior
-    Z = normal.cdf(b) - normal.cdf(a)       # [B,7]
-    Z = torch.clamp(Z, min=1e-6)            # avoid underflow
+    Z = normal.cdf(b) - normal.cdf(a)       #[B,7]
+    Z = torch.clamp(Z, min=1e-6)            #avoid underflow
 
-    # 3) quadratic term
+    #3) quadratic term
     quad = (predAbun - mu)**2 / (2 * sigmaPrior**2)
 
-    # 4) final NLL (drop constant log-term)
+    #4) final NLL (drop constant log-term)
     nll_trunc = quad - torch.log(Z)
 
-    # 5) mean over batch & species
+    #5) mean over batch & species
     return nll_trunc.mean()
 
 
@@ -611,14 +611,14 @@ def calculateLikelihood(yReal,ySim,sigma):
     mse = torch.mean((yReal - ySim)**2,dim=[1,2])  #Mean squared error between real and simulated data
     #return np.exp(-mse / (2 * sigma ** 2))
     nll = mse / (2 * sigma**2)
-    # nll_aggregated = torch.mean(nll, dim=0)  # shape: (B,)
-    # return nll_aggregated
+    #nll_aggregated = torch.mean(nll, dim=0)  #shape: (B,)
+    #return nll_aggregated
     return nll
 
 
 
 def calculatePosterior(yReal,ySim,sigmaLikelihood,predAbun,sigmaPrior):
-    # Math: P({y_{real}}|A_{pred}) \propto P(A_{pred}|Y_{real}) * P(A_{pred})
+    #Math: P({y_{real}}|A_{pred}) \propto P(A_{pred}|Y_{real}) * P(A_{pred})
     '''
     This function calculates the unnormalized posterior
 
@@ -640,8 +640,8 @@ def calculatePosterior(yReal,ySim,sigmaLikelihood,predAbun,sigmaPrior):
     likelihood=calculateLikelihood(yReal,ySim,sigmaLikelihood)
     nll_mean = torch.mean(likelihood)
 
-    # print(f"Likelihood: {nll_mean}")
-    # print(f"Prior: {prior}")
+    #print(f"Likelihood: {nll_mean}")
+    #print(f"Prior: {prior}")
 
     posterior=nll_mean+prior
     return posterior
@@ -652,24 +652,24 @@ def project_onto_simplex(v):
     returns x: [B, N] with x >=0, sum(x)=1
     """
     B, N = v.shape
-    # 1) sort v descending
-    v_sorted, _ = torch.sort(v, descending=True, dim=1)       # [B, N]
-    v_cumsum    = v_sorted.cumsum(dim=1)                     # [B, N]
+    #1) sort v descending
+    v_sorted, _ = torch.sort(v, descending=True, dim=1)       #[B, N]
+    v_cumsum    = v_sorted.cumsum(dim=1)                     #[B, N]
 
-    # 2) find rho
-    js = torch.arange(1, N+1, device=v.device).view(1, -1)    # [1, N]
-    rho_candidates = v_sorted + (1 - v_cumsum) / js           # [B, N]
-    mask = rho_candidates > 0                                # [B, N]
-    # argmax returns the first max index—since mask is True/False,
-    # converting to int and taking argmax gives the last True
-    rho = mask.to(torch.int).argmax(dim=1) + 1               # [B]
+    #2) find rho
+    js = torch.arange(1, N+1, device=v.device).view(1, -1)    #[1, N]
+    rho_candidates = v_sorted + (1 - v_cumsum) / js           #[B, N]
+    mask = rho_candidates > 0                                #[B, N]
+    #argmax returns the first max index—since mask is True/False,
+    #converting to int and taking argmax gives the last True
+    rho = mask.to(torch.int).argmax(dim=1) + 1               #[B]
 
-    # 3) compute theta
-    idx   = rho - 1                                          # [B]
-    theta = (1 - v_cumsum[torch.arange(B), idx]) / rho       # [B]
+    #3) compute theta
+    idx   = rho - 1                                          #[B]
+    theta = (1 - v_cumsum[torch.arange(B), idx]) / rho       #[B]
 
-    # 4) project
-    return torch.clamp(v + theta.view(B,1), min=0.0)         # [B, N]
+    #4) project
+    return torch.clamp(v + theta.view(B,1), min=0.0)         #[B, N]
 
 class PSGSPSAFunction(torch.autograd.Function):
     @staticmethod
@@ -683,7 +683,7 @@ class PSGSPSAFunction(torch.autograd.Function):
         ctx.eps = eps
         ctx.sim_args = configs
 
-        # Run unperturbed simulation (we need this for the forward output)
+        #Run unperturbed simulation (we need this for the forward output)
         T0 = testNewAbundances(configs,abundances)
         T0=T0.to(device)
         return T0
@@ -695,8 +695,8 @@ class PSGSPSAFunction(torch.autograd.Function):
         sim_args = ctx.sim_args
         batch, N = abundances.shape
 
-        # 1) draw a random ±1 perturbation for each sample & species
-        #    shape: [batch, N]
+        #1) draw a random ±1 perturbation for each sample & species
+        #   shape: [batch, N]
         delta = torch.randint(0, 2, (batch,N), device=abundances.device) * 2 - 1  
         
 
@@ -707,7 +707,7 @@ class PSGSPSAFunction(torch.autograd.Function):
         a_minus = project_onto_simplex(A_minus)
 
 
-        # 2) run two PSG calls at abund+εδ and abund−εδ
+        #2) run two PSG calls at abund+εδ and abund−εδ
 
 
         T_plus  = testNewAbundances(sim_args,a_plus)
@@ -716,23 +716,23 @@ class PSGSPSAFunction(torch.autograd.Function):
         T_plus  = T_plus.to(device)
         T_minus = T_minus.to(device)
 
-        # 3) directional finite difference: shape [batch, n_wl]
+        #3) directional finite difference: shape [batch, n_wl]
         dT_dir = (T_plus - T_minus) / (2 * eps)
-        # 4) element-wise prod with grad_T, then sum over *both* spectral dims (1 & 2)
+        #4) element-wise prod with grad_T, then sum over *both* spectral dims (1 & 2)
         #
-        # chain rule: ∂L/∂a_j = ∑_λ (∂L/∂T_λ)·(∂T_λ/∂a_j).
-        #    For SPSA: ∂T_λ/∂a_j ≈ dT_dir_λ * δ_j  (because 1/δ_j = δ_j when δ_j ∈ {±1})
-        #    So grad_abund[:, j] = ∑_λ grad_T[:,λ] * dT_dir[:,λ] * δ[:,j]
-        #    We can do this in one shot:
-        #    - first compute batch-wise dot over λ: D = (grad_T * dT_dir).sum(dim=1)  [batch]
-        #    - then multiply by δ for each species
-        prod = grad_T * dT_dir                  # shape [B, 784, 2]
-        D = prod.sum(dim=[1,2], keepdim=True)   # shape [B, 1, 1]
-        D = D.view(batch, 1)                        # shape [B, 1]
+        #chain rule: ∂L/∂a_j = ∑_λ (∂L/∂T_λ)·(∂T_λ/∂a_j).
+        #   For SPSA: ∂T_λ/∂a_j ≈ dT_dir_λ * δ_j  (because 1/δ_j = δ_j when δ_j ∈ {±1})
+        #   So grad_abund[:, j] = ∑_λ grad_T[:,λ] * dT_dir[:,λ] * δ[:,j]
+        #   We can do this in one shot:
+        #   - first compute batch-wise dot over λ: D = (grad_T * dT_dir).sum(dim=1)  [batch]
+        #   - then multiply by δ for each species
+        prod = grad_T * dT_dir                  #shape [B, 784, 2]
+        D = prod.sum(dim=[1,2], keepdim=True)   #shape [B, 1, 1]
+        D = D.view(batch, 1)                        #shape [B, 1]
 
-        # 5) broadcast across species to get [B, N_species]
-        grad_abund = D * delta                  # shape [B, 7]
-        # None for eps and sim_args (we don't backprop through those)
+        #5) broadcast across species to get [B, N_species]
+        grad_abund = D * delta                  #shape [B, 7]
+        #None for eps and sim_args (we don't backprop through those)
         
         return grad_abund, None, None
     
@@ -813,11 +813,11 @@ class hypcarLoss(nn.Module):
         likNLL*=self.w_like
 
 
-        # print("Physics Loss:")
-        # print(f"MSE loss: {dataLoss.item()}")
-        # print(f"Detection loss: {detectionLoss.item()}")
-        # print(f"Prior loss: {priorNLL}")
-        # print(f"Likelihood loss: {likNLL}")
+        #print("Physics Loss:")
+        #print(f"MSE loss: {dataLoss.item()}")
+        #print(f"Detection loss: {detectionLoss.item()}")
+        #print(f"Prior loss: {priorNLL}")
+        #print(f"Likelihood loss: {likNLL}")
 
 
         return dataLoss+detectionLoss+priorNLL+likNLL

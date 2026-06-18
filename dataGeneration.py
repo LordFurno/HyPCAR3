@@ -112,7 +112,7 @@ def generatePlanet(luminosity,sma):
     canHoldAtmosphere=False
     while not canHoldAtmosphere:
         planetRad=np.random.uniform(0.5,1.6)#In Earth radii
-        # Calcuate mass from radius using relation from
+        #Calcuate mass from radius using relation from
         #Sotin et al 2007, Icarus, 
         #"Mass-radius curve for extrasolar Earth-like planets and ocean planets"
         #Including a factor of +- 2% to account for the over/under shoot in paper

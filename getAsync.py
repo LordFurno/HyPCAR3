@@ -3,7 +3,7 @@ import numpy as np
 import torch
 from io import StringIO
 
-# Asynchronous function to execute the command with the provided index
+#Asynchronous function to execute the command with the provided index
 async def execute_command_async(file_path, index):
     command = [
         "curl", "-d", "type=trn", "--data-urlencode", f"file@{file_path}",

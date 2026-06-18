@@ -66,7 +66,7 @@ def testNewAbundances(fileName,moleculeAbundances):
 
     with open(tempFile,"w") as f:
         f.writelines(lines)
-def testNewAbundancesWithHe(fileName,moleculeAbundances):
+def testNewAbundancesWithHe(fileName,moleculeAbundances,tempFile=None):
     '''
     This function will update a temporary config file with the predictions from the ml model. 
     This is for the PSG-based loss, it takes in a batch of 32 different files and abundances. If this
@@ -90,7 +90,10 @@ def testNewAbundancesWithHe(fileName,moleculeAbundances):
         for line in f:
             lines.append(line)
         
-    tempFile=r"C:\Users\Tristan\Downloads\HyPCAR3\temp.txt"
+    if tempFile==None:
+        tempFile=r"C:\Users\Tristan\Downloads\HyPCAR3\temp.txt"
+    else:
+        pass
     #Deal with atmosphere layers here
     #Start line is 54
 
@@ -137,10 +140,12 @@ def testNewAbundancesWithHe(fileName,moleculeAbundances):
 #Taurex results:
 # testNewAbundancesWithHe(r"C:\Users\Tristan\Downloads\HyPCAR3\configFiles\B_8104.txt",[0,0.4963,0.0959,0.0929,0.0481,0.097,0.0734,0.0987])
 
-#My model:
-# testNewAbundances(r"C:\Users\Tristan\Downloads\HyPCAR3\configFiles\B_8104.txt",[0.1221,0.4844,0.0,0.2192,0.1743,0.0,0.0])
+#HyPCAR results:
+testNewAbundances(r"C:\Users\Tristan\Downloads\HyPCAR3\configFiles\B_8104.txt",[0.1154,0.5474,0.0,0.1856,0.1517,0.0,0.0])
 
 
 
 #Eartg testing
-testNewAbundances(r"C:\Users\Tristan\Downloads\HyPCAR3\earthConfigTemplate.txt",[0.8121215105056763, 0.022806989029049873, 0.0025340875145047903, 1.3289949492900632e-05, 0.01999226026237011, 0.13940148055553436, 0.003130426397547126])
+# testNewAbundances(r"C:\Users\Tristan\Downloads\HyPCAR3\earthConfigTemplate.txt",[0.8121215105056763, 0.022806989029049873, 0.0025340875145047903, 1.3289949492900632e-05, 0.01999226026237011, 0.13940148055553436, 0.003130426397547126])
+
+# testNewAbundances(r"C:\Users\Tristan\Downloads\HyPCAR3\lhs1140b.txt",[0.03443722054362297, 0.18520966172218323, 0.08198410272598267, 0.016101757064461708, 0.27920645475387573, 0.19176138937473297, 0.21129940450191498])

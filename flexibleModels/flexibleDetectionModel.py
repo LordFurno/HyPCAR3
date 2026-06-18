@@ -58,11 +58,11 @@ class customDataset(Dataset):
 
     def __getitem__(self,index):
         filePath,label=self.samples[index]
-        # /localscratch/tristanb.55643812.0/configFiles/A2_22622.txt
-        # /localscratch/tristanb.55644187.0/configFiles/A2_22622.txt
+        #/localscratch/tristanb.55643812.0/configFiles/A2_22622.txt
+        #/localscratch/tristanb.55644187.0/configFiles/A2_22622.txt
         #Get config file for this sample
         configFilePath=os.path.join(os.environ["SLURM_TMPDIR"],"configFiles")
-        # configFilePath="/home/tristanb/scratch/configFiles/"
+        #configFilePath="/home/tristanb/scratch/configFiles/"
         fileName=os.path.basename(filePath)
         fileName=fileName.removesuffix(".csv")
         configFilePath+=fileName+".txt"
@@ -72,12 +72,12 @@ class customDataset(Dataset):
         data=pd.read_csv(filePath)
         wavelength=list(map(wavelengthFilter,data.iloc[:,0]))#Removes um from wavelength data
         transmittance=list(data.iloc[:,1])
-        # if len(wavelength)!=784:
-        #     print(filePath)
-        # print(len(wavelength))
+        #if len(wavelength)!=784:
+        #    print(filePath)
+        #print(len(wavelength))
         combinedData=torch.tensor(list(zip(wavelength, transmittance)), dtype=torch.float32)
-        # if torch.isnan(combinedData).any():
-        #     print(filePath)
+        #if torch.isnan(combinedData).any():
+        #    print(filePath)
         return combinedData,label,configFilePath
         
 class detectionModel(nn.Module):
@@ -111,7 +111,7 @@ class detectionModel(nn.Module):
         self.fc3=nn.Linear(64,7)#7 molecule present
 
     def forward(self,x):
-        # Permute dimensions to [batch_size, channels, sequence_length]
+        #Permute dimensions to [batch_size, channels, sequence_length]
         x=x.permute(0, 2, 1)
         x=F.relu(self.bn1(self.conv1(x)))
         x=self.pool1(x)
@@ -141,7 +141,7 @@ class detectionModel(nn.Module):
 #Line 119
 def getLabel(filePath,specialMolecules=False):
     configFolder=os.path.join(os.environ["SLURM_TMPDIR"],"configFiles")
-    # configFolder="/home/tristanb/scratch/configFiles"
+    #configFolder="/home/tristanb/scratch/configFiles"
     filePath=filePath.removesuffix(".csv")
     configFilePath=os.path.join(configFolder,filePath)
     configFilePath+=".txt"
@@ -306,7 +306,7 @@ for trainIndex, valIndex in cv.split(allSamples, np.argmax(allLabels, axis=1)):#
 
                 predicted=(outputs > 0.5).float()
                 correct+=(predicted == labels).sum().item()
-                total+=labels.numel()  # Total number of elements
+                total+=labels.numel()  #Total number of elements
             valLoss=val_loss / len(validationDataloader)
             valAcc=100 * correct / total
             with open("flexible_detection_model.txt","a") as f:
@@ -344,12 +344,12 @@ with torch.no_grad():
 test_loss/=len(testingDataloader)
 test_accuracy=100 * test_correct / test_total
 
-# Concatenate all predictions and labels
+#Concatenate all predictions and labels
 all_predictions=np.concatenate(all_predictions, axis=0)
 all_labels=np.concatenate(all_labels, axis=0)
 
-# Calculate F1 score
-f1=f1_score(all_labels, all_predictions, average='macro')  # You can choose 'micro', 'macro', or 'weighted'
+#Calculate F1 score
+f1=f1_score(all_labels, all_predictions, average='macro')  #You can choose 'micro', 'macro', or 'weighted'
 with open("flexible_detection_model.txt","a") as f:
     f.write(f"Test Loss: {test_loss}, Test Accuracy: {test_accuracy}%, Test F1 Score: {f1}")
 print(f"Test Loss: {test_loss}, Test Accuracy: {test_accuracy}%, Test F1 Score: {f1}")

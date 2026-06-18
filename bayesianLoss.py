@@ -23,7 +23,6 @@ def calculateLikelihood(yReal,ySim,sigma):
     #return np.exp(-mse / (2 * sigma ** 2))
     nll = mse / (2 * sigma**2)
 
-    # Optionally include constant term: nll += 0.5 * np.log(2 * np.pi * sigma**2)
     return nll
 
 
@@ -66,7 +65,7 @@ def classifyAtmosphere(predAbun):
     elif 2*O > H + 4*C:
         return "B"
     
-    elif abs(H + C + O + N - 1) < 1e-3:  # Hydrogen-poor constraint
+    elif abs(H + C + O + N - 1) < 1e-3:  #Hydrogen-poor constraint
         return "C"
 
     else:
@@ -210,16 +209,16 @@ def calculatePrior(predAbun,sigmaPrior):
 
 #/home/tristanb/projects/def-pjmann/tristanb/psgSandbox/etc/httpd/conf
 
-# apptainer run \
-#   --bind /home/tristanb/projects/def-pjmann/tristanb/apacheLogs:/etc/httpd/logs \
-#   --bind /home/tristanb/projects/def-pjmann/tristanb/phpfpmLogs:/var/log/php-fpm \
-#   psgSandbox
+#apptainer run \
+#  --bind /home/tristanb/projects/def-pjmann/tristanb/apacheLogs:/etc/httpd/logs \
+#  --bind /home/tristanb/projects/def-pjmann/tristanb/phpfpmLogs:/var/log/php-fpm \
+#  psgSandbox
 
 
 
 
 def calculatePosterior(yReal,ySim,sigmaLikelihood,predAbun,muPrior,sigmaPrior):
-    # Math: P({y_{real}}|A_{pred}) \propto P(A_{pred}|Y_{real}) * P(A_{pred})
+    #Math: P({y_{real}}|A_{pred}) \propto P(A_{pred}|Y_{real}) * P(A_{pred})
     '''
     This function calculates the unnormalized posterior
 
@@ -246,11 +245,11 @@ def calculatePosterior(yReal,ySim,sigmaLikelihood,predAbun,muPrior,sigmaPrior):
 
     #For the likelihood, I should just take the aggregated transmittance. However, later if I want to include wavelength-molecule mapping, here is where I would do it.
     #LIkelihood, I need both wavelength and transmittance
-    # aggregated_likelihood=np.sum(likelihood,axis=0)
+    #aggregated_likelihood=np.sum(likelihood,axis=0)
 
-    # aggregated_likelihood=np.sum(np.log(likelihood), axis=0)
-    # print(prior)
-    # print(aggregated_likelihood)
+    #aggregated_likelihood=np.sum(np.log(likelihood), axis=0)
+    #print(prior)
+    #print(aggregated_likelihood)
     print(f"Likelihood: {likelihood}")
     print(f"Prior: {prior}")
 

@@ -3,14 +3,14 @@ import numpy as np
 import torch
 from io import StringIO
 
-# Asynchronous function to execute the command with the provided index
+#Asynchronous function to execute the command with the provided index
 async def execute_command_async(file_path, index):
     command = [
         "curl", "-d", "type=trn", "--data-urlencode", f"file@{file_path}",
         "http://localhost:8080/api.php"
     ]
     try:
-        # Run the subprocess asynchronously
+        #Run the subprocess asynchronously
         process = await asyncio.create_subprocess_exec(
             *command,
             stdout=asyncio.subprocess.PIPE,
@@ -44,10 +44,10 @@ def get_data_async():
         if output:
             try:
                 data_array = np.loadtxt(StringIO(output), comments='#')
-                # Ensure data is 2D
+                #Ensure data is 2D
                 if data_array.ndim == 1:
                     data_array = np.expand_dims(data_array, axis=0)
-                # Extract columns 0 and 1 and skip last row
+                #Extract columns 0 and 1 and skip last row
                 processed_data = data_array[:-1, :2]
                 data[index] = torch.tensor(processed_data, dtype=torch.float32)
             except Exception as e:
@@ -68,10 +68,10 @@ def get_data_async():
     else:
         return torch.empty(0)
 
-# # Run
-# if __name__ == "__main__":
-#     import time
-#     start = time.time()
-#     tensor_data = get_data_async()
-#     print(tensor_data.shape)
-#     print(f"Execution time: {time.time() - start:.2f} seconds")
+##Run
+#if __name__ == "__main__":
+#    import time
+#    start = time.time()
+#    tensor_data = get_data_async()
+#    print(tensor_data.shape)
+#    print(f"Execution time: {time.time() - start:.2f} seconds")

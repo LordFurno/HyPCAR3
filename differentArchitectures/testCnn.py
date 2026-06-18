@@ -45,7 +45,7 @@ def topKAccuracy(output,target,k=1):
     '''
     _,topKPred = output.topk(k, dim=1)
 
-    # Get the indices of the top k true abundances
+    #Get the indices of the top k true abundances
     _,topKTarget = target.topk(k, dim=1)
 
     #Compare predictions with true targets
@@ -68,16 +68,16 @@ def customCrossEntropy(output, target):
     cross_entropy_loss: The average cross-entropy loss for the batch.
     '''
 
-    # Apply log to predictions (log-softmax is typically used to stabilize computation)
-    log_predictions=torch.log(output + 1e-9)  # Adding a small value to prevent log(0)
+    #Apply log to predictions (log-softmax is typically used to stabilize computation)
+    log_predictions=torch.log(output + 1e-9)  #Adding a small value to prevent log(0)
 
-    # Element-wise multiplication of log_predictions with targets
+    #Element-wise multiplication of log_predictions with targets
     elementwise_loss=-target * log_predictions
 
-    # Sum over the molecules (dim=1) to get the loss for each example in the batch
+    #Sum over the molecules (dim=1) to get the loss for each example in the batch
     cross_entropy_loss=torch.sum(elementwise_loss, dim=1)
 
-    # Average over the batch
+    #Average over the batch
     cross_entropy_loss=torch.mean(cross_entropy_loss)
 
     return cross_entropy_loss
@@ -200,7 +200,7 @@ class detectionModel(nn.Module):
         self.fc3=nn.Linear(64,7)#7 molecule present
 
     def forward(self,x):
-        # Permute dimensions to [batch_size, channels, sequence_length]
+        #Permute dimensions to [batch_size, channels, sequence_length]
         x=x.permute(0, 2, 1)
         x=F.relu(self.bn1(self.conv1(x)))
         x=self.pool1(x)
@@ -252,14 +252,14 @@ class abundanceModel(nn.Module):
         self.dropout1=nn.Dropout(0.4)
         self.global_pool=nn.AdaptiveAvgPool1d(1)
 
-        self.fc_combined=nn.Linear(96, 128)  # Combines both input branches (detection + data)
+        self.fc_combined=nn.Linear(96, 128)  #Combines both input branches (detection + data)
 
         self.dropout2=nn.Dropout(0.75)
         self.fc2=nn.Linear(128, 64)
         self.fc3=nn.Linear(64, 32)
 
-        self.fc4=nn.Linear(32, 7)  # Abundance output
-        self.fc_uncertainty=nn.Linear(32, 7)  # Uncertainty output
+        self.fc4=nn.Linear(32, 7)  #Abundance output
+        self.fc_uncertainty=nn.Linear(32, 7)  #Uncertainty output
 
     def forward(self, x, detectionOutput):
         detectionOutput=F.relu(self.fcDetect(detectionOutput))
@@ -533,4 +533,4 @@ if __name__ == '__main__':
 
     with open("naiveCNN.txt",'a') as f:
         f.write(f"Testing Loss: {test_loss}, KL Divergence: {testKL}, Top-K Accuracy: {testTopK}, Cross Entropy: {testCrossEntropy}"+"\n")
-    # print(f"Testing Loss: {test_loss}, KL Divergence: {testKL}, Top-K Accuracy: {testTopK}, Cross Entropy: {testCrossEntropy}")
+    #print(f"Testing Loss: {test_loss}, KL Divergence: {testKL}, Top-K Accuracy: {testTopK}, Cross Entropy: {testCrossEntropy}")

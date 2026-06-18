@@ -423,7 +423,7 @@ model=detectionModel()
 
 #Load the saved model weights
 model.load_state_dict(torch.load(r"C:\Users\Tristan\Downloads\HyPCAR3\flexibleDetectionModel.pt",weights_only=True))
-aModel.load_state_dict(torch.load(r"C:\Users\Tristan\Downloads\HyPCAR3\finalBaseAbundance.pt",weights_only=True))
+aModel.load_state_dict(torch.load(r"C:\Users\Tristan\Downloads\HyPCAR3\setWeightAbundance.pt",weights_only=True))
 
 # filePath=r"C:\Users\Tristan\Downloads\HyPCAR\table_K2-18-b-Madhusudhan-et-al.-2023 (2).csv"#File path for the data
 filePath=r"C:\Users\Tristan\Downloads\HyPCAR3\table_LHS-1140-b-Cadieux-et-al.-2024.csv"
@@ -452,7 +452,7 @@ for i in range(784-len(transmittance)):
 # transmittance = savgol_filter(transmittance, window_length=5, polyorder=5)
 # wavelength = savgol_filter(wavelength, window_length=5, polyorder=5)
 # plt.plot(wavelength,transmittance)
-
+# plt.show()
 input_data=torch.tensor(np.stack([wavelength, transmittance], axis=1), dtype=torch.float32)
 # 
 # #add a batch dimension (1, since it's one example)
@@ -500,14 +500,14 @@ plt.plot(wavelength2,transmittance2,linestyle="--",color="orange")
 plt.plot(wavelength3,transmittance3,linestyle="--",color="green")
 
 # # plt.savefig(r"C:\Users\Tristan\Downloads\HyPCAR3\visuals\earthTransmittance.png")
-input_data=torch.tensor(np.stack([wavelength, transmittance], axis=1), dtype=torch.float32)
+# input_data=torch.tensor(np.stack([wavelength, transmittance], axis=1), dtype=torch.float32)
 # input_data2=torch.tensor(np.stack([wavelength2,transmittance2],axis=1),dtype=torch.float32)
 # print(input_data2)
 # print(input_data)
 # phys_mse = torch.mean((input_data-input_data2)**2).item()
 # print(phys_mse)
 # # #add a batch dimension (1, since it's one example)
-input_data=input_data.unsqueeze(0)
+# input_data=input_data.unsqueeze(0)
 
 with torch.no_grad():
     model.eval()
@@ -528,9 +528,9 @@ print(f"Predicted Class: {predicted}")
 
 # visualize_attention(aOutput[2],wavelength,transmittance)
 
-print(aOutput[0].tolist())
-print(aOutput[1].tolist())
-print(aOutput[2].tolist())
+print(aOutput[0].tolist())#Abundance
+print(aOutput[1].tolist())#Uncertainty
+print(aOutput[2].tolist())#Attention weights
 print(classifyAtmosphere(aOutput[0].tolist()[0]))
 #Not that bad, look into cleaning up any noise or whawtever before interpolation
 plt.show(block=True)
@@ -561,7 +561,15 @@ NH3: NOPE (3.2953798023704906e-10)
 '''
 LHS 1140B
 
-Val: 0.019258489832282066, 0.30832624435424805, 0.05459008738398552, 0.024095920845866203, 0.25379401445388794, 0.1625288426876068, 0.17740638554096222
-Uncertainty: 0.32078495621681213, 0.6767081022262573, 0.5994249582290649, 0.5880318284034729, 0.5760899782180786, 0.5738149285316467, 0.7441630363464355
+[[0.03443722054362297, 0.18520966172218323, 0.08198410272598267, 0.016101757064461708, 0.27920645475387573, 0.19176138937473297, 0.21129940450191498]]
+[[0.258197158575058, 0.21758189797401428, 0.5122489333152771, 0.15785932540893555, 0.2827094495296478, 0.12042415142059326, 0.34835949540138245]]
+
+O2: 3.4% - 0.258
+N2: 18.5% - 0.217
+H2: 8.2% - 0.512
+CO2: 1.6% - 0.157
+H2O: 27.9% - 0.282
+CH4: 19.1% - 0.120
+NH3: 21.1% - 0.349
 
 '''

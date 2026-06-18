@@ -65,7 +65,7 @@ def topKAccuracy(output,target,k=1):
     '''
     _,topKPred = output.topk(k, dim=1)
     
-    # Get the indices of the top k true abundances
+    #Get the indices of the top k true abundances
     _,topKTarget = target.topk(k, dim=1)
     
     #Compare predictions with true targets
@@ -88,16 +88,16 @@ def customCrossEntropy(output, target):
     cross_entropy_loss: The average cross-entropy loss for the batch.
     '''
 
-    # Apply log to predictions (log-softmax is typically used to stabilize computation)
-    log_predictions=torch.log(output + 1e-9)  # Adding a small value to prevent log(0)
+    #Apply log to predictions (log-softmax is typically used to stabilize computation)
+    log_predictions=torch.log(output + 1e-9)  #Adding a small value to prevent log(0)
     
-    # Element-wise multiplication of log_predictions with targets
+    #Element-wise multiplication of log_predictions with targets
     elementwise_loss=-target * log_predictions
     
-    # Sum over the molecules (dim=1) to get the loss for each example in the batch
+    #Sum over the molecules (dim=1) to get the loss for each example in the batch
     cross_entropy_loss=torch.sum(elementwise_loss, dim=1)
     
-    # Average over the batch
+    #Average over the batch
     cross_entropy_loss=torch.mean(cross_entropy_loss)
     
     return cross_entropy_loss
@@ -224,8 +224,8 @@ def calculateLikelihood(yReal,ySim,sigma):
     mse = torch.mean((yReal - ySim)**2,dim=[1,2])  #Mean squared error between real and simulated data
     #return np.exp(-mse / (2 * sigma ** 2))
     nll = mse / (2 * sigma**2)
-    # nll_aggregated = torch.mean(nll, dim=0)  # shape: (B,)
-    # return nll_aggregated
+    #nll_aggregated = torch.mean(nll, dim=0)  #shape: (B,)
+    #return nll_aggregated
     return nll
 
 
@@ -268,7 +268,7 @@ def classifyAtmosphere(predAbun):
     elif 2*O > H + 4*C:
         return "B"
     
-    elif abs(H + C + O + N - 1) < 1e-3:  # Hydrogen-poor constraint
+    elif abs(H + C + O + N - 1) < 1e-3:  #Hydrogen-poor constraint
         return "C"
 
     else:
@@ -405,16 +405,16 @@ def calculatePrior(predAbun,sigmaPrior):
 
 
     normal = torch.distributions.Normal(0., 1.)
-    # a = (0 - mu)/sigma,  b = (1 - mu)/sigma
+    #a = (0 - mu)/sigma,  b = (1 - mu)/sigma
     a = (0.0 - means) / sigmaPrior
     b = (1.0 - means) / sigmaPrior
-    Z = normal.cdf(b) - normal.cdf(a)    # (B, M)
+    Z = normal.cdf(b) - normal.cdf(a)    #(B, M)
 
-    # 3) unnormalized quadratic term
+    #3) unnormalized quadratic term
     quad = (predAbun - means)**2 / (2 * sigmaPrior**2)
 
 
-    nll_trunc = 0.5*torch.log(2*math.pi*sigmaPrior**2) + quad - torch.log(Z + 1e-12)  # add epsilon to avoid log(0)
+    nll_trunc = 0.5*torch.log(2*math.pi*sigmaPrior**2) + quad - torch.log(Z + 1e-12)  #add epsilon to avoid log(0)
 
 
 
@@ -424,7 +424,7 @@ def calculatePrior(predAbun,sigmaPrior):
 
 
 def calculatePosterior(yReal,ySim,sigmaLikelihood,predAbun,sigmaPrior):
-    # Math: P({y_{real}}|A_{pred}) \propto P(A_{pred}|Y_{real}) * P(A_{pred})
+    #Math: P({y_{real}}|A_{pred}) \propto P(A_{pred}|Y_{real}) * P(A_{pred})
     '''
     This function calculates the unnormalized posterior
 
@@ -446,8 +446,8 @@ def calculatePosterior(yReal,ySim,sigmaLikelihood,predAbun,sigmaPrior):
     likelihood=calculateLikelihood(yReal,ySim,sigmaLikelihood)
     nll_mean = torch.mean(likelihood)
 
-    # print(f"Likelihood: {nll_mean}")
-    # print(f"Prior: {prior}")
+    #print(f"Likelihood: {nll_mean}")
+    #print(f"Prior: {prior}")
 
     posterior=nll_mean+prior
     return posterior
@@ -465,7 +465,7 @@ class PSGSPSAFunction(torch.autograd.Function):
         ctx.eps = eps
         ctx.sim_args = configs
 
-        # Run unperturbed simulation (we need this for the forward output)
+        #Run unperturbed simulation (we need this for the forward output)
         T0 = testNewAbundances(configs,abundances)
         T0=T0.to(device)
         return T0
@@ -477,34 +477,34 @@ class PSGSPSAFunction(torch.autograd.Function):
         sim_args = ctx.sim_args
         batch, N = abundances.shape
 
-        # 1) draw a random ±1 perturbation for each sample & species
-        #    shape: [batch, N]
+        #1) draw a random ±1 perturbation for each sample & species
+        #   shape: [batch, N]
         delta = torch.randint(0, 2, (batch,N), device=abundances.device) * 2 - 1  
         
-        # 2) run two PSG calls at abund+εδ and abund−εδ
+        #2) run two PSG calls at abund+εδ and abund−εδ
         T_plus  = testNewAbundances(sim_args,abundances + eps*delta)
         T_minus = testNewAbundances(sim_args,abundances - eps*delta)
 
         T_plus  = T_plus.to(device)
         T_minus = T_minus.to(device)
 
-        # 3) directional finite difference: shape [batch, n_wl]
+        #3) directional finite difference: shape [batch, n_wl]
         dT_dir = (T_plus - T_minus) / (2 * eps)
-        # 4) element-wise prod with grad_T, then sum over *both* spectral dims (1 & 2)
+        #4) element-wise prod with grad_T, then sum over *both* spectral dims (1 & 2)
         #
-        # chain rule: ∂L/∂a_j = ∑_λ (∂L/∂T_λ)·(∂T_λ/∂a_j).
-        #    For SPSA: ∂T_λ/∂a_j ≈ dT_dir_λ * δ_j  (because 1/δ_j = δ_j when δ_j ∈ {±1})
-        #    So grad_abund[:, j] = ∑_λ grad_T[:,λ] * dT_dir[:,λ] * δ[:,j]
-        #    We can do this in one shot:
-        #    - first compute batch-wise dot over λ: D = (grad_T * dT_dir).sum(dim=1)  [batch]
-        #    - then multiply by δ for each species
-        prod = grad_T * dT_dir                  # shape [B, 784, 2]
-        D = prod.sum(dim=[1,2], keepdim=True)   # shape [B, 1, 1]
-        D = D.view(batch, 1)                        # shape [B, 1]
+        #chain rule: ∂L/∂a_j = ∑_λ (∂L/∂T_λ)·(∂T_λ/∂a_j).
+        #   For SPSA: ∂T_λ/∂a_j ≈ dT_dir_λ * δ_j  (because 1/δ_j = δ_j when δ_j ∈ {±1})
+        #   So grad_abund[:, j] = ∑_λ grad_T[:,λ] * dT_dir[:,λ] * δ[:,j]
+        #   We can do this in one shot:
+        #   - first compute batch-wise dot over λ: D = (grad_T * dT_dir).sum(dim=1)  [batch]
+        #   - then multiply by δ for each species
+        prod = grad_T * dT_dir                  #shape [B, 784, 2]
+        D = prod.sum(dim=[1,2], keepdim=True)   #shape [B, 1, 1]
+        D = D.view(batch, 1)                        #shape [B, 1]
 
-        # 5) broadcast across species to get [B, N_species]
-        grad_abund = D * delta                  # shape [B, 7]
-        # None for eps and sim_args (we don't backprop through those)
+        #5) broadcast across species to get [B, N_species]
+        grad_abund = D * delta                  #shape [B, 7]
+        #None for eps and sim_args (we don't backprop through those)
         
         return grad_abund, None, None
 def detectionLoss(predAbun,detOutput):

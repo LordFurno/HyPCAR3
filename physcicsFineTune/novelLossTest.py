@@ -65,7 +65,7 @@ def topKAccuracy(output,target,k=1):
     '''
     _,topKPred = output.topk(k, dim=1)
     
-    # Get the indices of the top k true abundances
+    #Get the indices of the top k true abundances
     _,topKTarget = target.topk(k, dim=1)
     
     #Compare predictions with true targets
@@ -88,16 +88,16 @@ def customCrossEntropy(output, target):
     cross_entropy_loss: The average cross-entropy loss for the batch.
     '''
 
-    # Apply log to predictions (log-softmax is typically used to stabilize computation)
-    log_predictions=torch.log(output + 1e-9)  # Adding a small value to prevent log(0)
+    #Apply log to predictions (log-softmax is typically used to stabilize computation)
+    log_predictions=torch.log(output + 1e-9)  #Adding a small value to prevent log(0)
     
-    # Element-wise multiplication of log_predictions with targets
+    #Element-wise multiplication of log_predictions with targets
     elementwise_loss=-target * log_predictions
     
-    # Sum over the molecules (dim=1) to get the loss for each example in the batch
+    #Sum over the molecules (dim=1) to get the loss for each example in the batch
     cross_entropy_loss=torch.sum(elementwise_loss, dim=1)
     
-    # Average over the batch
+    #Average over the batch
     cross_entropy_loss=torch.mean(cross_entropy_loss)
     
     return cross_entropy_loss
@@ -319,7 +319,7 @@ class detectionModel(nn.Module):
         self.fc3=nn.Linear(64,7)#7 molecule present
 
     def forward(self,x):
-        # Permute dimensions to [batch_size, channels, sequence_length]
+        #Permute dimensions to [batch_size, channels, sequence_length]
         x=x.permute(0, 2, 1)
         x=F.relu(self.bn1(self.conv1(x)))
         x=self.pool1(x)
@@ -358,33 +358,33 @@ class MultiHeadAttention(nn.Module):
     def forward(self, x):
         batch_size, seq_length, input_dim = x.size()
 
-        # Linear projections for Q, K, V
+        #Linear projections for Q, K, V
         Q = self.query(x)
         K = self.key(x)
         V = self.value(x)
 
-        # Split into heads
+        #Split into heads
         Q = Q.view(batch_size, seq_length, self.num_heads, input_dim // self.num_heads)
         K = K.view(batch_size, seq_length, self.num_heads, input_dim // self.num_heads)
         V = V.view(batch_size, seq_length, self.num_heads, input_dim // self.num_heads)
 
-        # Transpose to (batch, heads, seq_len, feature_dim)
+        #Transpose to (batch, heads, seq_len, feature_dim)
         Q = Q.permute(0, 2, 1, 3)
         K = K.permute(0, 2, 1, 3)
         V = V.permute(0, 2, 1, 3)
 
-        # Scaled dot-product attention
+        #Scaled dot-product attention
         scores = torch.matmul(Q, K.transpose(-1, -2)) / (input_dim ** 0.5)
         attention_weights = self.softmax(scores)
 
-        # Weighted sum of values
+        #Weighted sum of values
         weighted_sum = torch.matmul(attention_weights, V)
 
-        # Concatenate heads and apply linear projection
+        #Concatenate heads and apply linear projection
         weighted_sum = weighted_sum.permute(0, 2, 1, 3).contiguous()
         weighted_sum = weighted_sum.view(batch_size, seq_length, input_dim)
 
-        # Output linear layer
+        #Output linear layer
         out = self.fc_out(weighted_sum)
 
         return out, attention_weights
@@ -513,8 +513,8 @@ def calculateLikelihood(yReal,ySim,sigma):
     mse = torch.mean((yReal - ySim)**2,dim=[1,2])  #Mean squared error between real and simulated data
     #return np.exp(-mse / (2 * sigma ** 2))
     nll = mse / (2 * sigma**2)
-    # nll_aggregated = torch.mean(nll, dim=0)  # shape: (B,)
-    # return nll_aggregated
+    #nll_aggregated = torch.mean(nll, dim=0)  #shape: (B,)
+    #return nll_aggregated
     return nll
 
 
@@ -557,7 +557,7 @@ def classifyAtmosphere(predAbun):
     elif 2*O > H + 4*C:
         return "B"
     
-    elif abs(H + C + O + N - 1) < 1e-3:  # Hydrogen-poor constraint
+    elif abs(H + C + O + N - 1) < 1e-3:  #Hydrogen-poor constraint
         return "C"
 
     else:
@@ -694,17 +694,17 @@ def calculatePrior(predAbun,sigmaPrior):
 
 
     normal = torch.distributions.Normal(0., 1.)
-    # a = (0 - mu)/sigma,  b = (1 - mu)/sigma
+    #a = (0 - mu)/sigma,  b = (1 - mu)/sigma
     a = (0.0 - means) / sigmaPrior
     b = (1.0 - means) / sigmaPrior
-    Z = normal.cdf(b) - normal.cdf(a)    # (B, M)
+    Z = normal.cdf(b) - normal.cdf(a)    #(B, M)
 
-    # 3) unnormalized quadratic term
+    #3) unnormalized quadratic term
     quad = (predAbun - means)**2 / (2 * sigmaPrior**2)
 
-    # 4) negative log of truncated PDF
-    #    drop the +0.5*log(2πσ²) if you want simplicity
-    nll_trunc = quad - torch.log(Z + 1e-12)  # add epsilon to avoid log(0)
+    #4) negative log of truncated PDF
+    #   drop the +0.5*log(2πσ²) if you want simplicity
+    nll_trunc = quad - torch.log(Z + 1e-12)  #add epsilon to avoid log(0)
 
 
 
@@ -714,7 +714,7 @@ def calculatePrior(predAbun,sigmaPrior):
 
 
 def calculatePosterior(yReal,ySim,sigmaLikelihood,predAbun,sigmaPrior):
-    # Math: P({y_{real}}|A_{pred}) \propto P(A_{pred}|Y_{real}) * P(A_{pred})
+    #Math: P({y_{real}}|A_{pred}) \propto P(A_{pred}|Y_{real}) * P(A_{pred})
     '''
     This function calculates the unnormalized posterior
 
@@ -736,8 +736,8 @@ def calculatePosterior(yReal,ySim,sigmaLikelihood,predAbun,sigmaPrior):
     likelihood=calculateLikelihood(yReal,ySim,sigmaLikelihood)
     nll_mean = torch.mean(likelihood)
 
-    # print(f"Likelihood: {nll_mean}")
-    # print(f"Prior: {prior}")
+    #print(f"Likelihood: {nll_mean}")
+    #print(f"Prior: {prior}")
 
     posterior=nll_mean+prior
     return posterior
@@ -778,7 +778,7 @@ class hypcarLoss(nn.Module):
         #hinge_absent = max(0, pred_abun − 0.2)
         hinge_absent = F.relu(predAbun - 0.2)
         absent_penalty = ((1.0 - detectionOutput) * hinge_absent).mean()
-        # 4) Combine
+        #4) Combine
         detectionLoss = (80*present_penalty) + absent_penalty #This should make things work out better, and scale better
 
 
@@ -966,9 +966,9 @@ if __name__ == '__main__':
             loss=criterion(outputs,uncertainties,labels,detectionOutput,configs,data,counter)
 
             
-            # print(outputs.size())
-            # print(labels.size())
-            # print("")
+            #print(outputs.size())
+            #print(labels.size())
+            #print("")
 
             running_loss+=loss
 
@@ -1078,4 +1078,4 @@ if __name__ == '__main__':
 
     with open("novelLoss.txt",'a') as f:
         f.write(f"Testing Loss: {test_loss}, KL Divergence: {testKL}, Top-K Accuracy: {testTopK}, Cross Entropy: {testCrossEntropy}"+"\n")
-    # print(f"Testing Loss: {test_loss}, KL Divergence: {testKL}, Top-K Accuracy: {testTopK}, Cross Entropy: {testCrossEntropy}")
+    #print(f"Testing Loss: {test_loss}, KL Divergence: {testKL}, Top-K Accuracy: {testTopK}, Cross Entropy: {testCrossEntropy}")

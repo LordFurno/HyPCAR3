@@ -510,7 +510,7 @@ if __name__=="__main__":
     device=torch.device("cpu")
 
     model=abundanceModel()
-    model.load_state_dict(torch.load(r"C:\Users\Tristan\Downloads\HyPCAR3\setWeightAbundance2.pt",weights_only=True))
+    model.load_state_dict(torch.load(r"C:\Users\Tristan\Downloads\HyPCAR3\setWeightAbundance.pt",weights_only=True))
     model=model.to(device)
 
 
@@ -526,6 +526,7 @@ if __name__=="__main__":
     test_top_k=0.0
     test_cross_entropy=0.0
 
+
     avg=[]
     with torch.no_grad():
 
@@ -533,7 +534,7 @@ if __name__=="__main__":
         total=0
         totalSamples=0
         counter=0
-
+        inside=0
         for batch in tqdm(testingDataloader):
             data,labels,configs=batch
 
@@ -544,6 +545,7 @@ if __name__=="__main__":
             start=time.time()
             predAbun,uncertainties,attentionWeights=model(data,detectionOutput)
             total=time.time()-start
+
             avg.append(total)
             # print("REAL:")
             # print(labels)

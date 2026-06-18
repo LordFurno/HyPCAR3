@@ -1,1 +1,13 @@
 ray_results/
+data/
+configFiles/
+*.7z
+*.pt
+*.onnx
+*.out
+runs/
+__pycache__/
+*.pyc
+.VSCodeCounter/
+workingDirectory/
+HAPI_DB/

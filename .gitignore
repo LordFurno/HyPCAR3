@@ -11,3 +11,14 @@ __pycache__/
 .VSCodeCounter/
 workingDirectory/
 HAPI_DB/
+
+# Raw HPC job scripts can contain private DRAC account IDs, emails, and paths.
+*.slurm
+*.sbatch
+archive/legacy_psg/test_psg_call.sh
+bayesianOptimizationJob.sh
+dateGenerationJob.sh
+physcicsFineTune/physicsFineTune.sh
+pureAbundanceCNN.sh
+testPsgCall.sh
+trainDetectionModel.sh
